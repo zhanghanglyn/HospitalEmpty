@@ -28,6 +28,10 @@ public:
 	//根据传入的点击位置获取点击到的格子
 	void GetTouchGrid( FVector TouchLocation, FGridData& GridData);
 
+	//获取当前的横纵格子数量
+	int32 GetGridRow() { return GridWidthNum; };
+	int32 GetGridColumn() { return GridWidthNum; };
+
 protected:
 
 	UPROPERTY()

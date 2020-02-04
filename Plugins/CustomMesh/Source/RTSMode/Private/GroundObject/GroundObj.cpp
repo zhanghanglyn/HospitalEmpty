@@ -2,6 +2,7 @@
 #include "CustomMesh/Private/CustomWall/CustomWall.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "GroundGridMgrComponent.h"
 
 AGroundObj::AGroundObj(FString InActorName) : Super(InActorName)
@@ -52,6 +53,10 @@ void AGroundObj::OnConstruction(const FTransform& Transform)
 		//GridMgr->(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 		GridMgr->InitGridData(GroundWidthHeight);
 		GridMgr->InitGridStartLocation(GetActorLocation());
+		//为地面格子创建一个材质实例
+		CreateMaterialInstance();
+		//更新格子数
+		UpdateMaterialParam();
 	}
 }
 
@@ -112,6 +117,7 @@ void AGroundObj::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 			}
 		}
 	}
+	//在地面宽高更新的时候，去更新格子数据并且更新Mesh的材质参数
 	else if(PropertyChangedEvent.MemberProperty->GetName() == "GroundWidthHeight")
 	{
 		if (GroundMeshComponent)
@@ -127,8 +133,15 @@ void AGroundObj::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 		if (GridMgr)
 		{
 			GridMgr->InitGridData(GroundWidthHeight);
+			//更新格子数
+			UpdateMaterialParam();
 		}
-
+	}
+	//在地面宽高更新的时候，去更新格子数据并且更新Mesh的材质参数
+	else if (PropertyChangedEvent.MemberProperty->GetName() == "BorderWidth")
+	{
+		if (GridDynamicMaterial)
+			GridDynamicMaterial->SetScalarParameterValue("BorderWidth", BorderWidth);
 	}
 }
 
@@ -139,3 +152,56 @@ FVector AGroundObj::GetRelativeStart()
 }
 
 #pragma optimize("",on)
+
+void AGroundObj::UpdateMaterialParam()
+{
+	if (GridMgr)
+	{
+		MaterialParam.RowNum = GridMgr->GetGridRow();
+		MaterialParam.Column = GridMgr->GetGridColumn();
+		MaterialParam.BorderWidth = BorderWidth;
+	}
+
+	if (GridDynamicMaterial)
+	{
+		GridDynamicMaterial->SetScalarParameterValue("RowNum", MaterialParam.RowNum);
+		GridDynamicMaterial->SetScalarParameterValue("Column", MaterialParam.Column);
+		GridDynamicMaterial->SetScalarParameterValue("BorderWidth", MaterialParam.BorderWidth);
+	}
+}
+
+void AGroundObj::CreateMaterialInstance()
+{
+	if (!GroundMeshComponent)
+		return;
+	UMaterialInterface* MeshMaterial = GroundMeshComponent->GetMaterial(0);
+
+	//如果不是动态材质，则为其设置一个动态材质
+	/*if (UMaterialInstanceDynamic* DynamicMaterial = Cast<UMaterialInstanceDynamic>(MeshMaterial))
+	{
+		DynamicMaterial->SetScalarParameterValue("RowNum", MaterialParam.RowNum);
+		DynamicMaterial->SetScalarParameterValue("Column", MaterialParam.Column);
+		DynamicMaterial->SetScalarParameterValue("BorderWidth", MaterialParam.BorderWidth);
+	}
+	else
+	{
+		UMaterialInstanceDynamic* MaterialInstance = UMaterialInstanceDynamic::Create(MeshMaterial, GroundMeshComponent);
+		if (MaterialInstance)
+		{
+			GroundMeshComponent->SetMaterial(0, MaterialInstance);
+			MaterialInstance->SetScalarParameterValue("RowNum", MaterialParam.RowNum);
+			MaterialInstance->SetScalarParameterValue("Column", MaterialParam.Column);
+			MaterialInstance->SetScalarParameterValue("BorderWidth", MaterialParam.BorderWidth);
+		}
+	}*/
+	if (GridDynamicMaterial)
+	{
+		GridDynamicMaterial = nullptr;
+	}
+	if (MeshMaterial)
+	{
+		GridDynamicMaterial = UMaterialInstanceDynamic::Create(MeshMaterial, GroundMeshComponent);
+		GroundMeshComponent->SetMaterial(0, GridDynamicMaterial);
+	}
+
+}

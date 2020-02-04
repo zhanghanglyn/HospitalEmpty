@@ -1,13 +1,23 @@
 {
-	"FileVersion": 3,
-	"EngineAssociation": "4.23",
-	"Category": "",
-	"Description": "",
-	"Modules": [
-		{
-			"Name": "HospitalEmpty",
-			"Type": "Runtime",
-			"LoadingPhase": "Default"
-		}
-	]
+  "FileVersion": 3,
+  "EngineAssociation": "4.23",
+  "Category": "",
+  "Description": "",
+  "Modules": [
+    {
+      "Name": "HospitalEmpty",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    }
+  ],
+  "Plugins": [
+    {
+      "Name": "TestSlate",
+      "Enabled": true
+    },
+    {
+      "Name": "CustomMesh",
+      "Enabled": true
+    }
+  ]
 }

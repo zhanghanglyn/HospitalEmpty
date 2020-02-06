@@ -1,4 +1,5 @@
-﻿#include "GridMgr.h"
+﻿#include "GridSystemMgrBase.h"
+
 
 int32 FGridData::GridCount = 0;
 FString FGridData::GridName = "Grid_";

@@ -1,5 +1,6 @@
 ﻿#include "CustomWall.h"
 #include "KismetProceduralMeshLibrary.h"
+#include "ProceduralMeshComponent.h"
 
 ACustomWall::ACustomWall(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {

@@ -26,7 +26,7 @@ void UGroundGridMgrComponent::InitGridData(FVector2D InWidthHeight)
 			FGridData NewGridData;
 			NewGridData.SetGridId();
 
-			GridDataList.Add(NewGridData);
+			//GridDataList.Add(NewGridData);
 			if (GridDataListNested.Num() <= Row)
 			{
 				FNestedArray tempArray;
@@ -45,9 +45,10 @@ void UGroundGridMgrComponent::GetTouchGrid(FVector TouchLocation , FGridData& Gr
 	int32 CurGridRow = UKismetMathLibrary::FCeil(TouchLocation.Y / FGroundUtil::GroundGridHeight);
 
 	int32 GridIndex = (CurGridRow - 1) * GridWidthNum + CurGridColumn - 1;  //从0开始，所以-1
-	if (GridDataList.Num() >= GridIndex)
+	//if (GridDataList.Num() >= GridIndex)
+	if(GridDataListNested.Num() > CurGridRow)
 	{
-		GridData = GridDataList[GridIndex];
+		//GridData = GridDataList[GridIndex];
 
 		GridData = GridDataListNested[CurGridRow - 1].Array[CurGridColumn - 1];
 		UE_LOG(LogTemp, Warning , TEXT("aaaaaa"));

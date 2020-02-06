@@ -36,9 +36,9 @@ public:
 	void MoveToRight(float diretction);
 
 	/* 鼠标点击，移动以及抬起事件相关 */
-	void OnMouseClickStart();
-	void OnMouseClickMove();
-	void OnMouseClickEnd();
+	virtual void OnMouseClickStart();
+	virtual void OnMouseClickMove();
+	virtual void OnMouseClickEnd();
 
 
 protected:
@@ -64,7 +64,7 @@ public:
 protected:
 	UCameraComponent* CameraComponent;
 
-private:
+protected:
 	//当前将要移动到的位置，根据输入实时计算
 	FVector CurDestination = FVector(0,0,0);
 

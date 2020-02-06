@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "ProceduralMeshComponent.h"
+//#include "ProceduralMeshComponent.h"
 //#include "Plugins/Runtime/ProceduralMeshComponent/Source/ProceduralMeshComponent/Public/ProceduralMeshComponent.h"
 #include "CustomWall.generated.h"
 
@@ -26,7 +26,8 @@ public:
 protected:
 
 protected:
-	UProceduralMeshComponent* WallMesh;
+	UPROPERTY()
+	class UProceduralMeshComponent* WallMesh;
 
 private:
 	//起始点和结束点

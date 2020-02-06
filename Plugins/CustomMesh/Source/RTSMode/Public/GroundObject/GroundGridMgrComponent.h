@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "GroundUtil.h"
 #include "Components/ActorComponent.h"
-#include "GridMgr.h"
+#include "GridSystemMgrBase.h"
 //#include "NestedArray.h"
 #include "GroundGridMgrComponent.generated.h"
 
@@ -46,8 +46,8 @@ protected:
 	UPROPERTY()
 	FVector StartLocation;	//当前格子管理的左上角起始点在世界空间中的位置（和地面一致）
 
-	UPROPERTY()
-	TArray<FGridData> GridDataList;	//格子list
+	//UPROPERTY()
+	//TArray<FGridData> GridDataList;	//格子list   20.2.5 废弃，换为二维的Grid数组
 
 	//测试用NestArray
 	UPROPERTY()

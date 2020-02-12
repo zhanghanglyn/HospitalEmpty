@@ -69,7 +69,7 @@ void ARTSPlayerCameraSpectatorPawn::MoveToRight(float diretction)
 
 void ARTSPlayerCameraSpectatorPawn::OnMouseClickStart()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Start"));
+	//UE_LOG(LogTemp, Warning, TEXT("Start"));
 	BMouseLeftHold = true;
 
 	//先暂时写在这里，开始进行
@@ -84,7 +84,7 @@ void ARTSPlayerCameraSpectatorPawn::OnMouseClickStart()
 
 void ARTSPlayerCameraSpectatorPawn::OnMouseClickMove()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Holding"));
+	//UE_LOG(LogTemp, Warning, TEXT("Holding"));
 	FVector HitLocation;
 	AActorBase* TouchActor = GetCurTouchObj(HitLocation);
 	if (TouchActor)
@@ -96,7 +96,7 @@ void ARTSPlayerCameraSpectatorPawn::OnMouseClickMove()
 
 void ARTSPlayerCameraSpectatorPawn::OnMouseClickEnd()
 {
-	UE_LOG(LogTemp, Warning, TEXT("ClickOver"));
+	//UE_LOG(LogTemp, Warning, TEXT("ClickOver"));
 	BMouseLeftHold = false;
 
 	FVector HitLocation;
@@ -104,6 +104,17 @@ void ARTSPlayerCameraSpectatorPawn::OnMouseClickEnd()
 	if (TouchActor)
 	{
 		TouchActor->TouchEnd(HitLocation);
+	}
+}
+
+void ARTSPlayerCameraSpectatorPawn::OnMouseHover()
+{
+	//UE_LOG(LogTemp, Warning, TEXT("Hover"));
+	FVector HitLocation;
+	AActorBase* TouchActor = GetCurTouchObj(HitLocation);
+	if (TouchActor)
+	{
+		TouchActor->Hover(HitLocation);
 	}
 }
 
@@ -126,11 +137,10 @@ void ARTSPlayerCameraSpectatorPawn::Tick(float deltaSeconds)
 	if (gameViewport->IsFocused(gameViewport->Viewport) && gameViewport->GetMousePosition(mousePosition))
 	{
 		//响应长按事件
-		if (BMouseLeftHold)
-			OnMouseClickMove();
-
-		//发射射线，获取对应的位置（格子）并创建一个物体
-
+		//if (BMouseLeftHold)
+			//OnMouseClickMove();
+		if (!BMouseLeftHold)
+			OnMouseHover();
 	}
 	
 }
@@ -175,6 +185,17 @@ AActorBase* ARTSPlayerCameraSpectatorPawn::GetCurTouchObj(FVector &HitLocation)
 	}
 
 	return nullptr;
+}
+
+void ARTSPlayerCameraSpectatorPawn::GetMouseWorldPos(FVector& WorldLocation, FVector& WorldDirection) const
+{
+	UWorld* world = this->GetWorld();
+	if (world)
+	{
+		APlayerController* pc = world->GetFirstPlayerController();
+		pc->DeprojectMousePositionToWorld(WorldLocation, WorldDirection);
+	}
+	
 }
 
 #pragma optimize("",on)

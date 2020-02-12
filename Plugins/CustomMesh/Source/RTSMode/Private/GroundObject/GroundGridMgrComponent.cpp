@@ -1,5 +1,6 @@
 ﻿#include "GroundGridMgrComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "GroundObj.h"
 
 UGroundGridMgrComponent::UGroundGridMgrComponent()
 {
@@ -11,8 +12,12 @@ UGroundGridMgrComponent::UGroundGridMgrComponent(const FObjectInitializer& Objec
 
 }
 
-void UGroundGridMgrComponent::InitGridData(FVector2D InWidthHeight)
+void UGroundGridMgrComponent::InitGridData(FVector2D InWidthHeight , class AGroundObj* InGroundActor)
 {
+	GridDataListNested.Empty();
+
+	GroundActor = InGroundActor;
+
 	GridWidthNum = UKismetMathLibrary::FFloor(InWidthHeight.X / FGroundUtil::GroundGridWidth);	//一行有多少格子
 	GridHeightNum = UKismetMathLibrary::FFloor(InWidthHeight.Y / FGroundUtil::GroundGridHeight);	
 
@@ -25,6 +30,13 @@ void UGroundGridMgrComponent::InitGridData(FVector2D InWidthHeight)
 		{
 			FGridData NewGridData;
 			NewGridData.SetGridId();
+
+			/* 计算每一个格子的位置并记录 */
+			FVector GridLocation = FVector::ZeroVector;
+			GridLocation.Z = StartLocation.Z;
+			GridLocation.X = StartLocation.X - Column * FGroundUtil::GroundGridWidth;
+			GridLocation.Y = StartLocation.Y + Row * FGroundUtil::GroundGridHeight;
+			NewGridData.StartLocation = GridLocation;
 
 			//GridDataList.Add(NewGridData);
 			if (GridDataListNested.Num() <= Row)
@@ -40,20 +52,17 @@ void UGroundGridMgrComponent::InitGridData(FVector2D InWidthHeight)
 #pragma optimize("",off)
 void UGroundGridMgrComponent::GetTouchGrid(FVector TouchLocation , FGridData& GridData)
 {
+	FVector RelativeLocation = FVector(TouchLocation.X - GroundActor->GetTopRightLocation().X, TouchLocation.Y - GroundActor->GetTopRightLocation().Y, GroundActor->GetTopRightLocation().Z);
+	TouchLocation = RelativeLocation.GetAbs();
+
 	//判断相对位置落在哪个格子区间 ,
-	int32 CurGridColumn = UKismetMathLibrary::FCeil(TouchLocation.X / FGroundUtil::GroundGridWidth);
-	int32 CurGridRow = UKismetMathLibrary::FCeil(TouchLocation.Y / FGroundUtil::GroundGridHeight);
+	int32 CurGridRow = UKismetMathLibrary::FCeil(TouchLocation.X / FGroundUtil::GroundGridWidth);
+	int32 CurGridColumn = UKismetMathLibrary::FCeil(TouchLocation.Y / FGroundUtil::GroundGridHeight);
 
-	int32 GridIndex = (CurGridRow - 1) * GridWidthNum + CurGridColumn - 1;  //从0开始，所以-1
-	//if (GridDataList.Num() >= GridIndex)
-	if(GridDataListNested.Num() > CurGridRow)
+	if (GridDataListNested.Num() > CurGridRow)
 	{
-		//GridData = GridDataList[GridIndex];
-
 		GridData = GridDataListNested[CurGridRow - 1].Array[CurGridColumn - 1];
-		UE_LOG(LogTemp, Warning , TEXT("aaaaaa"));
 	}
-
 }
 #pragma optimize("",on)
 

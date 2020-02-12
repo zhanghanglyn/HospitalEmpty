@@ -1,10 +1,10 @@
 ﻿#include "HptGameInstance.h"
-#include "HospitalEmpty/GridSystem/GridSystemMgr.h"
+#include "HospitalEmpty/GridSystem/DecorationSystemMgr.h"
 
 void UHptGameInstance::Init()
 {
-	if (GridSystemMgr == nullptr)
-		GridSystemMgr = NewObject<UGridSystemMgr>(this, TEXT("GridSystemMgr"));
+	if (DecorationSystemMgr == nullptr)
+		DecorationSystemMgr = NewObject<UDecorationSystemMgr>(this, TEXT("DecorationSystemMgr"));
 }
 
 void UHptGameInstance::Shutdown()

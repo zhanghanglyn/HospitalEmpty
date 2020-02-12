@@ -23,9 +23,31 @@ public:
 public:
 	void InitGrid() {};
 
+	/* 设置自身关联的家具 */
+	void SetDecorationActor(class ADecorationBase* InDecorationActor)
+	{
+		DecorationActor = InDecorationActor;
+	};
+
+	/* 设置与之关联的地面GridMgr */
+	void SetGroundGridMgr(class UGroundGridMgrComponent* InGroundGridMgr);
+
+	/* 根据当前地面更新格子数据，并且让家具贴合到最近的格子中 */
+	void UpdateGrid();
+
 protected:
 	//格子List
 	UPROPERTY()
 	TArray< FNestedArray > GridDataList;
+
+protected:
+	/* 自身管理的家具Actor */
+	UPROPERTY()
+	class ADecorationBase* DecorationActor;
+
+	/* 放入其中的地面的总GridMgr */
+	UPROPERTY()
+	class UGroundGridMgrComponent* GroundGridMgr;
+
 };
 

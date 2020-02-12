@@ -21,11 +21,11 @@ public:
 	UGroundGridMgrComponent(const FObjectInitializer& ObjectInitializer);
 
 
-	void InitGridData( FVector2D InWidthHeight);
+	void InitGridData( FVector2D InWidthHeight , class AGroundObj* InGroundActor);
 	//设置当前格子的左上角起始点在世界空间中的位置（和地面一致）
 	void InitGridStartLocation(FVector InStartLocation) { StartLocation = InStartLocation; };
 
-	//根据传入的点击位置获取点击到的格子
+	//根据传入的点击位置获取点击到的格子 param: GridData 返回的当前位置的格子数据
 	void GetTouchGrid( FVector TouchLocation, FGridData& GridData);
 
 	//获取当前的横纵格子数量
@@ -49,7 +49,13 @@ protected:
 	//UPROPERTY()
 	//TArray<FGridData> GridDataList;	//格子list   20.2.5 废弃，换为二维的Grid数组
 
-	//测试用NestArray
+protected:
+	//格子的二维数组NestArray
 	UPROPERTY()
 	TArray< FNestedArray > GridDataListNested;
+
+	/* 自身管理的地面Actor */
+	UPROPERTY()
+	class AGroundObj* GroundActor;
+	
 };

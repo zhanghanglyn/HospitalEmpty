@@ -39,7 +39,11 @@ public:
 	virtual void OnMouseClickStart();
 	virtual void OnMouseClickMove();
 	virtual void OnMouseClickEnd();
-
+	/* 鼠标未点击但是移动 */
+	virtual void OnMouseHover();
+	
+	/* 获取当前鼠标在世界中的位置 */
+	void GetMouseWorldPos(FVector& WorldLocation, FVector& WorldDirection) const;
 
 protected:
 	/* 获取当前点击到的物体 */

@@ -25,6 +25,8 @@ public:
 	virtual void StartTouch(FVector TouchLocation) {};
 	virtual void TouchHold(FVector TouchLocation) {};
 	virtual void TouchEnd(FVector TouchLocation) {};
+	/* Hover */
+	virtual void Hover(FVector TouchLocation) {};
 public:
 	UPROPERTY(EditAnywhere, meta = (Category = "ActorBase"))
 	FString ActorName;

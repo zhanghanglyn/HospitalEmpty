@@ -18,14 +18,14 @@ public:
 
 public:
 	//获取格子管理器
-	class UGridSystemMgr* GetGridSystemMgr()
+	class UDecorationSystemMgr* GetDecorationSystemMgr()
 	{
-		return GridSystemMgr;
+		return DecorationSystemMgr;
 	}
 
 protected:
 
 	UPROPERTY()
-	class UGridSystemMgr* GridSystemMgr;
+	class UDecorationSystemMgr* DecorationSystemMgr;
 
 };

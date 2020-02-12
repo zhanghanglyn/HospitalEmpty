@@ -40,13 +40,26 @@ public:
 	virtual void StartTouch(FVector TouchLocation) override;
 	virtual void TouchHold(FVector TouchLocation) override;
 	virtual void TouchEnd(FVector TouchLocation) override;
+
+	virtual void BeginPlay() override;
 public:
 
-	//设置右下角的起点位置（用来计算相对位置）,会根据当前尺寸等自动计算 
+	//设置0,0,0起点位置（用来计算相对位置）,会根据当前尺寸等自动计算 
 	FVector GetRelativeStart();
 
 	//显示/隐藏格子
 	void SetGridState() {};
+
+	class UGroundGridMgrComponent* GetGridMgr() {
+		return GridMgr;
+	};
+
+
+	/* 获取地面格子右上角的坐标 */
+	FVector GetTopRightLocation();
+
+	/* 获取格子地面的宽高 */
+	void GetGridWidthHeight(float &Width, float &Height);
 
 protected:
 	/* 为地面格子创建一个材质实例 */
@@ -56,6 +69,7 @@ protected:
 	void UpdateMaterialParam();
 
 protected:
+	//地面格子模型
 	UPROPERTY(VisibleAnywhere , meta = (Category = "地面模型"))
 	class UStaticMeshComponent* GroundMeshComponent;
 	//模型路径 暂时这么标
@@ -67,6 +81,10 @@ protected:
 
 	UPROPERTY(EditAnywhere, meta = (Category = "格子地面配置"))
 	float BorderWidth = 0.01f;
+
+	/* 占地格子材质 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (Category = "格子数据相关"))
+	class UMaterial* GridMaterial;
 
 	UPROPERTY()
 	class UGroundGridMgrComponent* GridMgr;

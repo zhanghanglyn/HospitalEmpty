@@ -14,9 +14,7 @@ AGroundObj::AGroundObj(const FObjectInitializer& ObjectInitializer) : Super(Obje
 {
 	// 创建一个初始地面
 	GroundMeshComponent = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("GroundDefaultMesh"));
-	//GroundMeshComponent = NewObject<UStaticMeshComponent>(this, TEXT("GroundDefaultMesh"));
-	//GroundMeshComponent->RegisterComponent();
-	//GroundMeshComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	SetRootComponent(GroundMeshComponent);
 	
 	if (!GroundMeshPath.IsEmpty())
 	{
@@ -30,16 +28,6 @@ AGroundObj::AGroundObj(const FObjectInitializer& ObjectInitializer) : Super(Obje
 			GroundMeshComponent->SetWorldScale3D(Scale);
 		}
 	}
-
-	//创建一个格子数据,之后应该改成读取配置
-	/*if (GridMgr == nullptr)
-	{
-		GridMgr = NewObject<UGroundGridMgrComponent>(this, TEXT("GrigMgr"));
-		GridMgr->RegisterComponent();
-		//GridMgr->(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-		GridMgr->InitGridData(GroundWidthHeight);
-		GridMgr->InitGridStartLocation(GetActorLocation());
-	}*/
 }
 
 void AGroundObj::OnConstruction(const FTransform& Transform)
@@ -51,13 +39,26 @@ void AGroundObj::OnConstruction(const FTransform& Transform)
 		GridMgr = NewObject<UGroundGridMgrComponent>(this, TEXT("GrigMgr"));
 		GridMgr->RegisterComponent();
 		//GridMgr->(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-		GridMgr->InitGridData(GroundWidthHeight);
-		GridMgr->InitGridStartLocation(GetActorLocation());
+		GridMgr->InitGridStartLocation(GetTopRightLocation());
+		GridMgr->InitGridData(GroundWidthHeight , this);
+		
 		//为地面格子创建一个材质实例
 		CreateMaterialInstance();
 		//更新格子数
 		UpdateMaterialParam();
 	}
+}
+
+void AGroundObj::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (GridMgr)
+	{
+		GridMgr->InitGridStartLocation(GetTopRightLocation());
+		GridMgr->InitGridData(GroundWidthHeight, this);
+	}
+	
 }
 
 #pragma optimize("",off)
@@ -72,14 +73,12 @@ void AGroundObj::StartTouch(FVector TouchLocation)
 		//测试计算一个立方体
 		//testWall->CreateWall(FVector(50, 50, 50));
 
-
-
 		//测试，获取点击的格子
 		//取Actor的左上角
-		FVector RelativeLocation = FVector(TouchLocation.X - GetRelativeStart().X, TouchLocation.Y - GetRelativeStart().Y, GetRelativeStart().Z);
-		FGridData ttt;
-		GridMgr->GetTouchGrid(RelativeLocation.GetAbs() , ttt);
-		ttt.BeOccupy = true;
+		//FVector RelativeLocation = FVector(TouchLocation.X - GetRelativeStart().X, TouchLocation.Y - GetRelativeStart().Y, GetRelativeStart().Z);
+		//FGridData ttt;
+		//GridMgr->GetTouchGrid(RelativeLocation.GetAbs() , ttt);
+		//ttt.BeOccupy = true;
 	}
 }
 #pragma optimize("",on)
@@ -132,7 +131,7 @@ void AGroundObj::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 		}
 		if (GridMgr)
 		{
-			GridMgr->InitGridData(GroundWidthHeight);
+			GridMgr->InitGridData(GroundWidthHeight,this);
 			//更新格子数
 			UpdateMaterialParam();
 		}
@@ -198,10 +197,30 @@ void AGroundObj::CreateMaterialInstance()
 	{
 		GridDynamicMaterial = nullptr;
 	}
-	if (MeshMaterial)
+	if (GridMaterial)
 	{
-		GridDynamicMaterial = UMaterialInstanceDynamic::Create(MeshMaterial, GroundMeshComponent);
+		GridDynamicMaterial = UMaterialInstanceDynamic::Create(GridMaterial, GroundMeshComponent);
 		GroundMeshComponent->SetMaterial(0, GridDynamicMaterial);
 	}
 
 }
+
+void AGroundObj::GetGridWidthHeight(float &Width, float &Height)
+{
+	FVector Scale = GroundMeshComponent->GetComponentTransform().GetScale3D();
+	FBoxSphereBounds MeshBounds = GroundMeshComponent->GetStaticMesh()->GetBounds();
+	Width = MeshBounds.GetBox().GetSize().X * Scale.X;
+	Height = MeshBounds.GetBox().GetSize().Y * Scale.Y;
+}
+
+#pragma optimize("",off)
+FVector AGroundObj::GetTopRightLocation()
+{
+	float Width = 0;
+	float Height = 0;
+	GetGridWidthHeight(Width, Height);
+	FVector DecorationLocation = GetActorLocation();
+
+	return FVector(DecorationLocation.X - Width / 2, DecorationLocation.Y - Height / 2, DecorationLocation.Z);
+}
+#pragma optimize("",on)

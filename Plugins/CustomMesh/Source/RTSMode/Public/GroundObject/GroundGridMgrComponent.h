@@ -4,7 +4,6 @@
 #include "GroundUtil.h"
 #include "Components/ActorComponent.h"
 #include "GridSystemMgrBase.h"
-//#include "NestedArray.h"
 #include "GroundGridMgrComponent.generated.h"
 
 /* 
@@ -32,6 +31,25 @@ public:
 	int32 GetGridRow() { return GridWidthNum; };
 	int32 GetGridColumn() { return GridWidthNum; };
 
+	/*
+		更新阻挡格子信息，
+		家具调用该接口，根据自身格子信息更新阻挡格子，但只有当点击后，才会将数据正式写入正式数据中
+		*如果是正在移动中，得把之前的该移动家具的格子数据清除之后重新设置
+	*/
+	void UpdateBlockGrid(TArray< FNestedArray > BlockGridList);
+
+	/* 点击保存当前编辑的物体 , 将阻挡格子上的数据写入正式数据 */
+	bool SaveCurDecoration();
+
+	/* 判断当前家具的位置是否被阻挡 BlockGrid是否占用*/
+	bool CheckGridsBeBlock(TArray< FNestedArray > DecorationGridList);
+
+	/* 判断一个右上角点是否在当前格子地面上,修改为会把移动点变成右上角边缘 */
+	bool CheckLocationInGround(FVector &InLocation) const;
+
+	/* 判断一个左下角的点是否在格子地面上，如果不在，会重新设置左下角的坐标 */
+	bool CheckLeftBUttomLocationInGround(FVector &LeftButtomLocation);
+
 protected:
 
 	UPROPERTY()
@@ -54,8 +72,16 @@ protected:
 	UPROPERTY()
 	TArray< FNestedArray > GridDataListNested;
 
+	//用来单独存储被占用的格子，遍历时能减少大量计算
+	UPROPERTY()
+	TArray<FNestedArray> BlockGridDataList;
+
 	/* 自身管理的地面Actor */
 	UPROPERTY()
 	class AGroundObj* GroundActor;
-	
+
+	//当前地面是否有重复阻挡物体
+	UPROPERTY()
+	bool BeBlockDecorate = false;
+
 };

@@ -28,7 +28,7 @@ void ADecorationBase::OnConstruction(const FTransform& Transform)
 	{
 		GridMgr = NewObject<UDecorationGridMgrComponent>(this, TEXT("GridMgr"));
 		GridMgr->RegisterComponent();
-		GridMgr->SetDecorationActor(this);
+		GridMgr->InitGridMgr( ParamData, this);
 	}
 
 	//添加格子模型
@@ -97,10 +97,10 @@ void ADecorationBase::UpdateGridInfo()
 	}
 }
 
-void ADecorationBase::UpdateGridByGround()
-{
-	GridMgr->UpdateGrid();
-}
+//void ADecorationBase::UpdateGridByGround()
+//{
+// GridMgr->CreateInitGrid();
+//}
 
 void ADecorationBase::SetGround(AActorBase* InGround)
 {
@@ -139,4 +139,23 @@ FVector ADecorationBase::GetTopRightLocation()
 
 	return FVector(DecorationLocation.X - Width / 2, DecorationLocation.Y - Height / 2, DecorationLocation.Z);
 }
+
+FVector ADecorationBase::GetTopRightLocation(FVector InLocation)
+{
+	float Width = 0;
+	float Height = 0;
+	GetGridWidthHeight(Width, Height);
+
+	return FVector(InLocation.X - Width / 2, InLocation.Y - Height / 2, InLocation.Z);
+}
+
+/*
+	根据中间点InLocation取右上角位置，判断属于地面的哪一个格子中，
+	根据右上角格子更新家具位置。
+*/
+void ADecorationBase::MoveTo(FVector InLocation)
+{
+	GridMgr->MoveTo(InLocation);
+}
+
 #pragma optimize("",on)

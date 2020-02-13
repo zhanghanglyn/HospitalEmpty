@@ -83,24 +83,31 @@ public:
 	virtual void Hover(FVector TouchLocation) override {};
 	/* virtual end */
 
+	/* 拖动物体时的移动,根据传入的坐标，会自动对齐到最近的格子 */
+	void MoveTo( FVector InLocation );
+
 	/* 设置对应的地面以及对应的地面格子Mgr */
 	void SetGround(AActorBase* InGround);
 
-	/* 根据左上角的坐标，更新整个家具的坐标 */
+	/* 根据右上角的坐标，更新整个家具的坐标 */
 	void SetLocationByTopRight(FVector TopRightLocation);
 
-	/* 获取地面格子左上角的坐标 */
+	/* 获取地面格子右上角的坐标 */
 	FVector GetTopRightLocation();
 
+	/* 根据传入点作为当前家具中心取右上角坐标 */
+	FVector GetTopRightLocation(FVector InLocation);
+
 	/* 根据地面更新自身格子以及位置信息初始化 */
-	void UpdateGridByGround();
+	//void UpdateGridByGround();
+
+	/* 获取格子地面的宽高 */
+	void GetGridWidthHeight(float &Width, float &Height);
 
 protected:
 	/* 根据配置等更新格子数以及更新模型信息 */
 	void UpdateGridInfo();
 
-	/* 获取格子地面的宽高 */
-	void GetGridWidthHeight(float &Width, float &Height);
 
 public:
 	//模型路径 暂时这么标

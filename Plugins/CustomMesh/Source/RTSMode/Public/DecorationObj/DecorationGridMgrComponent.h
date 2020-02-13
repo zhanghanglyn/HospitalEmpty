@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "GridSystemMgrBase.h"
+#include "DecorationBase.h"
 #include "DecorationGridMgrComponent.generated.h"
 
 /*
@@ -21,21 +22,32 @@ public:
 
 
 public:
-	void InitGrid() {};
-
 	/* 设置自身关联的家具 */
 	void SetDecorationActor(class ADecorationBase* InDecorationActor)
 	{
 		DecorationActor = InDecorationActor;
 	};
 
+	void InitGridMgr(FDecorationConfig ParamData,class ADecorationBase* InDecorationActor);
+
 	/* 设置与之关联的地面GridMgr */
 	void SetGroundGridMgr(class UGroundGridMgrComponent* InGroundGridMgr);
 
-	/* 根据当前地面更新格子数据，并且让家具贴合到最近的格子中 */
-	void UpdateGrid();
+	/* 创建时根据当前地面更新格子数据，并且让家具贴合到最近的格子中 */
+	//void CreateInitGrid();
+
+	/* 拖动物体时的移动,根据传入的坐标，会自动对齐到最近的格子 */
+	void MoveTo(FVector InLocation);
 
 protected:
+	/* 根据左上角格子数据，更新自身格子信息 */
+	void UpdateGridInfo(FGridData TopRightGridData);
+
+protected:
+	//格子宽高
+	UPROPERTY()
+	FVector2D GridRowColumn;
+
 	//格子List
 	UPROPERTY()
 	TArray< FNestedArray > GridDataList;

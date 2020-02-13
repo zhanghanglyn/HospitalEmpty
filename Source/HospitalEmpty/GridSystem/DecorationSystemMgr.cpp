@@ -48,7 +48,8 @@ ADecorationBase* UDecorationSystemMgr::CreateDecoration(FVector Location, AGroun
 
 				/* 为生成的家具设置地面等相关 */
 				Decoration->SetGround(GridGround);
-				Decoration->UpdateGridByGround();
+				//Decoration->UpdateGridByGround();
+				Decoration->MoveTo(Location);
 
 				return Decoration;
 			}
@@ -84,13 +85,17 @@ void UDecorationSystemMgr::OnMouseClickStart()
 			CurControlType = ControlType::ArrangeDecoration;
 		}	
 	}
+	//放置家具
+	else if (CurControlType == ControlType::ArrangeDecoration)
+	{
+		if (!CurGridGround->SaveCurDecoration())
+			CurControlType = ControlType::None;
+	}
 		
 }
 
 void UDecorationSystemMgr::OnMouseHover()
 {
-	return;
-
 	if (PlayerPawn == nullptr)
 		return;
 
@@ -99,10 +104,12 @@ void UDecorationSystemMgr::OnMouseHover()
 	{
 		if (CurDecoration)
 		{
+
 			FVector PreLocation = CurDecoration->GetActorLocation();
 			FVector MoveToLocation = LastDecorationLocation;
 			PlayerPawn->GetMouseLocationInGround(MoveToLocation);
-			CurDecoration->SetActorLocation(FVector(MoveToLocation.X, MoveToLocation.Y, PreLocation.Z));
+			//CurDecoration->SetActorLocation(FVector(MoveToLocation.X, MoveToLocation.Y, PreLocation.Z));
+			CurDecoration->MoveTo(FVector(MoveToLocation.X, MoveToLocation.Y, PreLocation.Z));
 			LastDecorationLocation = MoveToLocation;
 		}
 	}

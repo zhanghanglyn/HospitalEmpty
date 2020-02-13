@@ -223,4 +223,93 @@ FVector AGroundObj::GetTopRightLocation()
 
 	return FVector(DecorationLocation.X - Width / 2, DecorationLocation.Y - Height / 2, DecorationLocation.Z);
 }
+
+FVector AGroundObj::GetButtomLeftLocation()
+{
+	float Width = 0;
+	float Height = 0;
+	GetGridWidthHeight(Width, Height);
+	FVector DecorationLocation = GetActorLocation();
+
+	return FVector(DecorationLocation.X + Width / 2, DecorationLocation.Y + Height / 2, DecorationLocation.Z);
+}
+
 #pragma optimize("",on)
+
+bool AGroundObj::CheckLocationInGround(FVector &InLocation)
+{
+	FVector ActorLocation = GetActorLocation();
+	float Width;
+	float Height;
+	GetGridWidthHeight(Width, Height);
+
+	bool Result = false;
+	
+	FVector2D RangeX = FVector2D(ActorLocation.X - Width / 2, ActorLocation.X + Width / 2);
+	FVector2D RangeY = FVector2D(ActorLocation.Y - Height / 2, ActorLocation.Y + Height / 2);
+
+	//先判断
+	if (InLocation.X >= RangeX.X && InLocation.X <= RangeX.Y)
+	{
+		if (InLocation.Y >= RangeY.X && InLocation.Y <= RangeY.Y)
+			Result = true;
+	}
+
+	//if (InLocation.X >= RangeX.X && InLocation.X <= RangeX.Y)
+	{
+		if (InLocation.X < RangeX.X)
+			InLocation.X = RangeX.X;
+		if (InLocation.X > RangeX.Y)
+			InLocation.X = RangeX.Y;
+	}
+	//if (InLocation.Y >= RangeY.X && InLocation.Y <= RangeY.Y)
+	{
+		if (InLocation.Y < RangeY.X)
+			InLocation.Y = RangeY.X;
+		if (InLocation.Y > RangeY.Y)
+			InLocation.Y = RangeY.Y;
+	}
+
+	return Result;
+
+}
+
+bool AGroundObj::CheckLeftBUttomLocationInGround(FVector &LeftButtomLocation)
+{
+	FVector ActorLocation = GetActorLocation();
+	float Width;
+	float Height;
+	GetGridWidthHeight(Width, Height);
+
+	FVector2D RangeX = FVector2D(ActorLocation.X - Width / 2, ActorLocation.X + Width / 2);
+	FVector2D RangeY = FVector2D(ActorLocation.Y - Height / 2, ActorLocation.Y + Height / 2);
+
+	bool Result = false;
+
+	if (LeftButtomLocation.X >= RangeX.X && LeftButtomLocation.X <= RangeX.Y)
+	{
+		if (LeftButtomLocation.Y >= RangeY.X && LeftButtomLocation.Y <= RangeY.Y)
+			Result = true;
+	}
+	//判断完毕后设置
+	{
+		if (LeftButtomLocation.X < RangeX.X)
+			LeftButtomLocation.X = RangeX.X;
+		if (LeftButtomLocation.X > RangeX.Y)
+			LeftButtomLocation.X = RangeX.Y;
+	}
+	{
+		if (LeftButtomLocation.Y < RangeY.X)
+			LeftButtomLocation.Y = RangeY.X;
+		if (LeftButtomLocation.Y > RangeY.Y)
+			LeftButtomLocation.Y = RangeY.Y;
+	}
+
+	return Result;
+}
+
+
+bool AGroundObj::SaveCurDecoration()
+{
+	return GridMgr->SaveCurDecoration();
+}

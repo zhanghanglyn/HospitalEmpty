@@ -57,9 +57,20 @@ public:
 
 	/* 获取地面格子右上角的坐标 */
 	FVector GetTopRightLocation();
+	/* 获取地面格子左下的坐标 */
+	FVector GetButtomLeftLocation();
 
 	/* 获取格子地面的宽高 */
 	void GetGridWidthHeight(float &Width, float &Height);
+
+	/* 放置当前家具，保存格子数据 */
+	bool SaveCurDecoration();
+
+	/* 判断一个点是否在当前格子地面上,修改为会把移动点变成边缘 */
+	bool CheckLocationInGround(FVector &InLocation);
+
+	/* 判断一个左下角的点是否在格子地面上，如果不在，会重新设置左下角的坐标 */
+	bool CheckLeftBUttomLocationInGround(FVector &LeftButtomLocation);
 
 protected:
 	/* 为地面格子创建一个材质实例 */
@@ -96,4 +107,5 @@ protected:
 	/* 动态创建的材质 */
 	UPROPERTY()
 	class UMaterialInstanceDynamic* GridDynamicMaterial;
+
 };

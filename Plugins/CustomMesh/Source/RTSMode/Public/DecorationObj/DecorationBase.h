@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "ActorBase.h"
+#include "GridSystemMgrBase.h"
 #include "DecorationBase.generated.h"
 
 USTRUCT(BlueprintType)
@@ -103,6 +104,12 @@ public:
 
 	/* 获取格子地面的宽高 */
 	void GetGridWidthHeight(float &Width, float &Height);
+
+	/* 设置阻挡状态，是否变红，会传入具体的格子，之后用来进行单独格子的变色 */
+	void SetBlockState(FGridData BlockGridParam ,bool BeOccupy);
+
+	/* 获取地面Grid数据 */
+	TArray< FNestedArray > GetGridList();
 
 protected:
 	/* 根据配置等更新格子数以及更新模型信息 */

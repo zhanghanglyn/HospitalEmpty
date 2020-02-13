@@ -159,3 +159,23 @@ void ADecorationBase::MoveTo(FVector InLocation)
 }
 
 #pragma optimize("",on)
+void ADecorationBase::SetBlockState(FGridData BlockGridParam, bool BeOccupy)
+{
+	if (BeOccupy)
+	{
+		//如果当前有变红的结构
+		if (BlockGridParam.IsNull == false)
+		{
+
+		}
+		GridMeshMaterial->SetVectorParameterValue("GridColor", FLinearColor::Red); //::FromSRGBColor(FColor(160, 151, 197)));
+	}
+		
+	else
+		GridMeshMaterial->SetVectorParameterValue("GridColor", FLinearColor(0.161919f, 0.661458f, 0.172982));
+}
+
+TArray< FNestedArray > ADecorationBase::GetGridList()
+{
+	return GridMgr->GetGridList();
+}

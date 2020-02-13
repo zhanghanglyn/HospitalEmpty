@@ -64,7 +64,7 @@ public:
 	void GetGridWidthHeight(float &Width, float &Height);
 
 	/* 放置当前家具，保存格子数据 */
-	bool SaveCurDecoration();
+	bool SaveCurDecoration( class ADecorationBase* SaveDecoration );
 
 	/* 判断一个点是否在当前格子地面上,修改为会把移动点变成边缘 */
 	bool CheckLocationInGround(FVector &InLocation);

@@ -88,8 +88,17 @@ void UDecorationSystemMgr::OnMouseClickStart()
 	//放置家具
 	else if (CurControlType == ControlType::ArrangeDecoration)
 	{
-		if (!CurGridGround->SaveCurDecoration())
+		if (!CurGridGround->SaveCurDecoration(CurDecoration))
+		{
 			CurControlType = ControlType::None;
+			CurDecoration = nullptr;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Block is Grid Block！！！！！！！！"));
+
+		}
+			
 	}
 		
 }
@@ -97,7 +106,9 @@ void UDecorationSystemMgr::OnMouseClickStart()
 void UDecorationSystemMgr::OnMouseHover()
 {
 	if (PlayerPawn == nullptr)
+	{
 		return;
+	}
 
 	//如果当前属于布置家具状态
 	if (CurControlType == ControlType::ArrangeDecoration)

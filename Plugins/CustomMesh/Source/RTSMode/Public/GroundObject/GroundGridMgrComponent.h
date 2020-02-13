@@ -34,12 +34,12 @@ public:
 	/*
 		更新阻挡格子信息，
 		家具调用该接口，根据自身格子信息更新阻挡格子，但只有当点击后，才会将数据正式写入正式数据中
-		*如果是正在移动中，得把之前的该移动家具的格子数据清除之后重新设置
+		该接口是通过查找当前地面上的所有家具，来更新
 	*/
-	void UpdateBlockGrid(TArray< FNestedArray > BlockGridList);
+	void UpdateBlockGrid( class ADecorationBase* CurDecoration );//TArray< FNestedArray > BlockGridList);
 
 	/* 点击保存当前编辑的物体 , 将阻挡格子上的数据写入正式数据 */
-	bool SaveCurDecoration();
+	bool SaveCurDecoration(class ADecorationBase* SaveDecoration);
 
 	/* 判断当前家具的位置是否被阻挡 BlockGrid是否占用*/
 	bool CheckGridsBeBlock(TArray< FNestedArray > DecorationGridList);
@@ -50,6 +50,15 @@ public:
 	/* 判断一个左下角的点是否在格子地面上，如果不在，会重新设置左下角的坐标 */
 	bool CheckLeftBUttomLocationInGround(FVector &LeftButtomLocation);
 
+	/* 把一个Decoration加入自身 */
+	void AddDecoration(class ADecorationBase* NewDecoration);
+
+	/* 删除一个Decoration */
+	void DeleteDecoration(class ADecorationBase* DelDecoration);
+
+protected:
+	/* 初始化遮挡格子 */
+	void InitBlockGrid();
 protected:
 
 	UPROPERTY()
@@ -76,6 +85,10 @@ protected:
 	UPROPERTY()
 	TArray<FNestedArray> BlockGridDataList;
 
+	/* 当前地面上的家具列表,正在操作中的家具不会计入列表中，但是会参与阻挡计算 */
+	UPROPERTY()
+	TArray<class ADecorationBase*> DecorationList;
+
 	/* 自身管理的地面Actor */
 	UPROPERTY()
 	class AGroundObj* GroundActor;
@@ -83,5 +96,7 @@ protected:
 	//当前地面是否有重复阻挡物体
 	UPROPERTY()
 	bool BeBlockDecorate = false;
+
+
 
 };

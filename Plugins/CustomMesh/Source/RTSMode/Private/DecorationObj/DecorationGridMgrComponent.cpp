@@ -100,5 +100,5 @@ void UDecorationGridMgrComponent::MoveTo(FVector InLocation)
 	UpdateGridInfo(TempData);
 
 	/* 更新整个地面的格子信息 */
-	//GroundGridMgr
+	GroundGridMgr->UpdateBlockGrid(DecorationActor);
 }

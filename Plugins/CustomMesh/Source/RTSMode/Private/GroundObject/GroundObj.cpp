@@ -309,7 +309,7 @@ bool AGroundObj::CheckLeftBUttomLocationInGround(FVector &LeftButtomLocation)
 }
 
 
-bool AGroundObj::SaveCurDecoration()
+bool AGroundObj::SaveCurDecoration(ADecorationBase* SaveDecoration)
 {
-	return GridMgr->SaveCurDecoration();
+	return GridMgr->SaveCurDecoration(SaveDecoration);
 }

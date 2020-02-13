@@ -13,5 +13,7 @@ bool FGridData::SetGridId()
 		return true;
 	}
 
+	IsNull = false;
+
 	return false;
 }

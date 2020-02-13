@@ -39,6 +39,11 @@ public:
 	/* 拖动物体时的移动,根据传入的坐标，会自动对齐到最近的格子 */
 	void MoveTo(FVector InLocation);
 
+	/* 获取地面Grid数据 */
+	TArray< FNestedArray > GetGridList()
+	{
+		return GridDataList;
+	};
 protected:
 	/* 根据左上角格子数据，更新自身格子信息 */
 	void UpdateGridInfo(FGridData TopRightGridData);

@@ -10,6 +10,10 @@ struct FGridData
 {
 	GENERATED_USTRUCT_BODY()
 public:
+	/* 用来标识当前结构是否并未被初始化，如果调用了SetGridId则会初始化 */
+	UPROPERTY()
+	bool IsNull = true;
+
 	UPROPERTY()
 	bool BeOccupy = false; //是否被占用
 

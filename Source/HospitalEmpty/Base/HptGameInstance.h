@@ -12,6 +12,8 @@ public:
 	UHptGameInstance(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer) {
 	};
 
+	static UHptGameInstance* GetInstance(const UObject* WorldContextObject);
+
 	virtual void Init();
 	virtual void Shutdown()override;
 
@@ -23,9 +25,17 @@ public:
 		return DecorationSystemMgr;
 	}
 
+	class UUMGManager* GetUMGManager()
+	{
+		return UMGManger;
+	}
+
 protected:
 
 	UPROPERTY()
 	class UDecorationSystemMgr* DecorationSystemMgr;
+
+	UPROPERTY()
+	class UUMGManager* UMGManger;
 
 };

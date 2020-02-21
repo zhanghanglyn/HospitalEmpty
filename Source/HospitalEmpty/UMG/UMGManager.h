@@ -9,7 +9,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "UMG/FullScreenWidgetBase.h"
+#include "UMG/UserWidgetBase.h"
 #include "UMG/FullScreenRoot.h"
 #include "Classes/Kismet/GameplayStatics.h"
 #include "Engine/Classes/Engine/Engine.h"
@@ -43,7 +43,7 @@ struct FUMGLayerWidget
 
 public:
 	UPROPERTY()
-		TArray<UFullScreenWidgetBase*> LayerWidgets;
+		TArray<UUserWidgetBase*> LayerWidgets;
 
 };
 
@@ -63,20 +63,20 @@ private:
 public:
 	UUMGManager(const FObjectInitializer& ObjectInitializer);
 	
-
+	static UUMGManager* Get(const UObject* WorldContextObject);
 /************************************************************************/
 /*						直接创建至屏幕相关                             */
 /************************************************************************/
 public:
 	//向屏幕添加一个UMG
 	UFUNCTION(BlueprintCallable , BlueprintCosmetic, meta = (WorldContext = "WorldContextObject"))
-	UFullScreenWidgetBase* CreateScreenWidget(const UObject* WorldContextObject,
-		FString _widgetBlueprintPath, /* TSubclassOf<UFullScreenWidgetBase> _widgetType,FString _widgetName,*/ 
+	UUserWidgetBase* CreateScreenWidget(const UObject* WorldContextObject,
+		FString _widgetBlueprintPath, /* TSubclassOf<UUserWidgetBase> _widgetType,FString _widgetName,*/ 
 		EUMGLayer Layer = EUMGLayer::None, int32 _zorder = 0);
 	//向屏幕添加一个UMG
 	
 	template<typename T>
-	T* CreateScreenWidget(FString _widgetBlueprintPath,UWorld* _world, /* TSubclassOf<UFullScreenWidgetBase> _widgetType, FString _widgetName,*/
+	T* CreateScreenWidget(FString _widgetBlueprintPath,UWorld* _world, /* TSubclassOf<UUserWidgetBase> _widgetType, FString _widgetName,*/
 		EUMGLayer Layer = EUMGLayer::None, int32 _zorder = 0)
 	{
 		/*if (m_ScreenWidget.Num() > 0 && m_ScreenWidget.Find(_widgetName) != nullptr)
@@ -91,7 +91,7 @@ public:
 			T* NewWidget = CreateWidget<T>(_world, Temp_Widget);
 			if (NewWidget != nullptr)
 			{
-				(Cast<UFullScreenWidgetBase>(NewWidget))->AddToViewport((int8)Layer * 100 +_zorder);
+				(Cast<UUserWidgetBase>(NewWidget))->AddToViewport((int8)Layer * 100 +_zorder);
 
 				if (m_ScreenWidget.Contains(Layer))
 					m_ScreenWidget[Layer].LayerWidgets.Add(NewWidget);
@@ -113,12 +113,12 @@ public:
 	}
 
 	//获取所有对应层的UMG
-	TArray<UFullScreenWidgetBase*> GetScreenWidget(EUMGLayer Layer);//FString _widgetName);
+	TArray<UUserWidgetBase*> GetScreenWidget(EUMGLayer Layer);//FString _widgetName);
 	/* 根据UID查找UMG */
-	UFullScreenWidgetBase* GetScreenWidget(FString UID);
+	UUserWidgetBase* GetScreenWidget(FString UID);
 	/*获取对应UI的层级*/
 	EUMGLayer GetScreenWidgetLayer(FString UID);
-	EUMGLayer GetScreenWidgetLayer(UFullScreenWidgetBase* InWidget);
+	EUMGLayer GetScreenWidgetLayer(UUserWidgetBase* InWidget);
 	//获取UMG
 	/*template<typename T1>
 	T1* GetScreenWidget(FString _widgetName)
@@ -133,7 +133,7 @@ public:
 
 	//清除Widget
 	void ClearWidget(FString UID);
-	void ClearWidget(UFullScreenWidgetBase* InWidget);
+	void ClearWidget(UUserWidgetBase* InWidget);
 	/* 清除对应层的UI */
 	void ClearWidget(EUMGLayer Layer);
 	void ClearAll();
@@ -146,7 +146,7 @@ protected:
 	UPROPERTY()
 	TMap<EUMGLayer, FUMGLayerWidget> m_ScreenWidget;
 	//记录每个名字对应的类型，用来转换  //暂时感觉没什么卵用 10.22
-	//TMap<FString, TSubclassOf<UFullScreenWidgetBase>> m_WidgetTypeRelate;
+	//TMap<FString, TSubclassOf<UUserWidgetBase>> m_WidgetTypeRelate;
 
 /************************************************************************/
 /*						创建至GameInstance相关                          */
@@ -157,27 +157,27 @@ public:
 
 	//创建INstanceUMG
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, meta = (WorldContext = "WorldContextObject"))
-	UFullScreenWidgetBase* CreateInstanceWidget(const UObject* WorldContextObject ,FString _widgetBlueprintPath,
+	UUserWidgetBase* CreateInstanceWidget(const UObject* WorldContextObject ,FString _widgetBlueprintPath,
 		EUMGLayer Layer = EUMGLayer::None, int32 _zorder = 0);
-	UFullScreenWidgetBase* CreateInstanceWidget(UWorld* _world, FString _widgetBlueprintPath, EUMGLayer Layer = EUMGLayer::None,
+	UUserWidgetBase* CreateInstanceWidget(UWorld* _world, FString _widgetBlueprintPath, EUMGLayer Layer = EUMGLayer::None,
 		int32 _zorder = 0);
 
 	//根据UID查找某个UMD
-	UFullScreenWidgetBase* GetInsUMG(FString UID);
+	UUserWidgetBase* GetInsUMG(FString UID);
 	/* 根据Layer查找所有的Widget */
-	TArray<UFullScreenWidgetBase*> GetInsUMGS(EUMGLayer Layer);
+	TArray<UUserWidgetBase*> GetInsUMGS(EUMGLayer Layer);
 
 	/*获取对应UI的层级*/
 	EUMGLayer GetInsWidgetLayer(FString UID);
-	EUMGLayer GetInsWidgetLayer(UFullScreenWidgetBase* InWidget);
+	EUMGLayer GetInsWidgetLayer(UUserWidgetBase* InWidget);
 
 	//删除全屏UMG
 	//void DeleteInsUMGWidget(FString UID);
 	//删除全屏UMG
-	//void DeleteInsUMGWidget( UFullScreenWidgetBase* widget);
+	//void DeleteInsUMGWidget( UUserWidgetBase* widget);
 	//删除全屏UMG
 	void ClearInsWidget(FString UID);
-	void ClearInsWidget(UFullScreenWidgetBase* InWidget);
+	void ClearInsWidget(UUserWidgetBase* InWidget);
 	/* 清除对应层的全屏UI */
 	void ClearInsWidget(EUMGLayer Layer);
 	//清空全屏UMG

@@ -45,7 +45,10 @@ public:
 	virtual void OnSlotAdded(UPanelSlot* InSlot);
 	virtual void OnSlotRemoved(UPanelSlot* InSlot);
 	
-
+public:
+	/* 外部调用，添加Item到List中 */
+	UFUNCTION(BlueprintCallable, Category = "Canvas Panel")
+	UHpListViewSlot* AddChildToList(UWidget* Content);
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ListView参数")

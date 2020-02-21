@@ -44,6 +44,11 @@ void UHpTestListView::OnSlotRemoved(UPanelSlot* InSlot)
 	}
 }
 
+UHpListViewSlot* UHpTestListView::AddChildToList(UWidget* Content)
+{
+	return Cast<UHpListViewSlot>(Super::AddChild(Content));
+}
+
 /************************************************************************/
 /*                              显示相关                               */
 /************************************************************************/

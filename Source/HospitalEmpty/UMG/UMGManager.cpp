@@ -2,6 +2,8 @@
 
 
 #include "UMGManager.h"
+#include "Engine/Engine.h"
+#include "Base/HptGameInstance.h"
 
 //UUMGManager* UUMGManager::Instace = nullptr;
 UUMGManager::UUMGManager(const FObjectInitializer& ObjectInitializer) :Super(ObjectInitializer)
@@ -9,18 +11,35 @@ UUMGManager::UUMGManager(const FObjectInitializer& ObjectInitializer) :Super(Obj
 	m_ScreenWidget.Empty();
 }
 
-UFullScreenWidgetBase* UUMGManager::CreateScreenWidget(const UObject* WorldContextObject, FString _widgetBlueprintPath, EUMGLayer Layer /* = EUMGLayer::None */, int32 _zorder /* = 0 */)
+UUMGManager * UUMGManager::Get(const UObject * WorldContextObject)
+{
+	UWorld* MyWorld = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
+	if (MyWorld)
+	{
+		UHptGameInstance* GameInstance = Cast<UHptGameInstance>(MyWorld->GetGameInstance());
+		if (GameInstance)
+		{
+			UUMGManager* Out = GameInstance->GetUMGManager();
+			return Out;
+		}
+	}
+
+	return nullptr;
+}
+
+
+UUserWidgetBase* UUMGManager::CreateScreenWidget(const UObject* WorldContextObject, FString _widgetBlueprintPath, EUMGLayer Layer /* = EUMGLayer::None */, int32 _zorder /* = 0 */)
 {
 	/*if (m_ScreenWidget.Num() > 0 && m_ScreenWidget.Find(Layer) != nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("this name is aleady in the map!!!!"));
 		return nullptr;
 	}*/
-	UClass* Temp_Widget = LoadClass<UFullScreenWidgetBase>(NULL, _widgetBlueprintPath.GetCharArray().GetData());
+	UClass* Temp_Widget = LoadClass<UUserWidgetBase>(NULL, _widgetBlueprintPath.GetCharArray().GetData());
 	if (Temp_Widget != nullptr)
 	{
 		UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
-		UFullScreenWidgetBase *NewWidget = CreateWidget<UFullScreenWidgetBase>(World, Temp_Widget);
+		UUserWidgetBase *NewWidget = CreateWidget<UUserWidgetBase>(World, Temp_Widget);
 		if (NewWidget != nullptr)
 		{
 			NewWidget->AddToViewport(((int8)Layer * 100 + _zorder));
@@ -44,9 +63,9 @@ UFullScreenWidgetBase* UUMGManager::CreateScreenWidget(const UObject* WorldConte
 	return nullptr;
 }
 
-TArray<UFullScreenWidgetBase*> UUMGManager::GetScreenWidget(EUMGLayer Layer)
+TArray<UUserWidgetBase*> UUMGManager::GetScreenWidget(EUMGLayer Layer)
 {
-	TArray<UFullScreenWidgetBase*> ReturnArray;
+	TArray<UUserWidgetBase*> ReturnArray;
 
 	if (m_ScreenWidget.Find(Layer) != nullptr)
 	{
@@ -57,7 +76,7 @@ TArray<UFullScreenWidgetBase*> UUMGManager::GetScreenWidget(EUMGLayer Layer)
 	return ReturnArray;
 }
 
-UFullScreenWidgetBase* UUMGManager::GetScreenWidget(FString UID)
+UUserWidgetBase* UUMGManager::GetScreenWidget(FString UID)
 {
 	for (auto& Widgets : m_ScreenWidget)
 	{
@@ -72,7 +91,7 @@ UFullScreenWidgetBase* UUMGManager::GetScreenWidget(FString UID)
 	return nullptr;
 }
 
-EUMGLayer UUMGManager::GetScreenWidgetLayer(UFullScreenWidgetBase* InWidget)
+EUMGLayer UUMGManager::GetScreenWidgetLayer(UUserWidgetBase* InWidget)
 {
 	for (auto& Widgets : m_ScreenWidget)
 	{
@@ -107,7 +126,7 @@ void UUMGManager::ClearWidget(FString UID)
 {
 	if (m_ScreenWidget.Num() > 0)
 	{
-		UFullScreenWidgetBase *tempWidget = GetScreenWidget(UID);//*m_ScreenWidget.Find(_widgetName);
+		UUserWidgetBase *tempWidget = GetScreenWidget(UID);//*m_ScreenWidget.Find(_widgetName);
 		if (tempWidget)
 		{
 			EUMGLayer WidgetLayer = GetScreenWidgetLayer(UID);
@@ -122,7 +141,7 @@ void UUMGManager::ClearWidget(FString UID)
 	}
 }
 /*根据Widget清除单个UMG*/
-void UUMGManager::ClearWidget(UFullScreenWidgetBase* InWidget)
+void UUMGManager::ClearWidget(UUserWidgetBase* InWidget)
 {
 	ClearWidget(InWidget->GetUID());
 }
@@ -131,7 +150,7 @@ void UUMGManager::ClearWidget(EUMGLayer Layer)
 {
 	if (m_ScreenWidget.Num() > 0)
 	{
-		TArray<UFullScreenWidgetBase*> tempWidgetList = GetScreenWidget(Layer);//*m_ScreenWidget.Find(_widgetName);
+		TArray<UUserWidgetBase*> tempWidgetList = GetScreenWidget(Layer);//*m_ScreenWidget.Find(_widgetName);
 		for (auto& Widgets : tempWidgetList)
 		{
 			if (Widgets->IsInViewport())
@@ -151,7 +170,7 @@ void UUMGManager::ClearAll()
 	{
 		for (auto& Widgets : m_ScreenWidget)
 		{
-			for (UFullScreenWidgetBase* ShowWidget : Widgets.Value.LayerWidgets)
+			for (UUserWidgetBase* ShowWidget : Widgets.Value.LayerWidgets)
 			{
 				if (ShowWidget->IsInViewport())
 				{
@@ -199,7 +218,7 @@ void UUMGManager::CreateInstanceRootWidget(UGameInstance * GameInstance)
 }
 
 //创建INstanceUMG
-UFullScreenWidgetBase* UUMGManager::CreateInstanceWidget(const UObject* WorldContextObject, FString _widgetBlueprintPath,
+UUserWidgetBase* UUMGManager::CreateInstanceWidget(const UObject* WorldContextObject, FString _widgetBlueprintPath,
 	EUMGLayer Layer, int32 _zorder)
 {
 	if (m_RootWidget == nullptr)
@@ -213,10 +232,10 @@ UFullScreenWidgetBase* UUMGManager::CreateInstanceWidget(const UObject* WorldCon
 		return nullptr;
 	}
 
-	UClass* Temp_Widget = LoadClass<UFullScreenWidgetBase>(NULL, _widgetBlueprintPath.GetCharArray().GetData());
+	UClass* Temp_Widget = LoadClass<UUserWidgetBase>(NULL, _widgetBlueprintPath.GetCharArray().GetData());
 	if (Temp_Widget != nullptr)
 	{
-		UFullScreenWidgetBase *NewWidget = CreateWidget<UFullScreenWidgetBase>( Cast<UUserWidget>(m_RootWidget) , Temp_Widget);
+		UUserWidgetBase *NewWidget = CreateWidget<UUserWidgetBase>( Cast<UUserWidget>(m_RootWidget) , Temp_Widget);
 		if (NewWidget != nullptr)
 		{
 			m_RootWidget->Root->AddChildToCanvas(NewWidget);
@@ -251,7 +270,7 @@ UFullScreenWidgetBase* UUMGManager::CreateInstanceWidget(const UObject* WorldCon
 	return nullptr;
 }
 
-UFullScreenWidgetBase* UUMGManager::CreateInstanceWidget(UWorld* _world, FString _widgetBlueprintPath, 
+UUserWidgetBase* UUMGManager::CreateInstanceWidget(UWorld* _world, FString _widgetBlueprintPath, 
 	EUMGLayer Layer, int32 _zorder)
 {
    	if (m_RootWidget == nullptr)
@@ -265,10 +284,10 @@ UFullScreenWidgetBase* UUMGManager::CreateInstanceWidget(UWorld* _world, FString
 		return nullptr;
 	}
 
-	UClass* Temp_Widget = LoadClass<UFullScreenWidgetBase>(NULL, _widgetBlueprintPath.GetCharArray().GetData());
+	UClass* Temp_Widget = LoadClass<UUserWidgetBase>(NULL, _widgetBlueprintPath.GetCharArray().GetData());
 	if (Temp_Widget != nullptr)
 	{
-		UFullScreenWidgetBase *NewWidget = CreateWidget<UFullScreenWidgetBase>(m_RootWidget, Temp_Widget);
+		UUserWidgetBase *NewWidget = CreateWidget<UUserWidgetBase>(m_RootWidget, Temp_Widget);
 		if (NewWidget != nullptr)
 		{
 			m_RootWidget->Root->AddChildToCanvas(NewWidget);
@@ -304,7 +323,7 @@ UFullScreenWidgetBase* UUMGManager::CreateInstanceWidget(UWorld* _world, FString
 	return nullptr;
 }
 
-UFullScreenWidgetBase* UUMGManager::GetInsUMG(FString UID)
+UUserWidgetBase* UUMGManager::GetInsUMG(FString UID)
 {
 	for (auto& Widgets : m_InsWidgetList)
 	{
@@ -319,9 +338,9 @@ UFullScreenWidgetBase* UUMGManager::GetInsUMG(FString UID)
 	return nullptr;
 }
 
-TArray<UFullScreenWidgetBase*> UUMGManager::GetInsUMGS(EUMGLayer Layer)
+TArray<UUserWidgetBase*> UUMGManager::GetInsUMGS(EUMGLayer Layer)
 {
-	TArray<UFullScreenWidgetBase*> ReturnArray;
+	TArray<UUserWidgetBase*> ReturnArray;
 
 	if (m_InsWidgetList.Find(Layer) != nullptr)
 	{
@@ -331,7 +350,7 @@ TArray<UFullScreenWidgetBase*> UUMGManager::GetInsUMGS(EUMGLayer Layer)
 	return ReturnArray;
 }
 
-EUMGLayer UUMGManager::GetInsWidgetLayer(UFullScreenWidgetBase* InWidget)
+EUMGLayer UUMGManager::GetInsWidgetLayer(UUserWidgetBase* InWidget)
 {
 	for (auto& Widgets : m_InsWidgetList)
 	{
@@ -367,7 +386,7 @@ void UUMGManager::ClearInsWidget(FString UID)
 {
 	if (m_InsWidgetList.Num() > 0)
 	{
-		UFullScreenWidgetBase *tempWidget = GetScreenWidget(UID);
+		UUserWidgetBase *tempWidget = GetScreenWidget(UID);
 		if (tempWidget)
 		{
 			EUMGLayer WidgetLayer = GetScreenWidgetLayer(UID);
@@ -386,7 +405,7 @@ void UUMGManager::ClearInsWidget(EUMGLayer Layer)
 {
 	if (m_InsWidgetList.Num() > 0)
 	{
-		TArray<UFullScreenWidgetBase*> tempWidgetList = GetScreenWidget(Layer);
+		TArray<UUserWidgetBase*> tempWidgetList = GetScreenWidget(Layer);
 		for (auto& Widgets : tempWidgetList)
 		{
 			Widgets->RemoveFromViewport();
@@ -399,7 +418,7 @@ void UUMGManager::ClearInsWidget(EUMGLayer Layer)
 	}
 }
 
-void UUMGManager::ClearInsWidget(UFullScreenWidgetBase* InWidget)
+void UUMGManager::ClearInsWidget(UUserWidgetBase* InWidget)
 {
 	ClearInsWidget(InWidget->GetUID());
 }
@@ -410,7 +429,7 @@ void UUMGManager::ClearAllIns()
 	{
 		for (auto& Widgets : m_InsWidgetList)
 		{
-			for (UFullScreenWidgetBase* ShowWidget : Widgets.Value.LayerWidgets)
+			for (UUserWidgetBase* ShowWidget : Widgets.Value.LayerWidgets)
 			{
 				ShowWidget->RemoveFromViewport();
 			}

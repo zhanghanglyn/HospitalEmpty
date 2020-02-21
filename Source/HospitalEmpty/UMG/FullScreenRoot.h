@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UMG/FullScreenWidgetBase.h"
+#include "UMG/UserWidgetBase.h"
 #include "FullScreenRoot.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class UFullScreenRoot : public UFullScreenWidgetBase
+class UFullScreenRoot : public UUserWidgetBase
 {
 	GENERATED_BODY()
 	

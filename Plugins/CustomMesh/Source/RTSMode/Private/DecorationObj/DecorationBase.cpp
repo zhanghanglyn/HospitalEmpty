@@ -54,6 +54,8 @@ void ADecorationBase::OnConstruction(const FTransform& Transform)
 				if (GridMeshMaterial)
 					GridMeshComponent->SetMaterial(0, GridMeshMaterial);
 			}
+			//20.2.14
+			UpdateGridInfo(GroundMesh);
 		}
 	}
 
@@ -70,10 +72,10 @@ void ADecorationBase::OnConstruction(const FTransform& Transform)
 
 void ADecorationBase::BeginPlay()
 {
-	UpdateGridInfo();
+	UpdateGridInfo(nullptr);
 }
 
-void ADecorationBase::UpdateGridInfo()
+void ADecorationBase::UpdateGridInfo( UStaticMesh* InMesh)
 {
 	/* 更新格子数据，占多少个格子 */
 
@@ -84,7 +86,13 @@ void ADecorationBase::UpdateGridInfo()
 		float GridMeshWidth = ParamData.GridParamData.RowNum * FGroundUtil::GroundGridWidth;
 		float GridMeshHeight = ParamData.GridParamData.ColumnNum * FGroundUtil::GroundGridHeight;
 
-		FBoxSphereBounds MeshBounds = GridMeshComponent->GetStaticMesh()->GetBounds();
+		FBoxSphereBounds MeshBounds;
+		
+		if (InMesh)
+			MeshBounds = InMesh->GetBounds();
+		else
+			MeshBounds = GridMeshComponent->GetStaticMesh()->GetBounds();
+
 		FVector ScaleSize = FVector((GridMeshWidth / MeshBounds.GetBox().GetSize().X), (GridMeshHeight / MeshBounds.GetBox().GetSize().Y), 1);
 		GridMeshComponent->SetWorldScale3D(ScaleSize);
 	}
@@ -178,4 +186,19 @@ void ADecorationBase::SetBlockState(FGridData BlockGridParam, bool BeOccupy)
 TArray< FNestedArray > ADecorationBase::GetGridList()
 {
 	return GridMgr->GetGridList();
+}
+
+void ADecorationBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+
+	if (PropertyChangedEvent.MemberProperty == nullptr)
+		return;
+
+	if (PropertyChangedEvent.MemberProperty->GetName() == "ParamData")
+	{
+		//因为有可能并没有创建完，所以延迟一帧进行
+		//UWorld* world = 
+		//UpdateGridInfo();
+	}
 }

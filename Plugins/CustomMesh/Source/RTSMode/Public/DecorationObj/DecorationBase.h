@@ -72,7 +72,7 @@ public:
 	ADecorationBase(const FObjectInitializer& ObjectInitializer);
 
 	/* virtual */
-	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override {};
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 	virtual void OnConstruction(const FTransform& Transform) override;
 
 	virtual void BeginPlay();
@@ -113,7 +113,7 @@ public:
 
 protected:
 	/* 根据配置等更新格子数以及更新模型信息 */
-	void UpdateGridInfo();
+	void UpdateGridInfo( class UStaticMesh* InMesh );
 
 
 public:

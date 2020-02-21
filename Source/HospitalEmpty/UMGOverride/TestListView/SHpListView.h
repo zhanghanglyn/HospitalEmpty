@@ -8,6 +8,8 @@
 #include "Layout/Children.h"
 #include "Layout/Visibility.h"
 #include "Styling/CoreStyle.h"
+#include "FHpListViewStyle.h"
+//#include "SConstraintCanvas.h"
 #include "UMGOverride/OverridUMGUtil.h"
 
 /*
@@ -71,23 +73,25 @@ public:
 
 	/* 定义自身Slate相关 */
 	SLATE_BEGIN_ARGS(SHpListView)
-		:_InBGImage(FCoreStyle::Get().GetBrush("Border"))
-		,_InRow(1)
-		,_InColumn(1)
-		,_InOffsetX(1)
-		,_InOffsetY(1)
-		,_InLayoutDirection(FLayoutDirection::Vertical)
+		: _Style(nullptr)
+		, _InBGImage(FCoreStyle::Get().GetBrush("Border"))
+		, _ColorAndOpacity(FLinearColor::White)
+		, _InRow(1)
+		, _InColumn(1)
+		, _InOffset(FVector2D::ZeroVector)
+		, _InLayoutDirection(FLayoutDirection::Vertical)
 	{
 		_Visibility = EVisibility::SelfHitTestInvisible;
 	}
 	SLATE_SUPPORTS_SLOT(SHpListView::FSlot)  //会在自身注册一个Slots，所以在Construct中，可以获取Slots
 
+	SLATE_STYLE_ARGUMENT(FHpListViewStyle, Style)
 	SLATE_ATTRIBUTE( const FSlateBrush* , InBGImage)
-	SLATE_ATTRIBUTE( int32, InRow)
-	SLATE_ATTRIBUTE( int32, InColumn)
-	SLATE_ATTRIBUTE(float, InOffsetX)
-	SLATE_ATTRIBUTE(float, InOffsetY)
-	SLATE_ATTRIBUTE(FLayoutDirection, InLayoutDirection)	//排列方向
+	SLATE_ATTRIBUTE(FSlateColor, ColorAndOpacity)
+	SLATE_ARGUMENT( int32, InRow)
+	SLATE_ARGUMENT( int32, InColumn)
+	SLATE_ARGUMENT(FVector2D, InOffset)
+	SLATE_ARGUMENT(FLayoutDirection, InLayoutDirection)	//排列方向
 
 	SLATE_END_ARGS()
 
@@ -100,15 +104,16 @@ public:
 
 	/** virtual **/
 	virtual void OnArrangeChildren(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren) const override;
-	//virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
+	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry,
+		const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
 	virtual FChildren* GetChildren() override;
-	virtual bool IsInteractable() const override { return true; };
-	virtual bool SupportsKeyboardFocus() const override { return true; };
+	//virtual bool IsInteractable() const override { return true; };
+	//virtual bool SupportsKeyboardFocus() const override { return true; };
 	//virtual void OnFocusLost(const FFocusEvent& InFocusEvent) override;
 	//virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	//virtual FReply OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	//virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
-	//virtual FVector2D ComputeDesiredSize(float) const override;
+	virtual FVector2D ComputeDesiredSize(float) const override;
 	/** virtual end **/
 
 	static FSlot& Slot()
@@ -118,6 +123,8 @@ public:
 
 	FSlot& AddSlot()
 	{
+		Invalidate(EInvalidateWidget::Layout);
+
 		SHpListView::FSlot& NewSlot = *(new FSlot());
 		this->Children.Add(&NewSlot);
 		return NewSlot;
@@ -134,7 +141,20 @@ public:
 	* Removes all slots from the panel.
 	*/
 	void ClearChildren();
-
+	/* 设置Style */
+	void SetStyle(const FHpListViewStyle* InStyle);
+	/* 设置背景图片 */
+	void SetBackGroundImage(const FSlateBrush* InBackgroundImage);
+	/* 获取背景图片 */
+	const FSlateBrush* GetBackgroundImage() const;
+	/*设置Offset*/
+	void SetItemOffSet( FVector2D InOffset);
+	/* 设置Row */
+	void SetRow(int32 InRow);
+	/** See the ColorAndOpacity attribute */
+	void SetColorAndOpacity(const TAttribute<FSlateColor>& InColorAndOpacity);
+	/** See the ColorAndOpacity attribute */
+	void SetColorAndOpacity(FLinearColor InColorAndOpacity);
 protected:
 	/*先做一些初始化的计算，因为Arrange是每一帧都在跑的*/
 	void Init();
@@ -143,6 +163,11 @@ protected:
 	/*  */
 	TPanelChildren<FSlot> Children;
 
+	/* 当前Slate的style */
+	const FHpListViewStyle* Style;
+
+	/** Color and opacity scale for this image */
+	TAttribute<FSlateColor> ColorAndOpacity;
 
 protected:
 	//背景图片
@@ -153,8 +178,7 @@ protected:
 	int32 Column = 1;
 
 	//Item间的空距
-	float OffsetX;
-	float OffsetY;
+	FVector2D Offset;
 
 	//排布方向
 	FLayoutDirection LayoutDirection;

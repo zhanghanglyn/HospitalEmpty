@@ -22,6 +22,7 @@ UENUM()
 enum class ControlType : int8
 {
 	None,
+	PreArrange,				//预放置物品中（还没有放置到地面上）
 	ArrangeDecoration,		//放置物品中
 
 };
@@ -56,8 +57,9 @@ public:
 	/* 创建一个家具
 		Param : CreateLocation  创建位置
 				GridGround      创建家具的地面,用来同步家具信息
+				BSetGroundData  如果是预创建的，输入False则不会设置格子等信息
 	*/
-	class ADecorationBase* CreateDecoration( FVector Location ,class AGroundObj* GridGround , EDecorationType DecorationType);
+	class ADecorationBase* CreateDecoration( FVector Location ,class AActorBase* GridGround , EDecorationType DecorationType , bool BSetGroundData = true);
 
 	void SetDecorationBPPath(FString InDecorationBPPath) {
 		DecorationBPPath = InDecorationBPPath;

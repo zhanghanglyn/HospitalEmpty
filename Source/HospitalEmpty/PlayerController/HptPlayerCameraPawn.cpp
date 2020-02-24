@@ -3,6 +3,7 @@
 #include "DecorationBase.h"
 #include "HospitalEmpty/GridSystem/DecorationSystemMgr.h"
 #include "GroundObject/GroundObj.h"
+#include "Actor/GroundDefaultActor.h"
 #include "Engine/Engine.h"
 #include "Runtime/Engine/Public/Engine.h"
 
@@ -68,7 +69,7 @@ void AHptPlayerCameraPawn::Tick(float deltaSeconds)
 }
 
 #pragma optimize("",off)
-AGroundObj* AHptPlayerCameraPawn::GetMouseLocationInGround(FVector &GroundLocation) const
+AActorBase* AHptPlayerCameraPawn::GetMouseLocationInGround(FVector &GroundLocation) const
 {
 	UWorld* world = GEngine->GetWorldFromContextObject(this, EGetWorldErrorMode::LogAndReturnNull);
 
@@ -92,6 +93,10 @@ AGroundObj* AHptPlayerCameraPawn::GetMouseLocationInGround(FVector &GroundLocati
 	world->LineTraceMultiByObjectType(temp_HitResult, StartPos, StartPos + Dir * RayLength, FCollisionObjectQueryParams::AllObjects, CollisionParam);
 	//DrawDebugLine(world, StartPos, StartPos + Dir * RayLength, FColor::Red, true, RayLength);
 
+	//20.2.24 新添加默认地面，如果没有射到格子地面，则返回射到默认地面的值
+	FVector HitDefaultLocation;
+	AGroundDefaultActor* DefaultGround = nullptr;
+
 	if (temp_HitResult.Num() > 0)
 	{
 		for (int i = 0; i < temp_HitResult.Num(); i++)
@@ -100,14 +105,20 @@ AGroundObj* AHptPlayerCameraPawn::GetMouseLocationInGround(FVector &GroundLocati
 			/* 把取得的Actor转化为地面 */
 			if (AGroundObj* HitGround = Cast<AGroundObj>(HitActor))
 			{
-				GroundLocation = temp_HitResult[i].Location;;
+				GroundLocation = temp_HitResult[i].Location;
 
 				return HitGround;
+			}
+			else if(AGroundDefaultActor* HitDefaultGround = Cast<AGroundDefaultActor>(HitActor))
+			{
+				HitDefaultLocation = temp_HitResult[i].Location;
+				DefaultGround = HitDefaultGround;
 			}
 		}
 	}
 
-	return nullptr;
+	GroundLocation = HitDefaultLocation;
+	return DefaultGround;
 }
 
 #pragma optimize("",on)

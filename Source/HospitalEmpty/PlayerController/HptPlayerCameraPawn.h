@@ -34,7 +34,7 @@ public:
 	/* 获取当前鼠标点在地面上的位置 ,并且返回当前的格子地面
 	   地面即为GridGround，之后肯定会有多个地面，或是多个Ground某些不需要格子的情况
 	*/
-	class AGroundObj* GetMouseLocationInGround( FVector &GroundLocation ) const;
+	class AActorBase* GetMouseLocationInGround( FVector &GroundLocation) const;
 
 
 protected:

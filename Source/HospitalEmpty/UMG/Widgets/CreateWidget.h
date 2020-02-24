@@ -28,6 +28,11 @@ public:
 	};
 
 public:
+
+	UFUNCTION(BlueprintCallable)
+	void AddToListView(UWidget* Content);
+
+public:
 	UPROPERTY(VisibleAnyWhere, BlueprintReadWrite, meta = (BindWidget))
 	UHpTestListView *ListView;   
 };

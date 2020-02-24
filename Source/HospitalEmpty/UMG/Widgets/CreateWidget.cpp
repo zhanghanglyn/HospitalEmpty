@@ -4,3 +4,11 @@ UCreateWidget::UCreateWidget(const FObjectInitializer& ObjectInitializer) : Supe
 {
 
 }
+
+void UCreateWidget::AddToListView(UWidget* Content)
+{
+	if (ListView)
+	{
+		ListView->AddChildToList(Content);
+	}
+}

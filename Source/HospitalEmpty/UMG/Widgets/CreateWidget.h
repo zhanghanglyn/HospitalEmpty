@@ -8,7 +8,8 @@
 #include "CreateWidget.generated.h"
 
 /**
- * 
+	放置物品的菜单，从配置中取出可以添加到场景中的物品，然后显示
+	点击物品后，会直接创建一个
  */
 UCLASS()
 class UCreateWidget : public UUserWidgetBase
@@ -18,9 +19,7 @@ class UCreateWidget : public UUserWidgetBase
 public:
 	UCreateWidget(const FObjectInitializer& ObjectInitializer);
 
-	virtual void NativeConstruct() override {
-		Super::NativeConstruct();
-	};
+	virtual void NativeConstruct() override;
 
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime)override
 	{
@@ -32,7 +31,20 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void AddToListView(UWidget* Content);
 
+protected:
+	//测试对应点击3个不同的家具
+	UFUNCTION(BlueprintCallable)
+	void OnClickedListItem0();
+	UFUNCTION(BlueprintCallable)
+	void OnClickedListItem1();
+	UFUNCTION(BlueprintCallable)
+	void OnClickedListItem2();
+
+
 public:
 	UPROPERTY(VisibleAnyWhere, BlueprintReadWrite, meta = (BindWidget))
 	UHpTestListView *ListView;   
+
+	UPROPERTY()
+	class UDecorationSystemMgr* DecorationSystemMgr;
 };

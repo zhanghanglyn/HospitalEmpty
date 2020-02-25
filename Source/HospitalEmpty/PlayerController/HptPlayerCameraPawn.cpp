@@ -5,7 +5,10 @@
 #include "GroundObject/GroundObj.h"
 #include "Actor/GroundDefaultActor.h"
 #include "Engine/Engine.h"
+#include "FSM/FSMMgr.h"
+#include "FSM/StatePlayerControl/StateIdle.h"
 #include "Runtime/Engine/Public/Engine.h"
+#include "FSM/StatePlayerControl/StatePreArrange.h"
 
 AHptPlayerCameraPawn::AHptPlayerCameraPawn(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -25,21 +28,38 @@ void AHptPlayerCameraPawn::OnMouseClickStart()
 {
 	Super::OnMouseClickStart();
 
+	if (FSMMgr)
+		FSMMgr->OnMouseClickStart();
 	//家具系统管理器
-	if (DecorationSystemMgr)
-		DecorationSystemMgr->OnMouseClickStart();
+	//if (DecorationSystemMgr)
+	//	DecorationSystemMgr->OnMouseClickStart();
 
 }
-
 
 void AHptPlayerCameraPawn::OnMouseClickMove()
 {
 	Super::OnMouseClickMove();
+	if (FSMMgr)
+		FSMMgr->OnMouseClickMove();
 }
 
 void AHptPlayerCameraPawn::OnMouseClickEnd()
 {
 	Super::OnMouseClickEnd();
+	if (FSMMgr)
+		FSMMgr->OnMouseClickEnd();
+}
+
+void AHptPlayerCameraPawn::OnMouseHover()
+{
+	Super::OnMouseHover();
+
+	//家具系统管理器
+	//if (DecorationSystemMgr)
+	//	DecorationSystemMgr->OnMouseHover();
+	if (FSMMgr)
+		FSMMgr->OnMouseHover();
+
 }
 
 void AHptPlayerCameraPawn::BeginPlay()
@@ -49,25 +69,60 @@ void AHptPlayerCameraPawn::BeginPlay()
 
 	DecorationSystemMgr = UDecorationSystemMgr::Get(this);
 	DecorationSystemMgr->SetPlayerPawn(this);
-}
 
-void AHptPlayerCameraPawn::OnMouseHover()
-{
-	Super::OnMouseHover();
-
-	//家具系统管理器
-	if (DecorationSystemMgr)
-		DecorationSystemMgr->OnMouseHover();
-
+	//创建一个玩家操作状态机
+	InitFSM();
 }
 
 void AHptPlayerCameraPawn::Tick(float deltaSeconds)
 {
 	Super::Tick(deltaSeconds);
 
+	if (FSMMgr)
+		FSMMgr->UpdateState();
 	
 }
 
+/************************************************************************/
+/*                              状态机相关                              */
+/************************************************************************/
+#pragma optimize("",off)
+void AHptPlayerCameraPawn::InitFSM()
+{
+	if (FSMMgr == nullptr)
+		FSMMgr = NewObject<UFSMMgr>(this, TEXT("ControlFSMMgr"));
+
+	/*** 创建多个状态State ***/
+	/*创建一个普通状态*/
+	UStateIdle* IdleState = NewObject< UStateIdle>(FSMMgr);
+	IdleState->AddCondition(ETransConditionID::C_CREATEFURNITURE , EStateEnum::PRE_ARRANGE);
+	IdleState->SetFSMMgr(FSMMgr);
+
+	/*创建一个预布置状态*/
+	UStatePreArrange* PreArrange = NewObject< UStatePreArrange>(FSMMgr);
+	PreArrange->AddCondition(ETransConditionID::C_PreToIdle, EStateEnum::IDLE);
+	PreArrange->SetDecorationSystemMgr(DecorationSystemMgr);
+	PreArrange->SetPlayerPawn(this);
+	PreArrange->SetFSMMgr(FSMMgr);
+
+	FSMMgr->Init(EStateEnum::IDLE, IdleState);
+	FSMMgr->AddState(EStateEnum::PRE_ARRANGE, PreArrange);
+}
+
+void AHptPlayerCameraPawn::SetStatePreArrange(EDecorationType InDecorationType)
+{
+	UPreArrangeParam* TempParam = NewObject<UPreArrangeParam>(FSMMgr);
+	TempParam->DecorationType = InDecorationType;
+	FSMMgr->TransState(ETransConditionID::C_CREATEFURNITURE, TempParam);
+	TempParam->RemoveFromRoot();
+	TempParam = nullptr;
+}
+#pragma optimize("",on)
+
+
+/************************************************************************/
+/*                                                                      */
+/************************************************************************/
 #pragma optimize("",off)
 AActorBase* AHptPlayerCameraPawn::GetMouseLocationInGround(FVector &GroundLocation) const
 {

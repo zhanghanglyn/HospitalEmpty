@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "Util/StateEnum.h"
 #include "RTSMode/Private/RTSControl/RTSPlayerCameraSpectatorPawn.h"
 #include "HptPlayerCameraPawn.generated.h"
 
@@ -36,6 +37,14 @@ public:
 	*/
 	class AActorBase* GetMouseLocationInGround( FVector &GroundLocation) const;
 
+	/*
+		切换状态机为预创建家具状态
+	*/
+	void SetStatePreArrange(EDecorationType InDecorationType);
+
+protected:
+	/* 初始化状态机 */
+	void InitFSM();
 
 protected:
 	UPROPERTY( EditAnywhere , BlueprintReadWrite)
@@ -54,4 +63,7 @@ protected:
 	UPROPERTY()
 	class ADecorationBase* TestCurDecoration;
 
+	/* 状态机 */
+	UPROPERTY()
+	class UFSMMgr* FSMMgr;
 };

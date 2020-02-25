@@ -2,6 +2,7 @@
 #include "Engine/Engine.h"
 #include "HospitalEmpty/Base/HptGameInstance.h"
 #include "GroundObj.h"
+#include "Util/StateEnum.h"
 #include "DecorationBase.h"
 #include "HospitalEmpty/PlayerController/HptPlayerCameraPawn.h"
 #include "HospitalEmpty/Common/CommonLibrary.h"
@@ -73,6 +74,7 @@ ADecorationBase* UDecorationSystemMgr::CreateDecoration(FVector Location, AActor
 首先去检测，是否点击到了格子地面，如果点击到了格子地面，则生成一个家具
 之后会使用状态机?看看是否有必要把  
 暂时都生成Base家具测试
+20.2.25 全部都会提成状态
 */
 void UDecorationSystemMgr::OnMouseClickStart()
 {

@@ -1,18 +1,8 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "Util/StateEnum.h"
 #include "DecorationSystemMgr.generated.h"
-
-/* 
-	如果所有的家具蓝图都放在一起，则可以直接通过枚举的名字来组合路径进行加载！
-*/
-UENUM()
-enum class EDecorationType : int8
-{
-	None,
-	DecorationBase,		//测试物品
-};
-
 
 /*
 	状态枚举，表明当前家具控制器的状态
@@ -67,6 +57,12 @@ public:
 
 	void SetPlayerPawn(class AHptPlayerCameraPawn* InPlayerPawn);
 
+	/* 可以通过该System获取玩家控制器 */
+	class AHptPlayerCameraPawn* GetPlayerCameraPawn()
+	{
+		return PlayerPawn;
+	}
+		
 protected:
 	//所有家具的蓝图位置，所有蓝图最终显示效果应该为 Blueprint'/Game/XXX/NAME/BP_NAME.BP_NAME_C' 类似
 	UPROPERTY()

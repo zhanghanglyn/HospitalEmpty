@@ -73,7 +73,12 @@ EStateEnum UFSMMgr::TransState(ETransConditionID InTransConditionID, UTransParam
 	CurFSMState->BeforeExit();
 	//下一个状态执行进入回调
 	NextFSMState->BeforeEnter(InParamObj);
+
+	//然后清除数据
+	CurFSMState->AfterExit();
+
 	CurFSMState = NextFSMState;
+
 
 	return tempStateID;
 }

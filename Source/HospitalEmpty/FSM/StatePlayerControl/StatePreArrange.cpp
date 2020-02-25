@@ -6,6 +6,7 @@
 #include "DecorationBase.h"
 #include "FSM/FSMMgr.h"
 #include "PlayerController/HptPlayerCameraPawn.h"
+#include "FSM/StatePlayerControl/StateArrange.h"
 
 /* 要在此预先创建一个家具 */
 void UStatePreArrange::BeforeEnter(UTransParamBase* InParamObj)
@@ -33,7 +34,8 @@ void UStatePreArrange::BeforeEnter(UTransParamBase* InParamObj)
 		AGroundDefaultActor* DefaultGround = Cast<AGroundDefaultActor>(ResultGround);
 		if (DefaultGround == nullptr)
 		{
-			FSMMgr->TransState(ETransConditionID::C_PreToIdle, nullptr);
+			//FSMMgr->TransState(ETransConditionID::C_PreToIdle, nullptr);
+			BBackToIdle = true;
 		}
 		else
 		{
@@ -62,7 +64,13 @@ void UStatePreArrange::OnMouseHover()
 			CurGridGround = HitGround;
 			CurDecoration->MoveTo(MoveToLocation);
 			//CurControlType = ControlType::ArrangeDecoration;
-			FSMMgr->TransState(ETransConditionID::C_CreateToArrange , nullptr);
+			UStateArrangeParam* TempParam = NewObject<UStateArrangeParam>(FSMMgr);
+			TempParam->CurDecoration = CurDecoration;
+			TempParam->CurGridGround = CurGridGround;
+			TempParam->LastDecorationLocation = LastDecorationLocation;
+			FSMMgr->TransState(ETransConditionID::C_CreateToArrange , TempParam);
+			TempParam->RemoveFromRoot();
+			TempParam = nullptr;
 		}
 		else
 		{
@@ -70,4 +78,21 @@ void UStatePreArrange::OnMouseHover()
 		}
 		LastDecorationLocation = MoveToLocation;
 	}
+}
+
+void UStatePreArrange::BreakCondition()
+{
+	if (BBackToIdle)
+	{
+		FSMMgr->TransState(ETransConditionID::C_PreToIdle, nullptr);
+		BBackToIdle = false;
+	}
+		
+}
+
+/*要在此清空所有的状态*/
+void UStatePreArrange::AfterExit()
+{
+	CurGridGround = nullptr;
+	CurDecoration = nullptr;
 }

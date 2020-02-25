@@ -134,7 +134,8 @@ void ARTSPlayerCameraSpectatorPawn::Tick(float deltaSeconds)
 	check(gameViewport);
 	gameViewport->GetViewportSize(viewportSize);
 	//如果鼠标当前在视窗中
-	if (gameViewport->IsFocused(gameViewport->Viewport) && gameViewport->GetMousePosition(mousePosition))
+	//if (gameViewport->IsFocused(gameViewport->Viewport) && gameViewport->GetMousePosition(mousePosition))
+	if (gameViewport->GetMousePosition(mousePosition))
 	{
 		//响应长按事件
 		//if (BMouseLeftHold)

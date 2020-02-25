@@ -27,6 +27,7 @@ public:
 	virtual void BeforeExit() {};
 	virtual void Update() {};
 	virtual void BreakCondition() {};
+	virtual void AfterExit() {};
 	
 	/* 响应点击 */
 	virtual void OnMouseClickStart() {};

@@ -9,6 +9,7 @@
 #include "FSM/StatePlayerControl/StateIdle.h"
 #include "Runtime/Engine/Public/Engine.h"
 #include "FSM/StatePlayerControl/StatePreArrange.h"
+#include "FSM/StatePlayerControl/StateArrange.h"
 
 AHptPlayerCameraPawn::AHptPlayerCameraPawn(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -53,6 +54,8 @@ void AHptPlayerCameraPawn::OnMouseClickEnd()
 void AHptPlayerCameraPawn::OnMouseHover()
 {
 	Super::OnMouseHover();
+
+	//UE_LOG( LogTemp , Warning , TEXT("Hovering!!!!!") );
 
 	//家具系统管理器
 	//if (DecorationSystemMgr)
@@ -101,12 +104,21 @@ void AHptPlayerCameraPawn::InitFSM()
 	/*创建一个预布置状态*/
 	UStatePreArrange* PreArrange = NewObject< UStatePreArrange>(FSMMgr);
 	PreArrange->AddCondition(ETransConditionID::C_PreToIdle, EStateEnum::IDLE);
+	PreArrange->AddCondition(ETransConditionID::C_CreateToArrange, EStateEnum::ARRANGE);
 	PreArrange->SetDecorationSystemMgr(DecorationSystemMgr);
 	PreArrange->SetPlayerPawn(this);
 	PreArrange->SetFSMMgr(FSMMgr);
 
+	/* 创建一个布置状态 */
+	UStateArrange* StateArrange = NewObject< UStateArrange>(FSMMgr);
+	StateArrange->AddCondition(ETransConditionID::C_PreToIdle, EStateEnum::IDLE);
+	StateArrange->SetDecorationSystemMgr(DecorationSystemMgr);
+	StateArrange->SetPlayerPawn(this);
+	StateArrange->SetFSMMgr(FSMMgr);
+
 	FSMMgr->Init(EStateEnum::IDLE, IdleState);
 	FSMMgr->AddState(EStateEnum::PRE_ARRANGE, PreArrange);
+	FSMMgr->AddState(EStateEnum::ARRANGE, StateArrange);
 }
 
 void AHptPlayerCameraPawn::SetStatePreArrange(EDecorationType InDecorationType)

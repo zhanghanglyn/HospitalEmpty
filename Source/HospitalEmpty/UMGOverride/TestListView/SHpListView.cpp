@@ -16,6 +16,7 @@ void SHpListView::Construct(const FArguments& InArgs)
 	ColorAndOpacity = InArgs._ColorAndOpacity;
 	BStartNotOffset = InArgs._InBStartNotOffset;
 	LayoutDirection = InArgs._InLayoutDirection;
+	//DelegateMouseBtnDownCall = InArgs._InMouseBtnDownCall;
 
 
 
@@ -329,4 +330,20 @@ void SHpListView::SetColorAndOpacity(FLinearColor InColorAndOpacity)
 		ColorAndOpacity = InColorAndOpacity;
 		Invalidate(EInvalidateWidget::PaintAndVolatility);
 	}
+}
+
+/************************************************************************/
+/*                           点击ListView相关                           */
+/************************************************************************/
+
+/* 并不拦截，还是可以往下传递 */
+FReply SHpListView::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+{
+	FReply Reply = FReply::Unhandled();
+
+	if (DelegateMouseBtnDownCall.IsBound())
+		DelegateMouseBtnDownCall.Execute(MyGeometry , MouseEvent , MouseDownParamBase.Get());
+
+
+	return Reply;
 }

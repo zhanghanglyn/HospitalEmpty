@@ -10,14 +10,16 @@
 #include "Styling/CoreStyle.h"
 #include "FHpListViewStyle.h"
 //#include "SConstraintCanvas.h"
-#include "UMGOverride/OverridUMGUtil.h"
+#include "UMGOverride/OverrideUMGUtil.h"
+#include "UMGOverride/OverrideUMGInterface.h"
 
 /*
 	自定义一个简单的ListView，此为Slate部分
-	后续涉及到拖动
+	后续涉及到拖动   20.2.28 再继承一个InterFace接口来实现回调等
 */
-class SHpListView : public SPanel
+class SHpListView : public SPanel , public UMGInterFace
 {
+
 public:
 	/* 定义slot 底下写法FSlot& 因为用法一般都是 TSharedPtr XXX = XXX.Position(11).Size(11),所以最终需要返回自身 */
 	class FSlot : public TSlotBase<FSlot>
@@ -110,12 +112,15 @@ public:
 	SLATE_ARGUMENT(bool, InBStartNotOffset)
 	SLATE_ARGUMENT(FLayoutDirection, InLayoutDirection)	//排列方向
 
+	//SLATE_EVENT(DMouseBtnDownCall, InMouseBtnDownCall)
+
 	SLATE_END_ARGS()
 
 	/************************************************************************/
 	/*                          类功能相关函数                              */
 	/************************************************************************/
 public:
+
 	SHpListView();
 	void Construct(const FArguments& InArgs);
 
@@ -127,7 +132,7 @@ public:
 	//virtual bool IsInteractable() const override { return true; };
 	//virtual bool SupportsKeyboardFocus() const override { return true; };
 	//virtual void OnFocusLost(const FFocusEvent& InFocusEvent) override;
-	//virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
+	virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	//virtual FReply OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	//virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual FVector2D ComputeDesiredSize(float) const override;
@@ -174,9 +179,19 @@ public:
 	void SetColorAndOpacity(const TAttribute<FSlateColor>& InColorAndOpacity);
 	/** See the ColorAndOpacity attribute */
 	void SetColorAndOpacity(FLinearColor InColorAndOpacity);
+
+	/* 设置点击回调的参数 */
+	void SetMouseDownParam(UUMGParamBase* InClcikParam)
+	{
+		MouseDownParamBase = InClcikParam;
+	};
 protected:
 	/*先做一些初始化的计算，因为Arrange是每一帧都在跑的*/
 	void Init();
+
+public:
+	//开始点击的委托
+	//DMouseBtnDownCall DelegateMouseBtnDownCall;
 
 protected:
 	/*  */
@@ -191,6 +206,8 @@ protected:
 protected:
 	//背景图片
 	TAttribute<const FSlateBrush*> BgImage;
+
+	TAttribute<UUMGParamBase*> MouseDownParamBase;
 	
 	//设计行列数
 	int32 Row = 1;

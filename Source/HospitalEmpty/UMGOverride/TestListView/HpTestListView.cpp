@@ -92,6 +92,7 @@ void UHpTestListView::SynchronizeProperties()
 
 TSharedRef<SWidget> UHpTestListView::RebuildWidget()
 {
+	//在这里为他绑定上点击回调参数
 	HpListView = SNew(SHpListView)
 		.InRow(5).InColumn(5);//.InBGImage()
 
@@ -108,5 +109,17 @@ TSharedRef<SWidget> UHpTestListView::RebuildWidget()
 		}
 	}
 
+	HpListView.Get()->SetMouseDownParam(nullptr);
+
+	HpListView.Get()->DelegateMouseBtnDownCall.BindUObject(this, &UHpTestListView::MouseDownListViewCall);
+
 	return HpListView.ToSharedRef();
+}
+
+/*******************************************************************/
+/*                        点击回调相关                             */
+/*******************************************************************/
+void UHpTestListView::MouseDownListViewCall(const FGeometry&, const FPointerEvent&, UUMGParamBase* Param)
+{
+	UE_LOG(LogTemp, Warning, TEXT("  MouseDownListViewCall   !!!!!!!!!"));
 }

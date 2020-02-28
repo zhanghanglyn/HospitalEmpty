@@ -6,6 +6,7 @@
 #include "Components/PanelWidget.h"
 #include "HpListViewSlot.h"
 #include "HpListViewWidgetStyle.h"
+#include "UMGOverride/OverrideUMGUtil.h"
 #include "HpTestListView.generated.h"
 
 /*
@@ -44,11 +45,14 @@ public:
 	virtual UClass* GetSlotClass() const override;
 	virtual void OnSlotAdded(UPanelSlot* InSlot);
 	virtual void OnSlotRemoved(UPanelSlot* InSlot);
-	
+
 public:
 	/* 外部调用，添加Item到List中 */
 	UFUNCTION(BlueprintCallable, Category = "Canvas Panel")
 	UHpListViewSlot* AddChildToList(UWidget* Content);
+
+	/* 点击ListView的回调 */
+	void MouseDownListViewCall(const FGeometry&, const FPointerEvent&, UUMGParamBase* Param);
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ListView参数")

@@ -53,6 +53,18 @@ public:
 			return *this;
 		}
 
+		FSlot& AutoSize(const TAttribute<bool>& InAutoSize)
+		{
+			AutoSizeAttr = InAutoSize;
+			return *this;
+		}
+
+		FSlot& Offset(const TAttribute<bool>& InAutoSize)
+		{
+			AutoSizeAttr = InAutoSize;
+			return *this;
+		}
+
 		/** Position */
 		TAttribute<FVector2D> PositionAttr;
 
@@ -63,11 +75,14 @@ public:
 
 		EVerticalAlignment VAlignment;
 
+		TAttribute<bool> AutoSizeAttr;
+
 		FSlot() : TSlotBase<FSlot>()
 			, PositionAttr(FVector2D::ZeroVector)
 			, SizeAttr(FVector2D(1.0f, 1.0f))
 			, HAlignment(HAlign_Left)
 			, VAlignment(VAlign_Top)
+			, AutoSizeAttr(false)
 		{}
 	};
 
@@ -79,6 +94,7 @@ public:
 		, _InRow(1)
 		, _InColumn(1)
 		, _InOffset(FVector2D::ZeroVector)
+		, _InBStartNotOffset(false)
 		, _InLayoutDirection(FLayoutDirection::Vertical)
 	{
 		_Visibility = EVisibility::SelfHitTestInvisible;
@@ -91,6 +107,7 @@ public:
 	SLATE_ARGUMENT( int32, InRow)
 	SLATE_ARGUMENT( int32, InColumn)
 	SLATE_ARGUMENT(FVector2D, InOffset)
+	SLATE_ARGUMENT(bool, InBStartNotOffset)
 	SLATE_ARGUMENT(FLayoutDirection, InLayoutDirection)	//排列方向
 
 	SLATE_END_ARGS()
@@ -151,6 +168,8 @@ public:
 	void SetItemOffSet( FVector2D InOffset);
 	/* 设置Row */
 	void SetRow(int32 InRow);
+	/* 设置是否第一个ITEM启用Offset */
+	void SetBStartNotOffset(bool InBStartNotOffset);
 	/** See the ColorAndOpacity attribute */
 	void SetColorAndOpacity(const TAttribute<FSlateColor>& InColorAndOpacity);
 	/** See the ColorAndOpacity attribute */
@@ -179,6 +198,9 @@ protected:
 
 	//Item间的空距
 	FVector2D Offset;
+
+	//是否起始Item不需要Offset
+	bool BStartNotOffset = false;
 
 	//排布方向
 	FLayoutDirection LayoutDirection;

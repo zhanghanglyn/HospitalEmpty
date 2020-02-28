@@ -61,6 +61,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ListView参数", meta = (DisplayName = "横向ITEM数"))
 	int32 Row = 1;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ListView参数", meta = (DisplayName = "是否ITEM起始不加Offset"))
+	bool BStartNotOffset = false; 
+
 protected:
 	/* 对应的SlistView Widget */
 	TSharedPtr<SHpListView> HpListView;

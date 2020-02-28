@@ -67,7 +67,7 @@ ADecorationBase* UDecorationSystemMgr::CreateDecoration(FVector Location, AActor
 }
 
 /************************************************************************/
-/*                            点击相关                                   */
+/*                       点击相关    已废除                             */
 /************************************************************************/ 
 
 /*
@@ -76,99 +76,99 @@ ADecorationBase* UDecorationSystemMgr::CreateDecoration(FVector Location, AActor
 暂时都生成Base家具测试
 20.2.25 全部都会提成状态
 */
-void UDecorationSystemMgr::OnMouseClickStart()
-{
-	if (PlayerPawn == nullptr)
-		return;
-
-	//如果当前处于空闲状态，则在对应位置生成一个家具
-	if (CurControlType == ControlType::None)
-	{
-		FVector CreateLocation;
-		AActorBase* ResultGround = PlayerPawn->GetMouseLocationInGround(CreateLocation);
-		CurGridGround = Cast<AGroundObj>(ResultGround);
-		if(CurGridGround != nullptr)
-		{
-			CreateLocation.Z += 1;
-			CurDecoration = CreateDecoration(CreateLocation, CurGridGround, EDecorationType::DecorationBase);
-			CurControlType = ControlType::PreArrange;
-		}	
-		//如果在默认地面上
-		else
-		{
-			AGroundDefaultActor* DefaultGround = Cast<AGroundDefaultActor>(ResultGround);
-			CreateLocation.Z += 3;
-			CurDecoration = CreateDecoration(CreateLocation, DefaultGround, EDecorationType::DecorationBase , false);
-			CurControlType = ControlType::PreArrange;
-		}
-	}
-	//如果在预放置中（没有放置与地面上）
-	else if (CurControlType == ControlType::PreArrange)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Not In The Ground"));
-	}
-	//放置家具
-	else if (CurControlType == ControlType::ArrangeDecoration)
-	{
-		if (!CurGridGround->SaveCurDecoration(CurDecoration))
-		{
-			CurControlType = ControlType::None;
-			CurDecoration = nullptr;
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Block is Grid Block！！！！！！！！"));
-
-		}
-			
-	}
-		
-}
-
-void UDecorationSystemMgr::OnMouseHover()
-{
-	if (PlayerPawn == nullptr)
-	{
-		return;
-	}
-
-	if (CurControlType == ControlType::PreArrange)
-	{
-		if (CurDecoration)
-		{
-			FVector PreLocation = CurDecoration->GetActorLocation();
-			FVector MoveToLocation = LastDecorationLocation;
-			//如果射到了地面，则直接将家具布置到场景中
-			AActorBase* ResultGround = PlayerPawn->GetMouseLocationInGround(MoveToLocation);
-			AGroundObj* HitGround = Cast<AGroundObj>(ResultGround);
-			if (HitGround != nullptr)
-			{
-				CurDecoration->SetActorLocation(FVector(MoveToLocation.X, MoveToLocation.Y, PreLocation.Z));
-
-				/* 为生成的家具设置地面等相关 */
-				CurDecoration->SetGround(HitGround);
-				CurGridGround = HitGround;
-				CurDecoration->MoveTo(MoveToLocation);
-				CurControlType = ControlType::ArrangeDecoration;
-			}
-			else
-			{
-				CurDecoration->SetActorLocation(FVector(MoveToLocation.X, MoveToLocation.Y, PreLocation.Z));
-			}
-			LastDecorationLocation = MoveToLocation;
-		}
-	}
-	//如果当前属于布置家具状态
-	else if (CurControlType == ControlType::ArrangeDecoration)
-	{
-		if (CurDecoration)
-		{
-			FVector PreLocation = CurDecoration->GetActorLocation();
-			FVector MoveToLocation = LastDecorationLocation;
-			PlayerPawn->GetMouseLocationInGround(MoveToLocation);
-			//CurDecoration->SetActorLocation(FVector(MoveToLocation.X, MoveToLocation.Y, PreLocation.Z));
-			CurDecoration->MoveTo(FVector(MoveToLocation.X, MoveToLocation.Y, PreLocation.Z));
-			LastDecorationLocation = MoveToLocation;
-		}
-	}
-}
+// void UDecorationSystemMgr::OnMouseClickStart()
+// {
+// 	if (PlayerPawn == nullptr)
+// 		return;
+// 
+// 	//如果当前处于空闲状态，则在对应位置生成一个家具
+// 	if (CurControlType == ControlType::None)
+// 	{
+// 		FVector CreateLocation;
+// 		AActorBase* ResultGround = PlayerPawn->GetMouseLocationInGround(CreateLocation);
+// 		CurGridGround = Cast<AGroundObj>(ResultGround);
+// 		if(CurGridGround != nullptr)
+// 		{
+// 			CreateLocation.Z += 1;
+// 			CurDecoration = CreateDecoration(CreateLocation, CurGridGround, EDecorationType::DecorationBase);
+// 			CurControlType = ControlType::PreArrange;
+// 		}	
+// 		//如果在默认地面上
+// 		else
+// 		{
+// 			AGroundDefaultActor* DefaultGround = Cast<AGroundDefaultActor>(ResultGround);
+// 			CreateLocation.Z += 3;
+// 			CurDecoration = CreateDecoration(CreateLocation, DefaultGround, EDecorationType::DecorationBase , false);
+// 			CurControlType = ControlType::PreArrange;
+// 		}
+// 	}
+// 	//如果在预放置中（没有放置与地面上）
+// 	else if (CurControlType == ControlType::PreArrange)
+// 	{
+// 		UE_LOG(LogTemp, Warning, TEXT("Not In The Ground"));
+// 	}
+// 	//放置家具
+// 	else if (CurControlType == ControlType::ArrangeDecoration)
+// 	{
+// 		if (!CurGridGround->SaveCurDecoration(CurDecoration))
+// 		{
+// 			CurControlType = ControlType::None;
+// 			CurDecoration = nullptr;
+// 		}
+// 		else
+// 		{
+// 			UE_LOG(LogTemp, Warning, TEXT("Block is Grid Block！！！！！！！！"));
+// 
+// 		}
+// 			
+// 	}
+// 		
+// }
+// 
+// void UDecorationSystemMgr::OnMouseHover()
+// {
+// 	if (PlayerPawn == nullptr)
+// 	{
+// 		return;
+// 	}
+// 
+// 	if (CurControlType == ControlType::PreArrange)
+// 	{
+// 		if (CurDecoration)
+// 		{
+// 			FVector PreLocation = CurDecoration->GetActorLocation();
+// 			FVector MoveToLocation = LastDecorationLocation;
+// 			//如果射到了地面，则直接将家具布置到场景中
+// 			AActorBase* ResultGround = PlayerPawn->GetMouseLocationInGround(MoveToLocation);
+// 			AGroundObj* HitGround = Cast<AGroundObj>(ResultGround);
+// 			if (HitGround != nullptr)
+// 			{
+// 				CurDecoration->SetActorLocation(FVector(MoveToLocation.X, MoveToLocation.Y, PreLocation.Z));
+// 
+// 				/* 为生成的家具设置地面等相关 */
+// 				CurDecoration->SetGround(HitGround);
+// 				CurGridGround = HitGround;
+// 				CurDecoration->MoveTo(MoveToLocation);
+// 				CurControlType = ControlType::ArrangeDecoration;
+// 			}
+// 			else
+// 			{
+// 				CurDecoration->SetActorLocation(FVector(MoveToLocation.X, MoveToLocation.Y, PreLocation.Z));
+// 			}
+// 			LastDecorationLocation = MoveToLocation;
+// 		}
+// 	}
+// 	//如果当前属于布置家具状态
+// 	else if (CurControlType == ControlType::ArrangeDecoration)
+// 	{
+// 		if (CurDecoration)
+// 		{
+// 			FVector PreLocation = CurDecoration->GetActorLocation();
+// 			FVector MoveToLocation = LastDecorationLocation;
+// 			PlayerPawn->GetMouseLocationInGround(MoveToLocation);
+// 			//CurDecoration->SetActorLocation(FVector(MoveToLocation.X, MoveToLocation.Y, PreLocation.Z));
+// 			CurDecoration->MoveTo(FVector(MoveToLocation.X, MoveToLocation.Y, PreLocation.Z));
+// 			LastDecorationLocation = MoveToLocation;
+// 		}
+// 	}
+// }

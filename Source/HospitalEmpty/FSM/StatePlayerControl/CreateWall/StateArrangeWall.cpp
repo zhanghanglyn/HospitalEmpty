@@ -1,4 +1,5 @@
-﻿#include "StateArrange.h"
+﻿#include "StateArrangeWall.h"
+#include "Decoration/Wall.h"
 #include "Engine/Engine.h"
 #include "HospitalEmpty/Base/HptGameInstance.h"
 #include "Actor/GroundDefaultActor.h"
@@ -7,33 +8,55 @@
 #include "Decoration/Wall.h"
 #include "FSM/FSMMgr.h"
 #include "PlayerController/HptPlayerCameraPawn.h"
+#include "FSM/StatePlayerControl/StateArrange.h"
+
 
 /* 把当前在操作的家具保存下来 */
-void UStateArrange::BeforeEnter(UTransParamBase* InParamObj)
+void UStateArrangeWall::BeforeEnter(UTransParamBase* InParamObj)
 {
 	EDecorationType CreateType = EDecorationType::None;
 	if (UStateArrangeParam* ArrangeParam = Cast<UStateArrangeParam>(InParamObj))
 	{
-		CurDecoration = ArrangeParam->CurDecoration;
+		CurDecoration = Cast<AWall>(ArrangeParam->CurDecoration);
 		CurGridGround = ArrangeParam->CurGridGround;
 		LastDecorationLocation = ArrangeParam->LastDecorationLocation;
 	}
 }
 
-void UStateArrange::OnMouseClickStart()
+void UStateArrangeWall::OnMouseClickStart()
 {
-	if (CurGridGround != nullptr && !CurGridGround->SaveCurDecoration(CurDecoration))
+	//如果是普通状态，点击开始延长墙
+	if (CurArrangeState == EWallArrangeState::None_Click)
 	{
-		//保存之后转回Idle状态
-		BBackToIdle = true;
+
+
+		CurArrangeState = EWallArrangeState::Click_Extend;
 	}
-	else
+	//如果是延长墙的状态，点击保存
+	else if (CurArrangeState == EWallArrangeState::Click_Extend)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Block is Grid Block！！！！！！！！"));
+		if (CurGridGround != nullptr && !CurGridGround->SaveCurDecoration(CurDecoration))
+		{
+			//保存之后转回Idle状态
+			BBackToIdle = true;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Block is Grid Block！！！！！！！！"));
+		}
 	}
 }
 
-void UStateArrange::OnMouseHover()
+/*当点击拖动时，拉长墙体*/
+void UStateArrangeWall::OnMouseClickMove()
+{
+	if (CurDecoration)
+	{
+		//PlayerPawn->GetMouseLocationInGround(MoveToLocation);
+	}
+}
+
+void UStateArrangeWall::OnMouseHover()
 {
 	if (CurDecoration)
 	{
@@ -46,25 +69,7 @@ void UStateArrange::OnMouseHover()
 	}
 }
 
-/* 点击鼠标后的拖动事件，在此处理墙的创建 */
-// void UStateArrange::OnMouseClickMove()
-// {
-// 	if (CurDecoration)
-// 	{
-// 		if (AWall* CreateWall = Cast<AWall>(CurDecoration))
-// 		{
-// 			/*  要根据移动的第一个格子，确定该墙体的增长方向，只有当方向一致时，才在对应方向拉长墙，反向减少墙，
-// 				如果移动的方向不一致，则重新创建一段新的墙体。
-// 			*/
-// 
-// 			/* 1、判断当前鼠标是否移动到了下一个格子，如果移动到了下一个格子，根据当前格子的位置，拉长墙体模型 */
-// 
-// 			/* 2、 */
-// 		}
-// 	}
-// }
-
-void UStateArrange::BreakCondition()
+void UStateArrangeWall::BreakCondition()
 {
 	if (BBackToIdle)
 	{
@@ -73,7 +78,7 @@ void UStateArrange::BreakCondition()
 	}
 }
 
-void UStateArrange::AfterExit()
+void UStateArrangeWall::AfterExit()
 {
 	CurDecoration = nullptr;
 	CurGridGround = nullptr;

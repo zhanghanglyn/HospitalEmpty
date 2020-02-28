@@ -25,6 +25,8 @@ enum class EStateEnum : uint8
 	IDLE					UMETA(DisplayName = "普通状态"),
 	PRE_ARRANGE				UMETA(DisplayName = "预放置家具（无格子）"),
 	ARRANGE					UMETA(DisplayName = "布置家具"),
+	WALL_ARRANGE			UMETA(DisplayName = "布置墙"),
+
 	CHOOSE_PARIENT			UMETA(DisplayName = "选中病人"),
 };
 
@@ -39,6 +41,7 @@ enum class ETransConditionID : uint8
 	/* 玩家控制创建家具相关 */
 	C_CREATEFURNITURE		UMETA(DisplayNmae = "从普通状态变成创建家具预布置状态"),
 	C_CreateToArrange		UMETA(DisplayNmae = "从预布置变成布置状态"),
+	C_CreateToWallArrange	UMETA(DisplayNmae = "从预布置变成布置墙状态"),
 	C_PreToIdle				UMETA(DisplayNmae = "从预布置变成普通状态"),
 	C_ARRANGEOVER			UMETA(DisplayNmae = "布置家具完成，变为普通状态"),
 

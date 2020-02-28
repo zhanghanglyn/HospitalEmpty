@@ -5,6 +5,7 @@
 #include "GroundObj.h"
 #include "DecorationBase.h"
 #include "FSM/FSMMgr.h"
+#include "Decoration/Wall.h"
 #include "PlayerController/HptPlayerCameraPawn.h"
 #include "FSM/StatePlayerControl/StateArrange.h"
 
@@ -26,7 +27,13 @@ void UStatePreArrange::BeforeEnter(UTransParamBase* InParamObj)
 	{
 		CreateLocation.Z += 1;
 		CurDecoration = DecorationSystemMgr->CreateDecoration(CreateLocation, CurGridGround, CreateType);
-		FSMMgr->TransState(ETransConditionID::C_CreateToArrange , nullptr);
+		//如果当前家具是墙，则跳转到布置墙的状态
+		if (AWall* CurWall = Cast<AWall>(CurDecoration))
+		{
+			FSMMgr->TransState(ETransConditionID::C_CreateToWallArrange, nullptr);
+		}
+		else
+			FSMMgr->TransState(ETransConditionID::C_CreateToArrange , nullptr);
 	}
 	//如果在默认地面上
 	else
@@ -68,7 +75,14 @@ void UStatePreArrange::OnMouseHover()
 			TempParam->CurDecoration = CurDecoration;
 			TempParam->CurGridGround = CurGridGround;
 			TempParam->LastDecorationLocation = LastDecorationLocation;
-			FSMMgr->TransState(ETransConditionID::C_CreateToArrange , TempParam);
+
+			if (AWall* CurWall = Cast<AWall>(CurDecoration))
+			{
+				FSMMgr->TransState(ETransConditionID::C_CreateToWallArrange, TempParam);
+			}
+			else
+				FSMMgr->TransState(ETransConditionID::C_CreateToArrange, TempParam);
+			//FSMMgr->TransState(ETransConditionID::C_CreateToArrange , TempParam);
 			TempParam->RemoveFromRoot();
 			TempParam = nullptr;
 		}

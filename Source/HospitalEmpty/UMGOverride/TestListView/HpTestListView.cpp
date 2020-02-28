@@ -9,7 +9,7 @@ UHpTestListView::UHpTestListView(const FObjectInitializer& ObjectInitializer)
 
 FText const UHpTestListView::GetPaletteCategory()
 {
-	return FText::FromString(FString(L"自定义UMG"));
+	return FText::FromString(FString(L"自定义UMG"));  
 }
 
 void UHpTestListView::ReleaseSlateResources(bool bReleaseChildren)
@@ -86,6 +86,7 @@ void UHpTestListView::SynchronizeProperties()
 	HpListView.Get()->SetBackGroundImage(SlateDefaults._InBGImage.Get());
 	HpListView.Get()->SetStyle(&WidgetStyle);
 	HpListView.Get()->SetRow(Row);
+	HpListView.Get()->SetBStartNotOffset(BStartNotOffset);
 	HpListView.Get()->SetItemOffSet(ItemOffSet);
 }
 

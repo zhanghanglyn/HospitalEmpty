@@ -39,10 +39,10 @@ public:
 */
 public:
 
-	void OnMouseClickStart();
+	void OnMouseClickStart() {};
 	void OnMouseClickMove() {};
 	void OnMouseClickEnd() {};
-	void OnMouseHover();
+	void OnMouseHover() {};
 
 	/* 创建一个家具
 		Param : CreateLocation  创建位置

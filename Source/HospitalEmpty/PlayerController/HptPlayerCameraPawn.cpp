@@ -10,6 +10,7 @@
 #include "Runtime/Engine/Public/Engine.h"
 #include "FSM/StatePlayerControl/StatePreArrange.h"
 #include "FSM/StatePlayerControl/StateArrange.h"
+#include "FSM/StatePlayerControl/CreateWall/StateArrangeWall.h"
 
 AHptPlayerCameraPawn::AHptPlayerCameraPawn(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -105,6 +106,7 @@ void AHptPlayerCameraPawn::InitFSM()
 	UStatePreArrange* PreArrange = NewObject< UStatePreArrange>(FSMMgr);
 	PreArrange->AddCondition(ETransConditionID::C_PreToIdle, EStateEnum::IDLE);
 	PreArrange->AddCondition(ETransConditionID::C_CreateToArrange, EStateEnum::ARRANGE);
+	PreArrange->AddCondition(ETransConditionID::C_CreateToWallArrange, EStateEnum::WALL_ARRANGE);
 	PreArrange->SetDecorationSystemMgr(DecorationSystemMgr);
 	PreArrange->SetPlayerPawn(this);
 	PreArrange->SetFSMMgr(FSMMgr);
@@ -116,9 +118,17 @@ void AHptPlayerCameraPawn::InitFSM()
 	StateArrange->SetPlayerPawn(this);
 	StateArrange->SetFSMMgr(FSMMgr);
 
+	/* 创建布置墙的状态 */
+	UStateArrangeWall* StateArrangeWall = NewObject< UStateArrangeWall>(FSMMgr);
+	StateArrangeWall->AddCondition(ETransConditionID::C_PreToIdle, EStateEnum::IDLE);
+	StateArrangeWall->SetDecorationSystemMgr(DecorationSystemMgr);
+	StateArrangeWall->SetPlayerPawn(this);
+	StateArrangeWall->SetFSMMgr(FSMMgr);
+
 	FSMMgr->Init(EStateEnum::IDLE, IdleState);
 	FSMMgr->AddState(EStateEnum::PRE_ARRANGE, PreArrange);
 	FSMMgr->AddState(EStateEnum::ARRANGE, StateArrange);
+	FSMMgr->AddState(EStateEnum::WALL_ARRANGE, StateArrangeWall);
 }
 
 void AHptPlayerCameraPawn::SetStatePreArrange(EDecorationType InDecorationType)

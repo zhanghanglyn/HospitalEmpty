@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Util/StateEnum.h"
+#include "TransParam.h"
 #include "FSMStateBase.generated.h"
 
 UCLASS(BlueprintType)

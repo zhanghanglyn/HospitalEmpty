@@ -63,20 +63,3 @@ protected:
 	UPROPERTY()
 	bool BBackToIdle = false;
 };
-
-/*
-	该状态所需要的使用的参数
-*/
-UCLASS()
-class UPreArrangeParam : public UTransParamBase
-{
-	GENERATED_BODY()
-public:
-	UPreArrangeParam(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer) {
-	};
-
-	/* 家具类型，即使对应的BP名字 */
-	UPROPERTY()
-	EDecorationType DecorationType;
-
-};

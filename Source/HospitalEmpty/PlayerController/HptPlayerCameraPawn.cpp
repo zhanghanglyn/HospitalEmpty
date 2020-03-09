@@ -100,6 +100,9 @@ void AHptPlayerCameraPawn::InitFSM()
 	/*创建一个普通状态*/
 	UStateIdle* IdleState = NewObject< UStateIdle>(FSMMgr);
 	IdleState->AddCondition(ETransConditionID::C_CREATEFURNITURE , EStateEnum::PRE_ARRANGE);
+	//3.9 为Idle添加一个转换状态，当Idle状态点击了家具时，直接设置为可拖动
+	IdleState->AddCondition(ETransConditionID::C_IdleClickToArrange, EStateEnum::ARRANGE);
+	IdleState->SetPlayerPawn(this);
 	IdleState->SetFSMMgr(FSMMgr);
 
 	/*创建一个预布置状态*/
@@ -196,6 +199,53 @@ AActorBase* AHptPlayerCameraPawn::GetMouseLocationInGround(FVector &GroundLocati
 
 	GroundLocation = HitDefaultLocation;
 	return DefaultGround;
+}
+
+AActorBase* AHptPlayerCameraPawn::GetMouseHitDecoration(FHitResult &InHitResult , FVector &GroundLocation) const
+{
+	UWorld* world = GEngine->GetWorldFromContextObject(this, EGetWorldErrorMode::LogAndReturnNull);
+
+	if (world == nullptr)
+		return nullptr;
+
+	FVector WorldPos;
+	FVector Dir;
+	GetMouseWorldPos(WorldPos, Dir);
+
+	FVector StartPos = WorldPos;
+	StartPos.Z = GetActorLocation().Z;
+	TArray<FHitResult> temp_HitResult;
+
+	FCollisionQueryParams CollisionParam(FName(TEXT("Combattrace")), true, NULL);
+	CollisionParam.bTraceComplex = true;
+
+	world->LineTraceMultiByObjectType(temp_HitResult, StartPos, StartPos + Dir * RayLength, FCollisionObjectQueryParams::AllObjects, CollisionParam);
+
+	AActorBase* ResultHitDecoration = nullptr;
+
+	if (temp_HitResult.Num() > 0)
+	{
+		for (int i = 0; i < temp_HitResult.Num(); i++)
+		{
+			AActor* HitActor = temp_HitResult[i].GetActor();
+			/* 把取得的Actor转化为家具 */
+			if (ADecorationBase* HitDecoration = Cast<ADecorationBase>(HitActor))
+			{
+				InHitResult = temp_HitResult[i];
+
+				ResultHitDecoration = HitDecoration;
+			}
+			/* 把取得的Actor转化为地面 */
+			if (AGroundObj* HitGround = Cast<AGroundObj>(HitActor))
+			{
+				GroundLocation = temp_HitResult[i].Location;
+			}
+
+		}
+	}
+
+	return ResultHitDecoration;
+
 }
 
 #pragma optimize("",on)

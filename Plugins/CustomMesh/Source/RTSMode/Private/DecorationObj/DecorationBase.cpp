@@ -119,6 +119,11 @@ void ADecorationBase::SetGround(AActorBase* InGround)
 
 }
 
+AGroundObj* ADecorationBase::GetGround()
+{
+	return Ground;
+}
+
 void ADecorationBase::GetGridWidthHeight(float &Width, float &Height)
 {
 	FVector Scale = GridMeshComponent->GetComponentTransform().GetScale3D();

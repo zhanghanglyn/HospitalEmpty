@@ -90,6 +90,9 @@ public:
 	/* 设置对应的地面以及对应的地面格子Mgr */
 	void SetGround(AActorBase* InGround);
 
+	/* 获取对应的格子地面 */
+	class AGroundObj* GetGround();
+
 	/* 根据右上角的坐标，更新整个家具的坐标 */
 	void SetLocationByTopRight(FVector TopRightLocation);
 

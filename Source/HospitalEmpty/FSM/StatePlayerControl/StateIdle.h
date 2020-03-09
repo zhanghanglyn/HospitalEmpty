@@ -16,6 +16,16 @@ public:
 		CurStateID = EStateEnum::IDLE;
 	};
 
-protected:
+	void SetPlayerPawn(class AHptPlayerCameraPawn* InPlayerPawn) {
+		PlayerPawn = InPlayerPawn;
+	}
 
+	/* 响应点击,如果点击到了家具，则设置家具移动 */
+	void OnMouseClickStart();
+
+
+protected:
+	/* 玩家操作器 */
+	UPROPERTY()
+	class AHptPlayerCameraPawn* PlayerPawn;
 };

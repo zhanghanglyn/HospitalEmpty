@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Util/StateEnum.h"
+#include "TransParam.h"
 #include "FSMMgr.generated.h"
 
 /*

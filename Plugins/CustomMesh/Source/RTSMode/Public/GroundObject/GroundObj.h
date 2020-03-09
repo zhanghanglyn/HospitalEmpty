@@ -54,7 +54,6 @@ public:
 		return GridMgr;
 	};
 
-
 	/* 获取地面格子右上角的坐标 */
 	FVector GetTopRightLocation();
 	/* 获取地面格子左下的坐标 */
@@ -72,6 +71,8 @@ public:
 	/* 判断一个左下角的点是否在格子地面上，如果不在，会重新设置左下角的坐标 */
 	bool CheckLeftBUttomLocationInGround(FVector &LeftButtomLocation);
 
+	/* 在地面中删除一个家具 */
+	void DeleteDecoration(class ADecorationBase* DelDecoration);
 protected:
 	/* 为地面格子创建一个材质实例 */
 	void CreateMaterialInstance();

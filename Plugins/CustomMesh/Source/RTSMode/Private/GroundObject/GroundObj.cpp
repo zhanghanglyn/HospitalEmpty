@@ -313,3 +313,8 @@ bool AGroundObj::SaveCurDecoration(ADecorationBase* SaveDecoration)
 {
 	return GridMgr->SaveCurDecoration(SaveDecoration);
 }
+
+void AGroundObj::DeleteDecoration(ADecorationBase* DelDecoration)
+{
+	GridMgr->DeleteDecoration(DelDecoration);
+}

@@ -65,27 +65,3 @@ protected:
 
 
 };
-
-/*
-	该状态所需要的使用的参数
-*/
-UCLASS()
-class UStateArrangeParam : public UTransParamBase
-{
-	GENERATED_BODY()
-public:
-	UStateArrangeParam(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer) {
-	};
-
-	/* 家具类型，即使对应的BP名字 */
-	UPROPERTY()
-	class ADecorationBase* CurDecoration;
-
-	/* 当前操作/保存的地面 */
-	UPROPERTY()
-	class AGroundObj* CurGridGround;
-
-	UPROPERTY()
-	FVector LastDecorationLocation;
-
-};

@@ -42,6 +42,9 @@ public:
 	*/
 	void SetStatePreArrange(EDecorationType InDecorationType);
 
+	/* 获取当前鼠标点是否有点中家具，如果有返回点中的家具 , InHitResult为射中的家具的射中信息 */
+	class AActorBase* GetMouseHitDecoration(FHitResult &InHitResult , FVector &GroundLocation) const;
+
 protected:
 	/* 初始化状态机 */
 	void InitFSM();

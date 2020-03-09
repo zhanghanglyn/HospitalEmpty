@@ -40,23 +40,10 @@ enum class ETransConditionID : uint8
 
 	/* 玩家控制创建家具相关 */
 	C_CREATEFURNITURE		UMETA(DisplayNmae = "从普通状态变成创建家具预布置状态"),
+	C_IdleClickToArrange	UMETA(DisplayNmae = "从普通状态点击家具后变成布置状态"),
 	C_CreateToArrange		UMETA(DisplayNmae = "从预布置变成布置状态"),
 	C_CreateToWallArrange	UMETA(DisplayNmae = "从预布置变成布置墙状态"),
 	C_PreToIdle				UMETA(DisplayNmae = "从预布置变成普通状态"),
 	C_ARRANGEOVER			UMETA(DisplayNmae = "布置家具完成，变为普通状态"),
-
-};
-
-/*
-	TransCondition时所使用的参数基类，通过转化为自己需要的类型在自己的State中进行数据的初始化等
-*/
-UCLASS(BlueprintType)
-class UTransParamBase : public UObject
-{
-	GENERATED_BODY()
-
-public:
-	UTransParamBase(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer) {
-	};
 
 };

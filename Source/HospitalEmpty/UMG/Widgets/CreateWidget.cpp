@@ -1,6 +1,9 @@
 #include "CreateWidget.h"
 #include "GridSystem/DecorationSystemMgr.h"
 #include "PlayerController/HptPlayerCameraPawn.h"
+#include "Serialize/TestSerializeObj.h"
+#include "Serialize/ChildSerializeObj.h"
+#include "Engine.h"
 
 UCreateWidget::UCreateWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -14,7 +17,7 @@ void UCreateWidget::NativeConstruct(){
 	DecorationSystemMgr = UDecorationSystemMgr::Get(this);
 
 	//加载两个button并且添加到List中并且设置点击函数  测试函数，先为不同的ITEM设置不同的回调函数
-	for (int32 BtnCount = 0; BtnCount < 3; BtnCount++)
+	for (int32 BtnCount = 0; BtnCount < 4; BtnCount++)
 	{
 		UButton* item = NewObject<UButton>(this);
 		FScriptDelegate Del;
@@ -40,6 +43,10 @@ void UCreateWidget::AddToListView(UWidget* Content)
 */
 void UCreateWidget::OnClickedListItem0()
 {
+	//test
+	//CreateSerializeObj();
+	//return;
+
 	UE_LOG(LogTemp, Warning, TEXT("000000"));
 	
 	if (DecorationSystemMgr)
@@ -52,6 +59,10 @@ void UCreateWidget::OnClickedListItem0()
 }
 void UCreateWidget::OnClickedListItem1()
 {
+	//test
+	//SaveSerialize();
+	//return;
+
 	UE_LOG(LogTemp, Warning, TEXT("11111111111"));
 	if (DecorationSystemMgr)
 	{
@@ -62,5 +73,53 @@ void UCreateWidget::OnClickedListItem1()
 }
 void UCreateWidget::OnClickedListItem2()
 {
+	//test
+	//LoadSerialize();
+	//return;
+
 	UE_LOG(LogTemp, Warning, TEXT("2222222"));
 }
+
+void UCreateWidget::OnClickedListItem3()
+{
+	//CreateObjAndSerialize();
+}
+
+#pragma optimize("",off)
+void UCreateWidget::CreateSerializeObj()
+{
+	//ATestSerializeObj
+	UWorld* world = GEngine->GetWorldFromContextObject(this, EGetWorldErrorMode::LogAndReturnNull);
+	if (world)
+	{
+		TestSerializeObj = world->SpawnActor<ATestSerializeObj>(ATestSerializeObj::StaticClass());
+		if (TestSerializeObj)
+		{
+			TestSerializeObj->ChildObj = NewObject<AChildSerializeObj>(TestSerializeObj);
+		}
+	}
+
+}
+
+void UCreateWidget::SaveSerialize()
+{
+	if (TestSerializeObj)
+		TestSerializeObj->SaveObjectToFile("SerializeTest1");
+}
+
+void UCreateWidget::LoadSerialize()
+{
+	if (TestSerializeObj)
+		TestSerializeObj->LoadObjectFromFile("SerializeTest1");
+}
+
+void UCreateWidget::CreateObjAndSerialize()
+{
+	UWorld* world = GEngine->GetWorldFromContextObject(this, EGetWorldErrorMode::LogAndReturnNull);
+	if (world)
+	{
+		TestSerializeObj = world->SpawnActor<ATestSerializeObj>(ATestSerializeObj::StaticClass());
+	}
+}
+
+#pragma optimize("",on)

@@ -24,10 +24,15 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "创建UI参数")
 	FString CreateUIPath = "WidgetBlueprint'/Game/StoryTest/UI/UI_NoticeDurationTip.UI_NoticeDurationTip_C'";
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "创建UI参数")
+	FString SaveUIPath = "WidgetBlueprint'/Game/StoryTest/UI/UI_NoticeDurationTip.UI_NoticeDurationTip_C'";
+
 protected:
 	UPROPERTY()
 	UUserWidgetBase* CreateWidget;
 
+	UPROPERTY()
+	UUserWidgetBase* SaveWidget;
 
 
 };

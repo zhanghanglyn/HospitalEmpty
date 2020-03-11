@@ -7,7 +7,7 @@
 #include "HospitalEmptyGameModeBase.generated.h"
 
 /**
- * 
+ * GameMode的BeginPlay中，
  */
 UCLASS()
 class HOSPITALEMPTY_API AHospitalEmptyGameModeBase : public AGameModeBase
@@ -16,4 +16,9 @@ class HOSPITALEMPTY_API AHospitalEmptyGameModeBase : public AGameModeBase
 	
 public:
 	AHospitalEmptyGameModeBase();
+
+	virtual void PostLogin(APlayerController* NewPlayer) override;
+	virtual void BeginPlay() override;
+	virtual void StartPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 };

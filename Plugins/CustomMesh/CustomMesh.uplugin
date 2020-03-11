@@ -1,18 +1,18 @@
 {
-	"FileVersion": 3,
-	"Version": 1,
-	"VersionName": "1.0",
-	"FriendlyName": "CustomMesh",
-	"Description": "",
-	"Category": "Other",
-	"CreatedBy": "zhanghang",
-	"CreatedByURL": "",
-	"DocsURL": "",
-	"MarketplaceURL": "",
-	"SupportURL": "",
-	"CanContainContent": true,
-	"IsBetaVersion": false,
-	"Installed": false,
+  "FileVersion": 3,
+  "Version": 1,
+  "VersionName": "1.0",
+  "FriendlyName": "CustomMesh",
+  "Description": "",
+  "Category": "Other",
+  "CreatedBy": "zhanghang",
+  "CreatedByURL": "",
+  "DocsURL": "",
+  "MarketplaceURL": "",
+  "SupportURL": "",
+  "CanContainContent": true,
+  "IsBetaVersion": false,
+  "Installed": false,
   "Modules": [
     {
       "Name": "CustomMesh",
@@ -23,6 +23,12 @@
       "Name": "RTSMode",
       "Type": "Runtime",
       "LoadingPhase": "Default"
+    }
+  ],
+  "Plugins": [
+    {
+      "Name": "ProceduralMeshComponent",
+      "Enabled": true
     }
   ]
 }

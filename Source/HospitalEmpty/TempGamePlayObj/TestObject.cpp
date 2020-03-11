@@ -1,6 +1,7 @@
 ﻿#include "TestObject.h"
 #include "Engine/World.h"
 #include "UMG/Widgets/CreateWidget.h"
+#include "UMG/Widgets/SaveGroundWidget.h"
 #include "Components/Button.h"
 #include "Base/HptGameInstance.h"
 
@@ -31,5 +32,8 @@ void ATestObject::LoadUI()
 		item->OnClicked.Add(Del);
 		Widget->AddToListView(item);
 	}*/
+
+	//再加一个保存地面的按钮
+	SaveWidget = UMGManager->CreateScreenWidget(MyWorld, SaveUIPath);
 
 }

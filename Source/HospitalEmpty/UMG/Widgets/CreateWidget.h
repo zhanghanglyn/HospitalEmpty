@@ -39,7 +39,14 @@ protected:
 	void OnClickedListItem1();
 	UFUNCTION(BlueprintCallable)
 	void OnClickedListItem2();
+	UFUNCTION(BlueprintCallable)
+	void OnClickedListItem3();
 
+	//3.10 序列化用测试
+	void CreateSerializeObj();
+	void SaveSerialize();
+	void LoadSerialize();
+	void CreateObjAndSerialize();
 
 public:
 	UPROPERTY(VisibleAnyWhere, BlueprintReadWrite, meta = (BindWidget))
@@ -47,4 +54,8 @@ public:
 
 	UPROPERTY()
 	class UDecorationSystemMgr* DecorationSystemMgr;
+
+	//序列化测试用
+	UPROPERTY()
+	class ATestSerializeObj* TestSerializeObj;
 };

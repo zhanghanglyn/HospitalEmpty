@@ -42,6 +42,9 @@ public:
 	virtual void TouchEnd(FVector TouchLocation) override;
 
 	virtual void BeginPlay() override;
+
+	/* 序列化相关 */
+	virtual void Serialize(FArchive& Ar) override;
 public:
 
 	//设置0,0,0起点位置（用来计算相对位置）,会根据当前尺寸等自动计算 
@@ -73,6 +76,17 @@ public:
 
 	/* 在地面中删除一个家具 */
 	void DeleteDecoration(class ADecorationBase* DelDecoration);
+
+	/***********************    序列化存储数据相关  ***************************/
+	void SaveOrLoadData(FArchive& Ar);
+	//保存该Obj到文件
+	UFUNCTION(BlueprintCallable)
+	bool SaveObjectToFile(FString FilePath);
+	//从文件中读取该Object
+	UFUNCTION(BlueprintCallable)
+	bool LoadObjectFromFile(FString FilePath);
+	/***********************    序列化存储数据END  ***************************/
+
 protected:
 	/* 为地面格子创建一个材质实例 */
 	void CreateMaterialInstance();

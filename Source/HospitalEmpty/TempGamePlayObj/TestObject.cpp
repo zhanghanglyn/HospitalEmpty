@@ -35,5 +35,9 @@ void ATestObject::LoadUI()
 
 	//再加一个保存地面的按钮
 	SaveWidget = UMGManager->CreateScreenWidget(MyWorld, SaveUIPath);
+	//if (USaveGroundWidget* SaveGroundWidget = Cast<USaveGroundWidget>(CreateWidget))
+	//{
+	//	SaveGroundWidget
+	//}
 
 }

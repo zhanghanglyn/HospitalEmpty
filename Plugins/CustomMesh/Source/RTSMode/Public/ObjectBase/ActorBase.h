@@ -30,4 +30,8 @@ public:
 public:
 	UPROPERTY(EditAnywhere, meta = (Category = "ActorBase"))
 	FString ActorName;
+
+	/* 20.3.13 新添加是否用来进行保存 */
+	UPROPERTY()
+	int VariableToSave;
 };

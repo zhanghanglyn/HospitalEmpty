@@ -62,6 +62,9 @@ public:
 	{
 		return PlayerPawn;
 	}
+
+	/* 获取当前场景中的所有地面 */
+	TArray<AActor*> GetAllGridGround(const UObject * WorldContextObject);
 		
 protected:
 	//所有家具的蓝图位置，所有蓝图最终显示效果应该为 Blueprint'/Game/XXX/NAME/BP_NAME.BP_NAME_C' 类似

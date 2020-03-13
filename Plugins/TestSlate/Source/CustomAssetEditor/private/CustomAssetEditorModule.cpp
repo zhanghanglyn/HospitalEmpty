@@ -8,10 +8,10 @@
 
 //const FName CustomAssetEditorAppIdentifier = FName(TEXT("CustomAssetEditorApp")); //自定义资产编辑器应用程序标识符
 
-class FCustomAssetEditorModule : public ICustomAssetEditorModule
+class FEventTreeEditorModule : public ICustomAssetEditorModule
 {
 public:
-	FCustomAssetEditorModule() {};
+	FEventTreeEditorModule() {};
 
 	/* 继承子IModuleInterface的接口 */
 	virtual void StartupModule() override {
@@ -98,9 +98,9 @@ protected:
 	TArray< TSharedPtr<IAssetTypeActions>> ActionList;
 };
 
-IMPLEMENT_GAME_MODULE(FCustomAssetEditorModule, CustomAssetEditor)
+IMPLEMENT_GAME_MODULE(FEventTreeEditorModule, CustomAssetEditor)
 
-void FCustomAssetEditorModule::RegisterAssetTypeAction(TSharedRef<IAssetTypeActions> Actions)
+void FEventTreeEditorModule::RegisterAssetTypeAction(TSharedRef<IAssetTypeActions> Actions)
 {
 	IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
 	AssetTools.RegisterAssetTypeActions(Actions);
@@ -108,7 +108,7 @@ void FCustomAssetEditorModule::RegisterAssetTypeAction(TSharedRef<IAssetTypeActi
 }
 
 #pragma optimize("",off)
-TSharedRef<FScenarioEditor> FCustomAssetEditorModule::CreateCustomStoryEditor(const EToolkitMode::Type Mode,
+TSharedRef<FScenarioEditor> FEventTreeEditorModule::CreateCustomStoryEditor(const EToolkitMode::Type Mode,
 	const TSharedPtr<IToolkitHost>& InitToolkitHost, UMyCustomAsset* CustomAsset)
 {
 	TSharedRef< FScenarioEditor > NewCustomAssetEditor(new FScenarioEditor());

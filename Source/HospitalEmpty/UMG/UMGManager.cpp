@@ -28,7 +28,8 @@ UUMGManager * UUMGManager::Get(const UObject * WorldContextObject)
 }
 
 
-UUserWidgetBase* UUMGManager::CreateScreenWidget(const UObject* WorldContextObject, FString _widgetBlueprintPath, EUMGLayer Layer /* = EUMGLayer::None */, int32 _zorder /* = 0 */)
+UUserWidgetBase* UUMGManager::CreateScreenWidget(const UObject* WorldContextObject,FString _widgetBlueprintPath, 
+	EUMGLayer Layer/* = EUMGLayer::None*/, int32 _zorder/* = 0*/, bool InBeAddToViewport /*= true*/)
 {
 	/*if (m_ScreenWidget.Num() > 0 && m_ScreenWidget.Find(Layer) != nullptr)
 	{
@@ -42,7 +43,8 @@ UUserWidgetBase* UUMGManager::CreateScreenWidget(const UObject* WorldContextObje
 		UUserWidgetBase *NewWidget = CreateWidget<UUserWidgetBase>(World, Temp_Widget);
 		if (NewWidget != nullptr)
 		{
-			NewWidget->AddToViewport(((int8)Layer * 100 + _zorder));
+			if (InBeAddToViewport == true)
+				NewWidget->AddToViewport(((int8)Layer * 100 + _zorder));
 
 			if (m_ScreenWidget.Contains(Layer))
 				m_ScreenWidget[Layer].LayerWidgets.Add(NewWidget);
@@ -219,7 +221,7 @@ void UUMGManager::CreateInstanceRootWidget(UGameInstance * GameInstance)
 
 //创建INstanceUMG
 UUserWidgetBase* UUMGManager::CreateInstanceWidget(const UObject* WorldContextObject, FString _widgetBlueprintPath,
-	EUMGLayer Layer, int32 _zorder)
+	EUMGLayer Layer, int32 _zorder, bool InBeAddToRoot)
 {
 	if (m_RootWidget == nullptr)
 	{
@@ -238,19 +240,23 @@ UUserWidgetBase* UUMGManager::CreateInstanceWidget(const UObject* WorldContextOb
 		UUserWidgetBase *NewWidget = CreateWidget<UUserWidgetBase>( Cast<UUserWidget>(m_RootWidget) , Temp_Widget);
 		if (NewWidget != nullptr)
 		{
-			m_RootWidget->Root->AddChildToCanvas(NewWidget);
-			UCanvasPanelSlot * Canvas = Cast <UCanvasPanelSlot>(NewWidget->Slot);
-			if (Canvas != nullptr)
+			//3.9 新添加区分，如果不在创建时添加，则需要后续自己添加显示
+			if (InBeAddToRoot)
 			{
-				//如果动态修改了ViewPort，应该在此添加更新
-				UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
-				FVector2D Result;
-				World->GetGameInstance()->GetGameViewportClient()->GetViewportSize(Result);
-				Canvas->SetSize(Result);
-			}
+				m_RootWidget->Root->AddChildToCanvas(NewWidget);
+				UCanvasPanelSlot * Canvas = Cast <UCanvasPanelSlot>(NewWidget->Slot);
+				if (Canvas != nullptr)
+				{
+					//如果动态修改了ViewPort，应该在此添加更新
+					UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
+					FVector2D Result;
+					World->GetGameInstance()->GetGameViewportClient()->GetViewportSize(Result);
+					Canvas->SetSize(Result);
+				}
 
-			//设置ZOrder
-			NewWidget->SetZorder(((int8)Layer * 100 + _zorder));
+				//设置ZOrder
+				NewWidget->SetZorder(((int8)Layer * 100 + _zorder));
+			}
 
 			if (m_InsWidgetList.Contains(Layer))
 				m_InsWidgetList[Layer].LayerWidgets.Add(NewWidget);
@@ -271,7 +277,7 @@ UUserWidgetBase* UUMGManager::CreateInstanceWidget(const UObject* WorldContextOb
 }
 
 UUserWidgetBase* UUMGManager::CreateInstanceWidget(UWorld* _world, FString _widgetBlueprintPath, 
-	EUMGLayer Layer, int32 _zorder)
+	EUMGLayer Layer, int32 _zorder, bool InBeAddToRoot)
 {
    	if (m_RootWidget == nullptr)
 	{
@@ -290,18 +296,22 @@ UUserWidgetBase* UUMGManager::CreateInstanceWidget(UWorld* _world, FString _widg
 		UUserWidgetBase *NewWidget = CreateWidget<UUserWidgetBase>(m_RootWidget, Temp_Widget);
 		if (NewWidget != nullptr)
 		{
-			m_RootWidget->Root->AddChildToCanvas(NewWidget);
-			UCanvasPanelSlot * Canvas = Cast <UCanvasPanelSlot>(NewWidget->Slot);
-			if (Canvas != nullptr)
+			//3.9 新添加区分，如果不在创建时添加，则需要后续自己添加显示
+			if (InBeAddToRoot)
 			{
-				//如果动态修改了ViewPort，应该在此添加更新
-				FVector2D Result;
-				_world->GetGameInstance()->GetGameViewportClient()->GetViewportSize(Result);
-				Canvas->SetSize(Result);
-			}
+				m_RootWidget->Root->AddChildToCanvas(NewWidget);
+				UCanvasPanelSlot * Canvas = Cast <UCanvasPanelSlot>(NewWidget->Slot);
+				if (Canvas != nullptr)
+				{
+					//如果动态修改了ViewPort，应该在此添加更新
+					FVector2D Result;
+					_world->GetGameInstance()->GetGameViewportClient()->GetViewportSize(Result);
+					Canvas->SetSize(Result);
+				}
 
-			//设置ZOrder
-			NewWidget->SetZorder(((int8)Layer * 100 + _zorder));
+				//设置ZOrder
+				NewWidget->SetZorder(((int8)Layer * 100 + _zorder));
+			}
 
 			if (m_InsWidgetList.Contains(Layer))
 				m_InsWidgetList[Layer].LayerWidgets.Add(NewWidget);
@@ -321,6 +331,24 @@ UUserWidgetBase* UUMGManager::CreateInstanceWidget(UWorld* _world, FString _widg
 	}
 
 	return nullptr;
+}
+
+void UUMGManager::AddInstanceWidget(const UObject* WorldContextObject, UUserWidgetBase* Widget,
+	EUMGLayer Layer /*= EUMGLayer::None */, int32 InZorder /*= 0*/)
+{
+	m_RootWidget->Root->AddChildToCanvas(Widget);
+	UCanvasPanelSlot * Canvas = Cast <UCanvasPanelSlot>(Widget->Slot);
+	if (Canvas != nullptr)
+	{
+		//如果动态修改了ViewPort，应该在此添加更新
+		UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
+		FVector2D Result;
+		World->GetGameInstance()->GetGameViewportClient()->GetViewportSize(Result);
+		Canvas->SetSize(Result);
+	}
+
+	//设置ZOrder
+	Widget->SetZorder(((int8)Layer * 100 + InZorder));
 }
 
 UUserWidgetBase* UUMGManager::GetInsUMG(FString UID)

@@ -72,12 +72,12 @@ public:
 	UFUNCTION(BlueprintCallable , BlueprintCosmetic, meta = (WorldContext = "WorldContextObject"))
 	UUserWidgetBase* CreateScreenWidget(const UObject* WorldContextObject,
 		FString _widgetBlueprintPath, /* TSubclassOf<UUserWidgetBase> _widgetType,FString _widgetName,*/ 
-		EUMGLayer Layer = EUMGLayer::None, int32 _zorder = 0);
+		EUMGLayer Layer = EUMGLayer::None, int32 _zorder = 0, bool InBeAddToViewport = true);
 	//向屏幕添加一个UMG
 	
 	template<typename T>
 	T* CreateScreenWidget(FString _widgetBlueprintPath,UWorld* _world, /* TSubclassOf<UUserWidgetBase> _widgetType, FString _widgetName,*/
-		EUMGLayer Layer = EUMGLayer::None, int32 _zorder = 0)
+		EUMGLayer Layer = EUMGLayer::None, int32 _zorder = 0, bool InBeAddToViewport = true)
 	{
 		/*if (m_ScreenWidget.Num() > 0 && m_ScreenWidget.Find(_widgetName) != nullptr)
 		{
@@ -91,7 +91,8 @@ public:
 			T* NewWidget = CreateWidget<T>(_world, Temp_Widget);
 			if (NewWidget != nullptr)
 			{
-				(Cast<UUserWidgetBase>(NewWidget))->AddToViewport((int8)Layer * 100 +_zorder);
+				if (InBeAddToViewport == true)
+					(Cast<UUserWidgetBase>(NewWidget))->AddToViewport((int8)Layer * 100 +_zorder);
 
 				if (m_ScreenWidget.Contains(Layer))
 					m_ScreenWidget[Layer].LayerWidgets.Add(NewWidget);
@@ -158,9 +159,12 @@ public:
 	//创建INstanceUMG
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, meta = (WorldContext = "WorldContextObject"))
 	UUserWidgetBase* CreateInstanceWidget(const UObject* WorldContextObject ,FString _widgetBlueprintPath,
-		EUMGLayer Layer = EUMGLayer::None, int32 _zorder = 0);
+		EUMGLayer Layer = EUMGLayer::None, int32 _zorder = 0 , bool InBeAddToRoot = true);
 	UUserWidgetBase* CreateInstanceWidget(UWorld* _world, FString _widgetBlueprintPath, EUMGLayer Layer = EUMGLayer::None,
-		int32 _zorder = 0);
+		int32 _zorder = 0, bool InBeAddToRoot = true);
+
+	/* 3.9 手动添加InsWidget显示,与CreateInstanceWidget配套使用,建议还是直接创建时添加 */
+	void AddInstanceWidget(const UObject* WorldContextObject, UUserWidgetBase* Widget, EUMGLayer Layer = EUMGLayer::None, int32 InZorder = 0);
 
 	//根据UID查找某个UMD
 	UUserWidgetBase* GetInsUMG(FString UID);

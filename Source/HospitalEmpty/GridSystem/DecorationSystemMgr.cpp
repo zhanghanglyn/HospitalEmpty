@@ -7,6 +7,7 @@
 #include "HospitalEmpty/PlayerController/HptPlayerCameraPawn.h"
 #include "HospitalEmpty/Common/CommonLibrary.h"
 #include "Actor/GroundDefaultActor.h"
+#include "Kismet/GameplayStatics.h"
 
 UDecorationSystemMgr* UDecorationSystemMgr::Get(const UObject * WorldContextObject)
 {
@@ -66,6 +67,13 @@ ADecorationBase* UDecorationSystemMgr::CreateDecoration(FVector Location, AActor
 	return nullptr;
 }
 
+TArray<AActor*> UDecorationSystemMgr::GetAllGridGround(const UObject * WorldContextObject)
+{
+	TArray<AActor*> ResultActor;
+	UGameplayStatics::GetAllActorsOfClass(WorldContextObject, AGroundObj::StaticClass(), ResultActor);
+
+	return ResultActor;
+}
 /************************************************************************/
 /*                       点击相关    已废除                             */
 /************************************************************************/ 

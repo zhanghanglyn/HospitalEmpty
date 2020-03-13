@@ -4,6 +4,11 @@
 #include "Engine/StaticMesh.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "GroundGridMgrComponent.h"
+#include "Serialization/BufferArchive.h"
+#include "Misc/FileHelper.h"
+#include "Serializable.h"
+#include "Misc/Paths.h"
+#include "Serialization/MemoryReader.h"
 
 AGroundObj::AGroundObj(FString InActorName) : Super(InActorName)
 {
@@ -59,6 +64,8 @@ void AGroundObj::BeginPlay()
 		GridMgr->InitGridData(GroundWidthHeight, this);
 	}
 	
+	//3.11 尝试读取序列化的数据
+	LoadObjectFromFile("TTTTTT1");
 }
 
 #pragma optimize("",off)
@@ -317,4 +324,90 @@ bool AGroundObj::SaveCurDecoration(ADecorationBase* SaveDecoration)
 void AGroundObj::DeleteDecoration(ADecorationBase* DelDecoration)
 {
 	GridMgr->DeleteDecoration(DelDecoration);
+}
+
+/************************************************************************/
+/*                             序列化相关                               */
+/************************************************************************/
+void AGroundObj::Serialize(FArchive& Ar)
+{
+	Super::Serialize(Ar);
+}
+
+void AGroundObj::SaveOrLoadData(FArchive& Ar)
+{
+	return;
+
+	if (Ar.IsSaving())
+		UE_LOG(LogTemp, Warning, TEXT("AGroundObj::SaveOrLoadData   !! Saving!"));
+	if (Ar.IsLoading())
+		UE_LOG(LogTemp, Warning, TEXT("AGroundObj::SaveOrLoadData   !! Loading!!!"));
+
+	GroundMeshComponent->Serialize(Ar);
+
+	Ar << GroundMeshPath;
+
+	Ar << GroundWidthHeight;
+
+	Ar << BorderWidth;
+
+	Ar << GridMaterial;
+
+	//Ar << GridMgr;
+
+	//Ar << MaterialParam;
+
+	//Ar << GridDynamicMaterial;
+}
+
+bool AGroundObj::SaveObjectToFile(FString FilePath)
+{
+	FBufferArchive ToBinary;
+	SaveOrLoadData(ToBinary);
+
+	if (ToBinary.Num() <= 0)
+	{
+		UE_LOG(LogTemp , Warning , TEXT("地面保存失败！没有数据要写！"));
+		return false;
+	}
+		
+	if (!FFileHelper::SaveArrayToFile(ToBinary, *FString::Printf(TEXT("%s%s"), *FPaths::ProjectContentDir(), *FilePath)))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("地面保存写出到文件失败！"));
+		return false;
+	}
+
+	ToBinary.FlushCache();
+	ToBinary.Empty();
+
+	return true;
+}
+
+bool AGroundObj::LoadObjectFromFile(FString FilePath)
+{
+	return;
+
+	TArray<uint8> BinaryArray;
+	if (!FFileHelper::LoadFileToArray(BinaryArray, *FString::Printf(TEXT("%s%s"), *FPaths::ProjectContentDir(), *FilePath)))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("地面读取文件失败！"));
+		return false;
+	}
+
+	if (BinaryArray.Num() <= 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("地面读取文件内容为空！"));
+		return false;
+	}
+	//true表明内容为可持续的
+	FMemoryReader FromBinary = FMemoryReader(BinaryArray, true);
+	FromBinary.Seek(0);
+
+	SaveOrLoadData(FromBinary);
+
+	FromBinary.FlushCache();
+	BinaryArray.Empty();
+	FromBinary.Close();
+
+	return true;
 }

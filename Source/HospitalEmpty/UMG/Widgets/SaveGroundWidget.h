@@ -30,5 +30,10 @@ public:
 
 
 public:
+	UPROPERTY(VisibleAnyWhere, BlueprintReadWrite, meta = (BindWidget))
+	UButton *SaveButton;   //一定会有一个根节点！
+
+	UPROPERTY()
+	class UDecorationSystemMgr* DecorationSystemMgr;
 
 };

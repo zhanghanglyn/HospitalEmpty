@@ -1,6 +1,16 @@
 ﻿#include "DecorationGridMgrComponent.h"
 #include "GroundGridMgrComponent.h"
 
+void UDecorationGridMgrComponent::Serialize(FArchive& Ar)
+{
+
+	Ar << GridDataList;
+	Ar << DecorationActor;
+	Ar << GroundGridMgr;
+
+	Super::Serialize(Ar);
+}
+
 void UDecorationGridMgrComponent::SetGroundGridMgr(UGroundGridMgrComponent* InGroundGridMgr)
 {
 	GroundGridMgr = InGroundGridMgr;

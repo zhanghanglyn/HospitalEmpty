@@ -61,7 +61,8 @@ public:
 */
 struct FSaveActorArchive : public FObjectAndNameAsStringProxyArchive
 {
-	FSaveActorArchive(FArchive& InInnerArchive, bool bInLoadIfFindFails): Super(InInnerArchive , bInLoadIfFindFails){}
+	FSaveActorArchive(FArchive& InInnerArchive, bool bInLoadIfFindFails)
+		: FObjectAndNameAsStringProxyArchive(InInnerArchive, bInLoadIfFindFails) {};
 
 };
 
@@ -76,16 +77,32 @@ class USerializeSystem : public UObject
 public:
 	USerializeSystem(const FObjectInitializer& ObjectInitializer);
 
+	static USerializeSystem* Get(const UObject* WorldContextObject);
+
 	/* 保存某个单独Actor */
 	UFUNCTION()
-	static bool SaveActorData( class AActor* InActor );
+	bool SaveActorData( class AActor* InActor );
 
 	/* 保存所有场景中可存储的Actor */
 	UFUNCTION()
-	static bool SaveAllActorData() {};
+	bool SaveAllActorData() { return true; };
+
+	/* 从配置中加载 */
+
+protected:
+	/* 存储FGameActorSerializeData至本地文件中 */
+	bool SaveGameSerializeDataToFile(FGameActorSerializeData &InData);
 
 protected:
 	/* 存档文件的保存路径 */
 	UPROPERTY()
 	FString SavePath;
+
+	UPROPERTY( BlueprintReadWrite , EditAnywhere , meta = (DisplayName = "保存文件路径") )
+	FString SaveFileName = "HospitalProject/SaveData/Test1";
+
+	/* 保存当前游戏中所有Actor的结构体，暂时只存放一个场景，后续对应多个场景进行添加 */
+	//UPROPERTY()
+	//FGameActorSerializeData GameSaveSerializeData;
+
 };

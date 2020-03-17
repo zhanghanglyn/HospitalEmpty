@@ -1,8 +1,8 @@
 #include "CreateWidget.h"
 #include "GridSystem/DecorationSystemMgr.h"
 #include "PlayerController/HptPlayerCameraPawn.h"
-#include "Serialize/TestSerializeObj.h"
-#include "Serialize/ChildSerializeObj.h"
+#include "Serialize/testObj/TestSerializeObj.h"
+#include "Serialize/testObj/ChildSerializeObj.h"
 #include "Engine.h"
 
 UCreateWidget::UCreateWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)

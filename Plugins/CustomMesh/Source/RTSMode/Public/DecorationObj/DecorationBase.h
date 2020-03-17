@@ -15,7 +15,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 ColumnNum;
 
+	friend FArchive& operator<<(FArchive& Ar, FGridParam& InConfig)
+	{
+		Ar << InConfig.RowNum;
+		Ar << InConfig.ColumnNum;
 
+		return Ar;
+	}
 };
 
 /*
@@ -43,6 +49,16 @@ public:
 	/* 格子材质 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (Category = "格子数据相关"))
 	class UMaterial* GridMaterial;
+
+	friend FArchive& operator<<(FArchive& Ar, FDecorationConfig& InConfig)
+	{
+		Ar << InConfig.DecorationMesh;
+		Ar << InConfig.DecorationName;
+		Ar << InConfig.GridParamData;
+		Ar << InConfig.GridMaterial;
+
+		return Ar;
+	}
 };
 
 /*
@@ -70,6 +86,8 @@ public:
 
 	/** Constructor for AActor that takes an ObjectInitializer for backward compatibility */
 	ADecorationBase(const FObjectInitializer& ObjectInitializer);
+
+	virtual void Serialize(FArchive& Ar) override;
 
 	/* virtual */
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;

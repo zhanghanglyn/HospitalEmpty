@@ -13,6 +13,16 @@ UGroundGridMgrComponent::UGroundGridMgrComponent(const FObjectInitializer& Objec
 
 }
 
+void UGroundGridMgrComponent::Serialize(FArchive& Ar)
+{
+	Ar << GridDataListNested;
+	Ar << BlockGridDataList;
+	Ar << DecorationList;
+	Ar << GroundActor;
+
+	Super::Serialize(Ar);
+}
+
 void UGroundGridMgrComponent::InitBlockGrid()
 {
 	//初始化先清空所有List

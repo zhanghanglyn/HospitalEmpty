@@ -21,6 +21,15 @@ ADecorationBase::ADecorationBase(const FObjectInitializer& ObjectInitializer) :S
 	DecorationMeshComponent->SetupAttachment(RootSceneComponent);
 }
 
+void ADecorationBase::Serialize(FArchive& Ar)
+{
+	Ar << ParamData;
+	Ar << GridMgr;
+	Ar << Ground;
+
+	Super::Serialize(Ar);
+}
+
 void ADecorationBase::OnConstruction(const FTransform& Transform)
 {
 	//添加格子MGR

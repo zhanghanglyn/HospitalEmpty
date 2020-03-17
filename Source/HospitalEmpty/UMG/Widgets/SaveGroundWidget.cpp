@@ -1,10 +1,12 @@
 #include "SaveGroundWidget.h"
 #include "GridSystem/DecorationSystemMgr.h"
 #include "PlayerController/HptPlayerCameraPawn.h"
-#include "Serialize/TestSerializeObj.h"
-#include "Serialize/ChildSerializeObj.h"
+#include "Serialize/testObj/TestSerializeObj.h"
+#include "Serialize/testObj/ChildSerializeObj.h"
 #include "GroundObj.h"
 #include "Engine.h"
+#include "Base/HptGameInstance.h"
+#include "Serialize/SerializeSystem.h"
 
 USaveGroundWidget::USaveGroundWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -31,6 +33,9 @@ void USaveGroundWidget::NativeConstruct(){
 
 void USaveGroundWidget::SaveGround()
 {
+	//获取一下序列化System
+	USerializeSystem* SerializeSystem = USerializeSystem::Get(this);
+
 	if (DecorationSystemMgr)
 	{
 		TArray<AActor*> AllGround = DecorationSystemMgr->GetAllGridGround(this);
@@ -38,7 +43,8 @@ void USaveGroundWidget::SaveGround()
 		{
 			if (AGroundObj* GroundObj = Cast<AGroundObj>(AllGround[GroundNum]))
 			{
-				GroundObj->SaveObjectToFile("TTTTTT1");
+				//GroundObj->SaveObjectToFile("TTTTTT1");
+				SerializeSystem->SaveActorData(GroundObj);
 			}
 
 		}

@@ -16,6 +16,15 @@ public:
 	int32 Column = 0;
 	UPROPERTY()
 	float BorderWidth = 0.01f;
+
+	friend FArchive& operator<<(FArchive& Ar, FGridGroundMaterialParam& InMaterailPram)
+	{
+		Ar << InMaterailPram.RowNum;
+		Ar << InMaterailPram.Column;
+		Ar << InMaterailPram.BorderWidth;
+
+		return Ar;
+	}
 };
 
 /*

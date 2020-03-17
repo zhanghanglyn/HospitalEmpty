@@ -36,9 +36,26 @@ public:
 		return GridId;
 	};
 
+	friend FArchive& operator<<(FArchive& Ar, FGridData& InGridData)
+	{
+		Ar << InGridData.IsNull;
+		Ar << InGridData.BeOccupy;
+		Ar << InGridData.GridRow;
+		Ar << InGridData.GridColumn;
+		Ar << InGridData.StartGridId;
+		Ar << InGridData.StartLocation;
+		
+		Ar << InGridData.GridCount;
+		Ar << InGridData.GridName;
+
+		Ar << InGridData.GridId;
+
+		return Ar;
+	}
+
 protected:
 	UPROPERTY()
-		FString GridId = "";
+	FString GridId = "";
 
 public:
 	static int32 GridCount;// = 0;
@@ -59,7 +76,7 @@ public:
 
 	//typedef FGridData ElementType;
 	UPROPERTY()
-		TArray<FGridData> Array;
+	TArray<FGridData> Array;
 
 	void Add(FGridData& item)
 	{
@@ -79,4 +96,10 @@ public:
 		return Array[Index];
 	}
 
+	friend FArchive& operator<<(FArchive& Ar, FNestedArray& InNestedArray)
+	{
+		Ar << InNestedArray.Array;
+
+		return Ar;
+	}
 };

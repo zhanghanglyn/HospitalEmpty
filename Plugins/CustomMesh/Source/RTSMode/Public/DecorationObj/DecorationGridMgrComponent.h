@@ -20,6 +20,7 @@ public:
 	UDecorationGridMgrComponent() {};
 	UDecorationGridMgrComponent(const FObjectInitializer& ObjectInitializer) :Super(ObjectInitializer) {};
 
+	virtual void Serialize(FArchive& Ar) override;
 
 public:
 	/* 设置自身关联的家具 */

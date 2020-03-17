@@ -58,6 +58,8 @@ void AGroundObj::BeginPlay()
 {
 	Super::BeginPlay();
 
+	UE_LOG(LogTemp, Warning , TEXT(" GroundName IS :: %s") , *GetName() );
+
 	if (GridMgr)
 	{
 		GridMgr->InitGridStartLocation(GetTopRightLocation());
@@ -65,7 +67,7 @@ void AGroundObj::BeginPlay()
 	}
 	
 	//3.11 尝试读取序列化的数据
-	LoadObjectFromFile("TTTTTT1");
+	//LoadObjectFromFile("TTTTTT1");
 }
 
 #pragma optimize("",off)
@@ -331,6 +333,16 @@ void AGroundObj::DeleteDecoration(ADecorationBase* DelDecoration)
 /************************************************************************/
 void AGroundObj::Serialize(FArchive& Ar)
 {
+	if (Ar.IsLoading())
+	{
+		if (GridMgr != nullptr)
+			Ar << GridMgr;
+	}
+	else
+		Ar << GridMgr;
+
+	Ar << MaterialParam;
+
 	Super::Serialize(Ar);
 }
 
@@ -385,7 +397,7 @@ bool AGroundObj::SaveObjectToFile(FString FilePath)
 
 bool AGroundObj::LoadObjectFromFile(FString FilePath)
 {
-	return;
+	return false;
 
 	TArray<uint8> BinaryArray;
 	if (!FFileHelper::LoadFileToArray(BinaryArray, *FString::Printf(TEXT("%s%s"), *FPaths::ProjectContentDir(), *FilePath)))

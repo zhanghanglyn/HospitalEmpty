@@ -23,9 +23,9 @@ ADecorationBase::ADecorationBase(const FObjectInitializer& ObjectInitializer) :S
 
 void ADecorationBase::Serialize(FArchive& Ar)
 {
-	Ar << ParamData;
+	/*Ar << ParamData;
 	Ar << GridMgr;
-	Ar << Ground;
+	Ar << Ground;*/
 
 	Super::Serialize(Ar);
 }

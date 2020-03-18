@@ -15,10 +15,10 @@ UGroundGridMgrComponent::UGroundGridMgrComponent(const FObjectInitializer& Objec
 
 void UGroundGridMgrComponent::Serialize(FArchive& Ar)
 {
-	Ar << GridDataListNested;
+	/*Ar << GridDataListNested;
 	Ar << BlockGridDataList;
 	Ar << DecorationList;
-	Ar << GroundActor;
+	Ar << GroundActor;*/
 
 	Super::Serialize(Ar);
 }

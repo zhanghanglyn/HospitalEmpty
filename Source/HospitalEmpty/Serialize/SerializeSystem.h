@@ -88,7 +88,7 @@ public:
 	bool SaveAllActorData() { return true; };
 
 	/* 从配置中加载 */
-
+	bool LoadActorData(const UObject* WorldContextObject, FString LoadPath);
 protected:
 	/* 存储FGameActorSerializeData至本地文件中 */
 	bool SaveGameSerializeDataToFile(FGameActorSerializeData &InData);

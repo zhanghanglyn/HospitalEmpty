@@ -1,9 +1,12 @@
 #include "SerializeSystem.h"
 #include "Misc/Paths.h"
 #include "Base/HptGameInstance.h"
+#include "Serialization/MemoryReader.h"
 #include "Serialization/MemoryWriter.h"
 #include "Engine.h"
 #include "Misc/DateTime.h"
+#include "GroundObj.h"
+#include "RTSMode/Public/GroundObject/GroundGridMgrComponent.h"
 #include "Misc/FileHelper.h"
 
 USerializeSystem* USerializeSystem::Get(const UObject* WorldContextObject)
@@ -70,4 +73,52 @@ bool USerializeSystem::SaveGameSerializeDataToFile(FGameActorSerializeData &InDa
 
 	return true;
 }
-		
+#pragma optimize("",off)
+bool USerializeSystem::LoadActorData(const UObject* WorldContextObject,FString LoadPath)
+{
+	TArray<uint8> BinaryData;
+	if (FFileHelper::LoadFileToArray(BinaryData, *SavePath))
+	{
+		UE_LOG(LogTemp, Warning, TEXT(" LoadFileToArray Over~ "));
+	}
+	else
+	{
+		return false;
+	}
+
+	FMemoryReader FromBinary = FMemoryReader(BinaryData, true);
+	FromBinary.Seek(0);
+
+	FGameActorSerializeData LoadGameData;
+	FromBinary << LoadGameData;
+
+	FromBinary.FlushCache();
+	BinaryData.Empty();
+	FromBinary.Close();
+
+	for (FActorSerializeData ActorData : LoadGameData.SerializeActors)
+	{
+		FVector SpawnPos = ActorData.ActorTransForm.GetLocation();
+		FRotator SpawnRot = ActorData.ActorTransForm.Rotator();
+		FActorSpawnParameters SpawnParam;
+		SpawnParam.Name = ActorData.ActorName;
+		UClass* SpawnClass = FindObject<UClass>(ANY_PACKAGE, *ActorData.ActorClass);
+		UWorld* CurWorld = GEngine->GetWorldFromContextObject(WorldContextObject);
+		if (SpawnClass && CurWorld)
+		{
+			AActor* NewActor = CurWorld->SpawnActor(SpawnClass, &SpawnPos, &SpawnRot, SpawnParam);
+			FMemoryReader MemoryReader(ActorData.ActorData, true);
+			FSaveActorArchive Ar(MemoryReader,true);
+			NewActor->Serialize(Ar);
+			NewActor->SetActorTransform(ActorData.ActorTransForm);
+
+			/*AGroundObj* GroundObj = Cast<AGroundObj>(NewActor);
+			UGroundGridMgrComponent* MgrComponent = GroundObj->GetGridMgr();
+			int32 a = 1;*/
+			//int32 GridRow = MgrComponent->GetGridRow();
+		}
+	}
+
+	return true;
+}
+#pragma optimize("",on)

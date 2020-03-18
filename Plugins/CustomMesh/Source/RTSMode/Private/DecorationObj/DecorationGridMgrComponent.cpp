@@ -4,9 +4,9 @@
 void UDecorationGridMgrComponent::Serialize(FArchive& Ar)
 {
 
-	Ar << GridDataList;
+	/*Ar << GridDataList;
 	Ar << DecorationActor;
-	Ar << GroundGridMgr;
+	Ar << GroundGridMgr;*/
 
 	Super::Serialize(Ar);
 }

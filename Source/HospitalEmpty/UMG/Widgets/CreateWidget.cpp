@@ -3,6 +3,8 @@
 #include "PlayerController/HptPlayerCameraPawn.h"
 #include "Serialize/testObj/TestSerializeObj.h"
 #include "Serialize/testObj/ChildSerializeObj.h"
+#include "Base/HptGameInstance.h"
+#include "Serialize/SerializeSystem.h"
 #include "Engine.h"
 
 UCreateWidget::UCreateWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
@@ -82,6 +84,13 @@ void UCreateWidget::OnClickedListItem2()
 
 void UCreateWidget::OnClickedListItem3()
 {
+
+	USerializeSystem* SerializeSystem = USerializeSystem::Get(this);
+	if (SerializeSystem)
+	{
+		SerializeSystem->LoadActorData(this,"11");
+	}
+
 	//CreateObjAndSerialize();
 }
 

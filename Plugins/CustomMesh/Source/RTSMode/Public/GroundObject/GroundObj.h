@@ -54,6 +54,8 @@ public:
 
 	/* 序列化相关 */
 	virtual void Serialize(FArchive& Ar) override;
+	friend FArchive& operator<<(FArchive& Ar, AGroundObj& SaveRef);
+
 public:
 
 	//设置0,0,0起点位置（用来计算相对位置）,会根据当前尺寸等自动计算 

@@ -13,14 +13,25 @@ UGroundGridMgrComponent::UGroundGridMgrComponent(const FObjectInitializer& Objec
 
 }
 
+FArchive& operator<<(FArchive& Ar, UGroundGridMgrComponent& SaveRef)
+{
+	Ar << SaveRef.GridDataListNested;
+	Ar << SaveRef.BlockGridDataList;
+	Ar << SaveRef.DecorationList;
+	//Ar << *SaveRef.GroundActor;
+
+	return Ar;
+}
+
 void UGroundGridMgrComponent::Serialize(FArchive& Ar)
 {
+	Super::Serialize(Ar);
+
 	/*Ar << GridDataListNested;
 	Ar << BlockGridDataList;
-	Ar << DecorationList;
-	Ar << GroundActor;*/
+	Ar << DecorationList;*/
+	//Ar << *GroundActor;
 
-	Super::Serialize(Ar);
 }
 
 void UGroundGridMgrComponent::InitBlockGrid()

@@ -53,6 +53,38 @@ bool USerializeSystem::SaveActorData(class AActor* InActor)
 	return SaveGameSerializeDataToFile(GameSaveSerializeData);
 }
 
+bool USerializeSystem::SaveAllActorData(const UObject* WorldContextObject)
+{
+	TArray<AActor*> SaveActors;
+	UGameplayStatics::GetAllActorsOfClass(WorldContextObject, AActorBase::StaticClass(), SaveActors);
+
+	//将当前数据添加到保存结构中
+	FGameActorSerializeData GameSaveSerializeData;
+	//GameSaveSerializeData.SerializeActors.Add(ActorRecord);
+	GameSaveSerializeData.GameID = "SaveData1";
+	GameSaveSerializeData.Timestamp = FDateTime::Now();
+
+	for (AActor* InActor : SaveActors)
+	{
+		//先创建一个存储Actor的结构体
+		FActorSerializeData ActorRecord;
+		ActorRecord.ActorName = FName(*InActor->GetName());
+		FString TestSee = InActor->GetClass()->GetName();
+		ActorRecord.ActorClass = InActor->GetClass()->GetPathName();
+		ActorRecord.ActorTransForm = InActor->GetTransform();
+
+		//创建用来进行序列化的结构
+		FMemoryWriter MemoryWriter(ActorRecord.ActorData, true);
+		FSaveActorArchive Ar(MemoryWriter, true);
+		InActor->Serialize(Ar);
+
+		GameSaveSerializeData.SerializeActors.Add(ActorRecord);
+	}
+
+	return SaveGameSerializeDataToFile(GameSaveSerializeData);
+}
+
+
 bool USerializeSystem::SaveGameSerializeDataToFile(FGameActorSerializeData &InData)
 {
 	FBufferArchive BinaryData;
@@ -64,7 +96,7 @@ bool USerializeSystem::SaveGameSerializeDataToFile(FGameActorSerializeData &InDa
 	}
 	else
 	{
-		UE_LOG(  LogTemp , Warning , TEXT(" SaveFileTo Error!!! "));
+		UE_LOG(LogTemp, Warning, TEXT(" SaveFileTo Error!!! "));
 		return false;
 	}
 
@@ -73,6 +105,11 @@ bool USerializeSystem::SaveGameSerializeDataToFile(FGameActorSerializeData &InDa
 
 	return true;
 }
+
+/************************************************************************/
+/*                             Load     相关                            */
+/************************************************************************/
+
 #pragma optimize("",off)
 bool USerializeSystem::LoadActorData(const UObject* WorldContextObject,FString LoadPath)
 {
@@ -103,7 +140,11 @@ bool USerializeSystem::LoadActorData(const UObject* WorldContextObject,FString L
 		FActorSpawnParameters SpawnParam;
 		SpawnParam.Name = ActorData.ActorName;
 		UClass* SpawnClass = FindObject<UClass>(ANY_PACKAGE, *ActorData.ActorClass);
-		UWorld* CurWorld = GEngine->GetWorldFromContextObject(WorldContextObject);
+		//是有可能找不到的！如果未加载的话
+		if (SpawnClass == nullptr)
+			SpawnClass = LoadObject<UClass>(NULL, *ActorData.ActorClass);
+
+		UWorld* CurWorld = GEngine->GetWorldFromContextObject(WorldContextObject,EGetWorldErrorMode::LogAndReturnNull);
 		if (SpawnClass && CurWorld)
 		{
 			AActor* NewActor = CurWorld->SpawnActor(SpawnClass, &SpawnPos, &SpawnRot, SpawnParam);
@@ -111,14 +152,12 @@ bool USerializeSystem::LoadActorData(const UObject* WorldContextObject,FString L
 			FSaveActorArchive Ar(MemoryReader,true);
 			NewActor->Serialize(Ar);
 			NewActor->SetActorTransform(ActorData.ActorTransForm);
-
-			/*AGroundObj* GroundObj = Cast<AGroundObj>(NewActor);
-			UGroundGridMgrComponent* MgrComponent = GroundObj->GetGridMgr();
-			int32 a = 1;*/
-			//int32 GridRow = MgrComponent->GetGridRow();
 		}
 	}
 
+	//20.3.19
+
 	return true;
 }
+
 #pragma optimize("",on)

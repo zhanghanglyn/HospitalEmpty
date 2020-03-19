@@ -44,7 +44,7 @@ void USaveGroundWidget::SaveGround()
 			if (AGroundObj* GroundObj = Cast<AGroundObj>(AllGround[GroundNum]))
 			{
 				//GroundObj->SaveObjectToFile("TTTTTT1");
-				SerializeSystem->SaveActorData(GroundObj);
+				SerializeSystem->SaveAllActorData(this);
 			}
 
 		}

@@ -22,8 +22,8 @@ void UStateIdle::OnMouseClickStart()
 		TempParam->LastDecorationLocation = HitGroundLocation; //HitDecoration->GetActorLocation();//HitGroundLocation;
 
 		/* 要在自身地面上，先把自身清除再重新添加 */
-		AGroundObj* CurGround = HitDecoration->GetGround();
-		CurGround->DeleteDecoration(HitDecoration);
+		if( AGroundObj* CurGround = HitDecoration->GetGround())
+			CurGround->DeleteDecoration(HitDecoration);
 
 		FSMMgr->TransState(ETransConditionID::C_IdleClickToArrange, TempParam);
 		TempParam->RemoveFromRoot();

@@ -88,6 +88,7 @@ public:
 	ADecorationBase(const FObjectInitializer& ObjectInitializer);
 
 	virtual void Serialize(FArchive& Ar) override;
+	friend FArchive& operator<<(FArchive& Ar, ADecorationBase& SaveRef);
 
 	/* virtual */
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;

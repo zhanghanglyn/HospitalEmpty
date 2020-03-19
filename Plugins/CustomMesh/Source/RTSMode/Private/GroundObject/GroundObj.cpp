@@ -333,19 +333,30 @@ void AGroundObj::DeleteDecoration(ADecorationBase* DelDecoration)
 /************************************************************************/
 void AGroundObj::Serialize(FArchive& Ar)
 {
-	//if (Ar.IsSaving())
-	//{
-	//	if (GridMgr != nullptr)
-	//		Ar << GridMgr;
-	//}
-	//else
-	//	Ar << GridMgr;
-
-	//Ar << MaterialParam;
+	if (GridMgr != nullptr)
+		GridMgr->Serialize(Ar);
 
 	Super::Serialize(Ar);
 
+	//if (Ar.IsSaving())
+	//{
+	//	if (GridMgr != nullptr)
+	//		Ar << *GridMgr;
+	//}
+	//else
+	//{	//其实如果为Null，是不是应该直接在这里创建一个
+	//	if (GridMgr != nullptr)
+	//		Ar << *GridMgr;
+	//}
+
 	/* 应该是要手动序列化完毕之后进行初始化吧 */
+}
+
+FArchive& operator<<(FArchive& Ar, AGroundObj& SaveRef)
+{
+	Ar << *SaveRef.GridMgr;
+
+	return Ar;
 }
 
 void AGroundObj::SaveOrLoadData(FArchive& Ar)

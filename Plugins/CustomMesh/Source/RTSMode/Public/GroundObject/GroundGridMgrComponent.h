@@ -20,6 +20,7 @@ public:
 	UGroundGridMgrComponent(const FObjectInitializer& ObjectInitializer);
 
 	virtual void Serialize(FArchive& Ar) override;
+	friend FArchive& operator<<(FArchive& Ar, UGroundGridMgrComponent& SaveRef);
 
 	void InitGridData( FVector2D InWidthHeight , class AGroundObj* InGroundActor);
 	//设置当前格子的左上角起始点在世界空间中的位置（和地面一致）

@@ -1,14 +1,22 @@
 ﻿#include "DecorationGridMgrComponent.h"
 #include "GroundGridMgrComponent.h"
-
+#pragma optimize("",off)
 void UDecorationGridMgrComponent::Serialize(FArchive& Ar)
 {
-
-	/*Ar << GridDataList;
-	Ar << DecorationActor;
-	Ar << GroundGridMgr;*/
-
 	Super::Serialize(Ar);
+
+	//Ar << GridDataList;
+	//Ar << *DecorationActor;
+	//Ar << *GroundGridMgr; 
+}
+#pragma optimize("",on)
+FArchive& operator<<(FArchive& Ar, UDecorationGridMgrComponent& SaveRef)
+{
+	Ar << SaveRef.GridDataList;
+	//Ar << *SaveRef.DecorationActor;
+	//Ar << *SaveRef.GroundGridMgr;
+
+	return Ar;
 }
 
 void UDecorationGridMgrComponent::SetGroundGridMgr(UGroundGridMgrComponent* InGroundGridMgr)

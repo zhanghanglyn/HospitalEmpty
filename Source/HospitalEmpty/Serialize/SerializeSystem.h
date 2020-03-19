@@ -68,6 +68,8 @@ struct FSaveActorArchive : public FObjectAndNameAsStringProxyArchive
 
 /*
 	全局游戏的序列化存储系统直接就放在这
+	20.3.19 之前的想法是，全部通过序列化来实现整个场景的保存和加载，实际体验起来，不是特别的现实，如果想要达到UE的序列化效果，需要单独进行很多
+	很多很多额外的处理，感觉性价比就低了。因为改为使用序列化+数据生成+重新定位Pointer的方式来进行，即加载完毕Actor后，重新遍历并且对应一下指针。
 */
 UCLASS()
 class USerializeSystem : public UObject
@@ -85,7 +87,7 @@ public:
 
 	/* 保存所有场景中可存储的Actor */
 	UFUNCTION()
-	bool SaveAllActorData() { return true; };
+	bool SaveAllActorData(const UObject* WorldContextObject);
 
 	/* 从配置中加载 */
 	bool LoadActorData(const UObject* WorldContextObject, FString LoadPath);

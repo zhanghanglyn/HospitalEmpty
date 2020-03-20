@@ -8,8 +8,39 @@
 #include "Serialization/ObjectAndNameAsStringProxyArchive.h"
 #include "SerializeSystem.generated.h"
 
+/*
+	用来存储序列化的继承了接口SaveableActorInterface的Component
+*/
+USTRUCT()
+struct FPropertySerializeData
+{
+	GENERATED_USTRUCT_BODY()
+
+public:
+	FString Class;
+	FName Name;
+	TArray<uint8> PropertyData;
+
+	/* 该Component附加的Actor的FName */
+	FName OuterName;
+	/* 该Component附加的Actor的Class,该两个用来进行指针的重置 */
+	FString OuterClass;
+
+	friend FArchive& operator<< (FArchive& Ar, FPropertySerializeData& InFPropertySerializeData)
+	{
+		Ar << InFPropertySerializeData.Class;
+		Ar << InFPropertySerializeData.Name;
+		Ar << InFPropertySerializeData.PropertyData;
+		Ar << InFPropertySerializeData.OuterName;
+		Ar << InFPropertySerializeData.OuterClass;
+
+		return Ar;
+	}
+};
+
+
 /* 
-	用来保存序列化数据的结构体
+	用来保存序列化数据的结构体,用来存储Actor
 */
 USTRUCT()
 struct FActorSerializeData
@@ -21,6 +52,8 @@ public:
 	FName ActorName;
 	FTransform ActorTransForm;
 	TArray<uint8> ActorData;
+	/* 该Actor身上，继承了接口可以保存的部分 */
+	TArray<FPropertySerializeData> PropertyData;
 
 	friend FArchive& operator<<(FArchive& Ar, FActorSerializeData& InActorSerializeData)
 	{
@@ -28,6 +61,7 @@ public:
 		Ar << InActorSerializeData.ActorName;
 		Ar << InActorSerializeData.ActorTransForm;
 		Ar << InActorSerializeData.ActorData;
+		Ar << InActorSerializeData.PropertyData;
 
 		return Ar;
 	}
@@ -81,19 +115,25 @@ public:
 
 	static USerializeSystem* Get(const UObject* WorldContextObject);
 
-	/* 保存某个单独Actor */
-	UFUNCTION()
-	bool SaveActorData( class AActor* InActor );
-
 	/* 保存所有场景中可存储的Actor */
 	UFUNCTION()
 	bool SaveAllActorData(const UObject* WorldContextObject);
 
-	/* 从配置中加载 */
+	/*	从配置中加载 
+		生成Actor后，生成该Actor对应的Property部分，并且将其生成时使用NewActor作为Outer，因为保存时做过筛选，不会将场景中存在的Actor放入Property部分,
+		所以不用使用world来Spawn
+	*/
 	bool LoadActorData(const UObject* WorldContextObject, FString LoadPath);
+
 protected:
 	/* 存储FGameActorSerializeData至本地文件中 */
 	bool SaveGameSerializeDataToFile(FGameActorSerializeData &InData);
+
+	/* 获取一个Actor上的所有UPROPERTY指针，如果是继承自ISaveableActorInterface的可保存项，保存它 */
+	TArray<FPropertySerializeData> GetSavableObjAndSave(AActor* InActor ,const TArray<AActor*> InSaveActor);
+
+	/* 辅助函数，判断Actor是否在TArray中 */
+	bool CheckActorInArray(UObject* InActor, const TArray<AActor*> InSaveActor);
 
 protected:
 	/* 存档文件的保存路径 */

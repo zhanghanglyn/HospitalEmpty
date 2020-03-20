@@ -35,6 +35,8 @@ void USaveGroundWidget::SaveGround()
 {
 	//获取一下序列化System
 	USerializeSystem* SerializeSystem = USerializeSystem::Get(this);
+	SerializeSystem->SaveAllActorData(this);
+	return;
 
 	if (DecorationSystemMgr)
 	{

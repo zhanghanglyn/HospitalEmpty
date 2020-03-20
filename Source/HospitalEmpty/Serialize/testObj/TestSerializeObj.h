@@ -1,12 +1,13 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "SaveableActorInterface.h"
 #include "TestSerializeObj.generated.h"
 /*
 	序列化测试OBJ
 */
 UCLASS(BlueprintType, Blueprintable)
-class ATestSerializeObj : public AActor
+class ATestSerializeObj : public AActor , public ISaveableActorInterface
 {
 	GENERATED_BODY()
 public:

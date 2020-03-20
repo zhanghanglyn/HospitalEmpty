@@ -333,8 +333,8 @@ void AGroundObj::DeleteDecoration(ADecorationBase* DelDecoration)
 /************************************************************************/
 void AGroundObj::Serialize(FArchive& Ar)
 {
-	if (GridMgr != nullptr)
-		GridMgr->Serialize(Ar);
+	//if (GridMgr != nullptr)
+		//GridMgr->Serialize(Ar);
 
 	Super::Serialize(Ar);
 

@@ -35,7 +35,7 @@ void ADecorationBase::Serialize(FArchive& Ar)
 	//Ar << ParamData;
 	//Ar << GridMgr;
 
-	GridMgr->Serialize(Ar);
+	//GridMgr->Serialize(Ar);
 	//Ar << Ground;
 
 	Super::Serialize(Ar);

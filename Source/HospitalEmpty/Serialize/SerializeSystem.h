@@ -68,6 +68,38 @@ public:
 };
 
 /* 
+	20.3.20 尝试，重新定义。将每一个！指向外部的自定义的可以保存的Ojb，都作为一个结构体整体(FObjSerializeData)，而不是通过PropertyData的方式进行存储
+	在序列化每一个Actor/Object的时候，会将指向外部的指针部分，保存其应该对应的FObjSerializeData的KeyID，同时将该Property的PropertyName保存，
+	这样加载的时候，就会去外部取得反序列化生成的Obj并重新指定指针的引用,还更加清晰明了。
+*/
+//USTRUCT()
+//struct FObjSerializeData
+//{
+//	GENERATED_USTRUCT_BODY()
+//
+//public:
+//	/* 该序列化结构数据的ID */
+//	FString ID;
+//
+//	FString Class;
+//	FName Name;
+//	FTransform ActorTransForm;
+//	TArray<uint8> SerializeData;
+//	/* Key 为一个FString的ID，该ID由Class_Name组成， Value 为该ID对应的自身Obj的PropertyName */
+//	TMap< FString, FName > RefurrenceList;
+//
+//	friend FArchive& operator<<(FArchive& Ar, FObjSerializeData& InData)
+//	{
+//		Ar << InData.ActorClass;
+//		Ar << InData.ActorName;
+//		Ar << InData.ActorTransForm;
+//		Ar << InData.SerializeData;
+//		Ar << InData.RefurrenceList;
+//
+//		return Ar;
+//	}
+//};
+/* 
 	用来保存所有Actor数据的GameDataSaveStruct
 */
 USTRUCT()
@@ -124,6 +156,10 @@ public:
 		所以不用使用world来Spawn
 	*/
 	bool LoadActorData(const UObject* WorldContextObject, FString LoadPath);
+
+	/* 
+		20.3.20 新结构，
+	*/
 
 protected:
 	/* 存储FGameActorSerializeData至本地文件中 */

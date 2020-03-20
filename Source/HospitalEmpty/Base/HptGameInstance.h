@@ -30,7 +30,7 @@ public:
 		return UMGManger;
 	}
 
-	class USerializeSystem* GetSerializeSystem()
+	class USerializeSystemNew* GetSerializeSystem()
 	{
 		return SerializeSystem;
 	}
@@ -45,5 +45,5 @@ protected:
 
 	/* 序列化系统 */
 	UPROPERTY()
-	class USerializeSystem* SerializeSystem;
+	class USerializeSystemNew* SerializeSystem;
 };

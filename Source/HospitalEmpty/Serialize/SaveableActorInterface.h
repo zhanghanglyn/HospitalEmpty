@@ -14,7 +14,7 @@ class ISaveableActorInterface
 	GENERATED_IINTERFACE_BODY()
 
 public:
-
-
+	/* 用来存储，需要等待 */
+	//UPROPERTY()
 
 };

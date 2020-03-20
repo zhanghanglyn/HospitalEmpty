@@ -1,7 +1,7 @@
 ﻿#include "HptGameInstance.h"
 #include "HospitalEmpty/GridSystem/DecorationSystemMgr.h"
 #include "UMG/UMGManager.h"
-#include "Serialize/SerializeSystem.h"
+#include "Serialize/SerializeSystemNew.h"
 
 UHptGameInstance* UHptGameInstance::GetInstance(const UObject* WorldContextObject)
 {
@@ -25,7 +25,7 @@ void UHptGameInstance::Init()
 		UMGManger = NewObject<UUMGManager>(this, TEXT("UMGManager"));
 
 	if(SerializeSystem == nullptr)
-		SerializeSystem = NewObject<USerializeSystem>(this, TEXT("SerializeSystem"));
+		SerializeSystem = NewObject<USerializeSystemNew>(this, TEXT("SerializeSystem"));
 }
 
 void UHptGameInstance::Shutdown()

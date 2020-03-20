@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "SaveableActorInterface.h"
+#include "Serialize/SaveableActorInterface.h"
 #include "TestSerializeObj.generated.h"
 /*
 	序列化测试OBJ

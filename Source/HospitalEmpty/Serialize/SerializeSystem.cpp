@@ -19,8 +19,8 @@ USerializeSystem* USerializeSystem::Get(const UObject* WorldContextObject)
 		UHptGameInstance* GameInstance = Cast<UHptGameInstance>(MyWorld->GetGameInstance());
 		if (GameInstance)
 		{
-			USerializeSystem* Out = GameInstance->GetSerializeSystem();
-			return Out;
+			//USerializeSystem* Out = GameInstance->GetSerializeSystem();
+			return nullptr;
 		}
 	}
 
@@ -90,10 +90,11 @@ TArray<FPropertySerializeData> USerializeSystem::GetSavableObjAndSave(AActor* In
 			if (UObjectProperty* ObjProperty = Cast<UObjectProperty>(PropertyT))
 			{
 				UObject* subObject = ObjProperty->GetObjectPropertyValue_InContainer(InActor);
-				
-				if (!CheckActorInArray(subObject , InSaveActor) &&  ISaveableActorInterface* SavableActor = Cast<ISaveableActorInterface>(subObject))
+
+				ISaveableActorInterface* SavableActor = Cast<ISaveableActorInterface>(subObject);
+				if (!CheckActorInArray(subObject , InSaveActor) && SavableActor)
 				{
-					FPropertySerializeData ComponentRecord;
+					/*FPropertySerializeData ComponentRecord;
 					ComponentRecord.ComponentClass = subObject->GetClass()->GetName();
 					ComponentRecord.ComponentName = FName(*subObject->GetName());
 					ComponentRecord.OuterClass = InActor->GetClass()->GetName();
@@ -103,7 +104,8 @@ TArray<FPropertySerializeData> USerializeSystem::GetSavableObjAndSave(AActor* In
 					FSaveActorArchive Ar(MemoryWriter, true);
 					subObject->Serialize(Ar);
 
-					ReturnData.Add(ComponentRecord);
+					ReturnData.Add(ComponentRecord);*/
+					int32 a = 1;
 				}
 			}
 		}
@@ -218,3 +220,8 @@ bool USerializeSystem::LoadActorData(const UObject* WorldContextObject,FString L
 }
 
 #pragma optimize("",on)
+
+
+/************************************************************************/
+/*                                                                      */
+/************************************************************************/

@@ -4,8 +4,9 @@
 #include "Serialize/testObj/TestSerializeObj.h"
 #include "Serialize/testObj/ChildSerializeObj.h"
 #include "Base/HptGameInstance.h"
-#include "Serialize/SerializeSystem.h"
+#include "Serialize/SerializeSystemNew.h"
 #include "Engine.h"
+#include "Serialize/TestObjNew/BaseSerializeObj.h"
 
 UCreateWidget::UCreateWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -78,6 +79,11 @@ void UCreateWidget::OnClickedListItem2()
 	//test
 	//LoadSerialize();
 	//return;
+	ABaseSerializeObj* Actor = Cast<ABaseSerializeObj>(UGameplayStatics::GetActorOfClass(this, ABaseSerializeObj::StaticClass()));
+	if (Actor)
+	{
+		Actor->AddTestSerializeObj();
+	}
 
 	UE_LOG(LogTemp, Warning, TEXT("2222222"));
 }
@@ -85,7 +91,7 @@ void UCreateWidget::OnClickedListItem2()
 void UCreateWidget::OnClickedListItem3()
 {
 
-	USerializeSystem* SerializeSystem = USerializeSystem::Get(this);
+	USerializeSystemNew* SerializeSystem = USerializeSystemNew::Get(this);
 	if (SerializeSystem)
 	{
 		SerializeSystem->LoadActorData(this,"11");

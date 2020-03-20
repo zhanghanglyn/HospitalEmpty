@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "GameFramework/Actor.h"
 #include "Serialize/SaveableActorInterface.h"
 #include "TestSerializeObj.generated.h"
 /*
@@ -23,6 +24,9 @@ public:
 	//从文件中读取该Object
 	UFUNCTION(BlueprintCallable)
 	bool LoadObjectFromFile(FString FilePath);
+
+	//先暂时这么写，之后把插件的东西移出来
+	virtual void RePointRefurrence(TArray< FRefurrenceData> InRefurrenceData, TMap<FString, UObject *> InSerializeObjList) override;
 
 protected:
 	//尝试存取Obj相关,Ar操作函数

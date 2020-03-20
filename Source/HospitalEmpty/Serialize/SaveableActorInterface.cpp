@@ -5,3 +5,9 @@ USaveableActorInterface::USaveableActorInterface(const class FObjectInitializer&
 {
 
 }
+
+void ISaveableActorInterface::RePointRefurrence(TArray<FRefurrenceData> InRefurrenceData, TMap<FString, UObject *> InSerializeObjList)
+{
+	int32 a = 1;
+	int32 b = 2;
+}

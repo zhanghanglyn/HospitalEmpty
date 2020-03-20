@@ -46,6 +46,7 @@ public:
 
 	friend FArchive& operator<<(FArchive& Ar, FObjSerializeData& InData)
 	{
+		Ar << InData.ID;
 		Ar << InData.Class;
 		Ar << InData.Name;
 		Ar << InData.ActorTransForm;

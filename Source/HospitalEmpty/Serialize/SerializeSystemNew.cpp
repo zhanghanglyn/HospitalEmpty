@@ -75,7 +75,7 @@ void USerializeSystemNew::SaveObjToData(UObject* InObj, TMap< FString, FObjSeria
 	FSaveOjbArchive Ar(MemoryWriter, true);
 	InObj->Serialize(Ar);
 
-	ActorRecord.ID = ActorRecord.Class + "_" + ActorRecord.Name.ToString();
+	ActorRecord.ID = InObj->GetClass()->GetName() + "_" + ActorRecord.Name.ToString();//ActorRecord.Class + "_" + ActorRecord.Name.ToString();
 
 	//将当前以保存ID记录
 	CurrentFObjSerializeDataID.Add(ActorRecord.ID);
@@ -93,7 +93,7 @@ TArray<FRefurrenceData> USerializeSystemNew::CheckSavableProject(UObject* InObj,
 	TArray< FRefurrenceData> RefurrenceList;
 
 	//设置一下当前Obj的ID
-	FString SerializeDataID = InObj->GetClass()->GetPathName() + "_" + InObj->GetName();
+	FString SerializeDataID = InObj->GetClass()->GetName() + "_" + InObj->GetName();//InObj->GetClass()->GetPathName() + "_" + InObj->GetName();
 
 	UClass* ObjClass = InObj->GetClass();
 	/* 遍历该Obj的所有属性 */
@@ -115,7 +115,8 @@ TArray<FRefurrenceData> USerializeSystemNew::CheckSavableProject(UObject* InObj,
 				FName PropertyName = *OneProperty->GetNameCPP();
 				//FString FullName = OneProperty->GetName();
 				FRefurrenceData TempData;
-				TempData.SerializeDataID = SerializeDataID;
+				FString RefurrenceSerializeDataID = subObject->GetClass()->GetName() + "_" + subObject->GetName();
+				TempData.SerializeDataID = RefurrenceSerializeDataID;//SerializeDataID;
 				TempData.PropertyName = PropertyName;
 				RefurrenceList.Add(TempData);//*OneProperty->GetNameCPP());
 			}
@@ -141,7 +142,7 @@ bool USerializeSystemNew::CheckObjInArray(UObject* InActor, const TArray<AActor*
 bool USerializeSystemNew::CheckObjectBeSerialized(UObject* InObject)
 {
 	FName Name = FName(*InObject->GetName());
-	FString Class = InObject->GetClass()->GetPathName();
+	FString Class = InObject->GetClass()->GetName();//GetPathName();
 	
 	FString CurId = Class +"_" + Name.ToString() ;
 	if (CurrentFObjSerializeDataID.Contains(CurId))
@@ -264,6 +265,8 @@ bool USerializeSystemNew::LoadActorData(const UObject* WorldContextObject, FStri
 			SavableActor->RePointRefurrence(RefurrenceData[Iterator->Key], SerializeObjList);
 		}
 	}
+
+	UE_LOG(LogTemp ,Warning , TEXT("Load Object OVer~!"));
 
 	return true;
 }

@@ -52,7 +52,8 @@ void ABaseSerializeObj::RePointRefurrence(TArray< FRefurrenceData> InRefurrenceD
 			//再根据ID去找对应的对象指针，赋予即可。
 			if (InSerializeObjList.Contains(RefurrenceData.SerializeDataID))
 			{
-				subObject = InSerializeObjList[RefurrenceData.SerializeDataID];
+				//subObject = InSerializeObjList[RefurrenceData.SerializeDataID];
+				ObjProperty->SetObjectPropertyValue_InContainer(this, InSerializeObjList[RefurrenceData.SerializeDataID]);
 			}
 		}
 	}

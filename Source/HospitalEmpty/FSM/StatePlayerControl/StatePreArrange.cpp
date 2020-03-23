@@ -64,6 +64,9 @@ void UStatePreArrange::OnMouseHover()
 		AGroundObj* HitGround = Cast<AGroundObj>(ResultGround);
 		if (HitGround != nullptr)
 		{
+			//默认地面和正式设置地面可能不在一个高度上，要重新设置下
+			PreLocation.Z = MoveToLocation.Z + 1;
+
 			CurDecoration->SetActorLocation(FVector(MoveToLocation.X, MoveToLocation.Y, PreLocation.Z));
 
 			/* 为生成的家具设置地面等相关 */

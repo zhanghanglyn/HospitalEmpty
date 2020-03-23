@@ -41,7 +41,8 @@ void AGroundObj::OnConstruction(const FTransform& Transform)
 
 	if (GridMgr == nullptr)
 	{
-		GridMgr = NewObject<UGroundGridMgrComponent>(this, TEXT("GrigMgr"));
+		FName GridMgrName = *(this->GetName() + "UDecorationGridMgrComponent");
+		GridMgr = NewObject<UGroundGridMgrComponent>(this , GridMgrName);
 		GridMgr->RegisterComponent();
 		//GridMgr->(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 		GridMgr->InitGridStartLocation(GetTopRightLocation());
@@ -177,7 +178,7 @@ void AGroundObj::UpdateMaterialParam()
 		GridDynamicMaterial->SetScalarParameterValue("BorderWidth", MaterialParam.BorderWidth);
 	}
 }
-
+#pragma optimize("",off)
 void AGroundObj::CreateMaterialInstance()
 {
 	if (!GroundMeshComponent)
@@ -213,7 +214,7 @@ void AGroundObj::CreateMaterialInstance()
 	}
 
 }
-
+#pragma optimize("",on)
 void AGroundObj::GetGridWidthHeight(float &Width, float &Height)
 {
 	FVector Scale = GroundMeshComponent->GetComponentTransform().GetScale3D();
@@ -333,106 +334,11 @@ void AGroundObj::DeleteDecoration(ADecorationBase* DelDecoration)
 /************************************************************************/
 void AGroundObj::Serialize(FArchive& Ar)
 {
-	//if (GridMgr != nullptr)
-		//GridMgr->Serialize(Ar);
-
 	Super::Serialize(Ar);
-
-	//if (Ar.IsSaving())
-	//{
-	//	if (GridMgr != nullptr)
-	//		Ar << *GridMgr;
-	//}
-	//else
-	//{	//其实如果为Null，是不是应该直接在这里创建一个
-	//	if (GridMgr != nullptr)
-	//		Ar << *GridMgr;
-	//}
-
-	/* 应该是要手动序列化完毕之后进行初始化吧 */
+	
 }
 
-FArchive& operator<<(FArchive& Ar, AGroundObj& SaveRef)
+void AGroundObj::RefreshAfterRePoint()
 {
-	Ar << *SaveRef.GridMgr;
-
-	return Ar;
-}
-
-void AGroundObj::SaveOrLoadData(FArchive& Ar)
-{
-	return;
-
-	if (Ar.IsSaving())
-		UE_LOG(LogTemp, Warning, TEXT("AGroundObj::SaveOrLoadData   !! Saving!"));
-	if (Ar.IsLoading())
-		UE_LOG(LogTemp, Warning, TEXT("AGroundObj::SaveOrLoadData   !! Loading!!!"));
-
-	GroundMeshComponent->Serialize(Ar);
-
-	Ar << GroundMeshPath;
-
-	Ar << GroundWidthHeight;
-
-	Ar << BorderWidth;
-
-	Ar << GridMaterial;
-
-	//Ar << GridMgr;
-
-	//Ar << MaterialParam;
-
-	//Ar << GridDynamicMaterial;
-}
-
-bool AGroundObj::SaveObjectToFile(FString FilePath)
-{
-	FBufferArchive ToBinary;
-	SaveOrLoadData(ToBinary);
-
-	if (ToBinary.Num() <= 0)
-	{
-		UE_LOG(LogTemp , Warning , TEXT("地面保存失败！没有数据要写！"));
-		return false;
-	}
-		
-	if (!FFileHelper::SaveArrayToFile(ToBinary, *FString::Printf(TEXT("%s%s"), *FPaths::ProjectContentDir(), *FilePath)))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("地面保存写出到文件失败！"));
-		return false;
-	}
-
-	ToBinary.FlushCache();
-	ToBinary.Empty();
-
-	return true;
-}
-
-bool AGroundObj::LoadObjectFromFile(FString FilePath)
-{
-	return false;
-
-	TArray<uint8> BinaryArray;
-	if (!FFileHelper::LoadFileToArray(BinaryArray, *FString::Printf(TEXT("%s%s"), *FPaths::ProjectContentDir(), *FilePath)))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("地面读取文件失败！"));
-		return false;
-	}
-
-	if (BinaryArray.Num() <= 0)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("地面读取文件内容为空！"));
-		return false;
-	}
-	//true表明内容为可持续的
-	FMemoryReader FromBinary = FMemoryReader(BinaryArray, true);
-	FromBinary.Seek(0);
-
-	SaveOrLoadData(FromBinary);
-
-	FromBinary.FlushCache();
-	BinaryArray.Empty();
-	FromBinary.Close();
-
-	return true;
+	UpdateMaterialParam();
 }

@@ -24,25 +24,15 @@ ADecorationBase::ADecorationBase(const FObjectInitializer& ObjectInitializer) :S
 FArchive& operator<<(FArchive& Ar, ADecorationBase& SaveRef)
 {
 	Ar << SaveRef.ParamData;
-	//Ar << *SaveRef.GridMgr;
-	//Ar << *SaveRef.Ground;
 
 	return Ar;
 }
 
 void ADecorationBase::Serialize(FArchive& Ar)
 {
-	//Ar << ParamData;
-	//Ar << GridMgr;
-
-	//GridMgr->Serialize(Ar);
-	//Ar << Ground;
 
 	Super::Serialize(Ar);
-	
-	//Ar << ParamData;
-	//Ar << *GridMgr;
-	//Ar << *Ground; 
+
 }
 
 void ADecorationBase::OnConstruction(const FTransform& Transform)
@@ -50,7 +40,8 @@ void ADecorationBase::OnConstruction(const FTransform& Transform)
 	//添加格子MGR
 	if (GridMgr == nullptr)
 	{
-		GridMgr = NewObject<UDecorationGridMgrComponent>(this, TEXT("GridMgr"));
+		FName GridMgrName = *(this->GetName() + "UDecorationGridMgrComponent");
+		GridMgr = NewObject<UDecorationGridMgrComponent>(this, GridMgrName);
 		GridMgr->RegisterComponent();
 		GridMgr->InitGridMgr( ParamData, this);
 	}

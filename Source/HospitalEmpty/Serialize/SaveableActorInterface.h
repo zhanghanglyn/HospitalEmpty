@@ -27,4 +27,10 @@ public:
 	virtual void RePointRefurrence( UObject* Obj, TArray<FRefurrenceData> InRefurrenceData , TArray<FRefurrenceArrayData> InRefurrenceArrayData,
 		TMap<FString, UObject* > InSerializeObjList);
 
+	/*
+		由各自的类自行继承调用，在指针的引用重新链接完毕之后，重新刷新一下数据
+		Param :  Obj	因为在接口中取不到自身，所以传入
+	*/
+	UFUNCTION()
+	virtual void RefreshAfterRePoint(){};
 };

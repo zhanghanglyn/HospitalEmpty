@@ -4,6 +4,7 @@
 #include "GameBase/RTSUtil/GroundUtil.h"
 #include "Components/ActorComponent.h"
 #include "GameBase/GridMgr/GridSystemMgrBase.h"
+#include "Serialize/SaveableActorInterface.h"
 #include "GroundGridMgrComponent.generated.h"
 
 /* 
@@ -11,7 +12,7 @@
 	地板格子的起始点，就是地板Mesh的00点，与mesh的大小一一对应（但是生成时是使用的FLOOR()）
 */
 UCLASS()
-class UGroundGridMgrComponent : public UActorComponent
+class UGroundGridMgrComponent : public UActorComponent , public ISaveableActorInterface
 {
 	GENERATED_BODY()
 

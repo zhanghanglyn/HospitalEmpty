@@ -49,10 +49,10 @@ bool USerializeSystemNew::SaveAllActorData(const UObject* WorldContextObject)
 	for (AActor* InActor : SaveActors)
 	{
 		//最终需要保存的包含了所有序列化完成数据的Map
-		TMap< FString, FObjSerializeData> TempData;
-		SaveObjToData(Cast<UObject>(InActor) , TempData , SaveActors);
+		//TMap< FString, FObjSerializeData> TempData;
+		SaveObjToData(Cast<UObject>(InActor) , GameSaveSerializeData.SerializeObj, SaveActors);
 		
-		GameSaveSerializeData.SerializeObj = TempData;
+		//GameSaveSerializeData.SerializeObj.Add(TempData);
 	}
 
 	return SaveGameSerializeDataToFile(GameSaveSerializeData);
@@ -75,7 +75,7 @@ void USerializeSystemNew::SaveObjToData(UObject* InObj, TMap< FString, FObjSeria
 	FMemoryWriter MemoryWriter(ActorRecord.SerializeData, true);
 	FSaveOjbArchive Ar(MemoryWriter, true);
 	InObj->Serialize(Ar);
-
+	//20.3.23 将GetClass->GetName换成
 	ActorRecord.ID = InObj->GetClass()->GetName() + "_" + ActorRecord.Name.ToString();//ActorRecord.Class + "_" + ActorRecord.Name.ToString();
 
 	//将当前以保存ID记录
@@ -119,7 +119,7 @@ void USerializeSystemNew::CheckSavableProject(UObject* InObj, TMap<FString, FObj
 				}
 				//!然后，将该属性标记为需要外部进行设置！
 				FName PropertyName = *OneProperty->GetNameCPP();
-				FRefurrenceData TempData;
+				FRefurrenceData TempData; 
 				FString RefurrenceSerializeDataID = subObject->GetClass()->GetName() + "_" + subObject->GetName();
 				TempData.SerializeDataID = RefurrenceSerializeDataID;//SerializeDataID;
 				TempData.PropertyName = PropertyName;
@@ -320,6 +320,7 @@ bool USerializeSystemNew::LoadActorData(const UObject* WorldContextObject, FStri
 		if (SavableActor)
 		{
 			SavableActor->RePointRefurrence(Iterator->Value,RefurrenceData[Iterator->Key], RefurrenceArrayData[Iterator->Key], SerializeObjList);
+			SavableActor->RefreshAfterRePoint();
 		}
 	}
 

@@ -32,7 +32,7 @@ public:
 	暂时先默认一个底面对应一个GridMgr
 */
 UCLASS(BlueprintType, Blueprintable)
-class AGroundObj : public AActorBase
+class AGroundObj : public AActorBase , public ISaveableActorInterface
 {
 	GENERATED_BODY()
 public:
@@ -54,8 +54,8 @@ public:
 
 	/* 序列化相关 */
 	virtual void Serialize(FArchive& Ar) override;
-	friend FArchive& operator<<(FArchive& Ar, AGroundObj& SaveRef);
 
+	virtual void RefreshAfterRePoint() override;
 public:
 
 	//设置0,0,0起点位置（用来计算相对位置）,会根据当前尺寸等自动计算 
@@ -87,16 +87,6 @@ public:
 
 	/* 在地面中删除一个家具 */
 	void DeleteDecoration(class ADecorationBase* DelDecoration);
-
-	/***********************    序列化存储数据相关  ***************************/
-	void SaveOrLoadData(FArchive& Ar);
-	//保存该Obj到文件
-	UFUNCTION(BlueprintCallable)
-	bool SaveObjectToFile(FString FilePath);
-	//从文件中读取该Object
-	UFUNCTION(BlueprintCallable)
-	bool LoadObjectFromFile(FString FilePath);
-	/***********************    序列化存储数据END  ***************************/
 
 protected:
 	/* 为地面格子创建一个材质实例 */

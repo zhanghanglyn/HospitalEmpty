@@ -5,6 +5,8 @@
 //#include "GroundObject/GroundGridMgrComponent.h"
 #include "FSM/FSMMgr.h"
 
+
+#pragma optimize("",off)
 void UStateIdle::OnMouseClickStart()
 {
 	if (PlayerPawn == nullptr)
@@ -30,3 +32,4 @@ void UStateIdle::OnMouseClickStart()
 		TempParam = nullptr;
 	}
 }
+#pragma optimize("",on)

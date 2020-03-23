@@ -77,7 +77,7 @@ public:
 	该类也充当一个Mgr的作用
 */
 UCLASS(BlueprintType, Blueprintable)
-class ADecorationBase : public AActorBase
+class ADecorationBase : public AActorBase , public ISaveableActorInterface
 {
 	GENERATED_BODY()
 

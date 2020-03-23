@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Serialize/SaveableActorInterface.h"
 #include "ActorBase.generated.h"
 
 /*

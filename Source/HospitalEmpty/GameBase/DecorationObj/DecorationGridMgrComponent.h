@@ -4,6 +4,7 @@
 #include "Components/ActorComponent.h"
 #include "GameBase/GridMgr/GridSystemMgrBase.h"
 #include "GameBase/DecorationObj/DecorationBase.h"
+#include "Serialize/SaveableActorInterface.h"
 #include "DecorationGridMgrComponent.generated.h"
 
 /*
@@ -12,7 +13,7 @@
 	会根据当前的位置与传入的GroundGridMgr，去进行计算当前家具的格子信息
 */
 UCLASS()
-class UDecorationGridMgrComponent : public UActorComponent
+class UDecorationGridMgrComponent : public UActorComponent , public ISaveableActorInterface
 {
 	GENERATED_BODY()
 

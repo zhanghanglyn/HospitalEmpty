@@ -28,7 +28,7 @@ void ATestSerializeObj::SaveLoadData(FArchive& Ar)
 	if (Ar.IsLoading())
 		UE_LOG(LogTemp, Warning, TEXT("ATestSerializeObj::Serialize   !! Loading!!!"));
 
-	Ar << testText;
+	/*Ar << testText;
 	if (Ar.IsSaving())
 	{
 		if( ChildObj != nullptr)
@@ -36,7 +36,7 @@ void ATestSerializeObj::SaveLoadData(FArchive& Ar)
 	}
 	else if (Ar.IsLoading())
 		Ar << *ChildObj;
-
+*/
 }
 
 bool ATestSerializeObj::SaveObjectToFile(FString FilePath)

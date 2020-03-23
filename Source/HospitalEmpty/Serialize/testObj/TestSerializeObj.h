@@ -38,7 +38,7 @@ public:
 	FString testText = "empty";
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "子Object", meta = (Category = "序列化测试"))
-	class AChildSerializeObj* ChildObj;
+	TArray<class AChildSerializeObj*> ChildObj;
 
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	//FString FilePath;

@@ -108,10 +108,10 @@ void UCreateWidget::CreateSerializeObj()
 	if (world)
 	{
 		TestSerializeObj = world->SpawnActor<ATestSerializeObj>(ATestSerializeObj::StaticClass());
-		if (TestSerializeObj)
-		{
-			TestSerializeObj->ChildObj = NewObject<AChildSerializeObj>(TestSerializeObj);
-		}
+		//if (TestSerializeObj)
+		//{
+			//TestSerializeObj->ChildObj = NewObject<AChildSerializeObj>(TestSerializeObj);
+		//}
 	}
 
 }

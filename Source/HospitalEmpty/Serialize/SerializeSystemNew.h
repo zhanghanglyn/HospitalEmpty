@@ -24,6 +24,28 @@ public:
 };
 
 /*
+	用来存储Array引用对应关系的结构体
+*/
+USTRUCT()
+struct FRefurrenceArrayData
+{
+	GENERATED_USTRUCT_BODY()
+public:
+	//对应的序列化的Data ID
+	TArray<FString> SerializeListID;
+	//对应的Property的ID
+	FName PropertyName;
+
+	friend FArchive& operator<<(FArchive& Ar, FRefurrenceArrayData& InData)
+	{
+		Ar << InData.SerializeListID;
+		Ar << InData.PropertyName;
+
+		return Ar;
+	}
+};
+
+/*
 	20.3.20 尝试，重新定义。将每一个！指向外部的自定义的可以保存的Ojb，都作为一个结构体整体(FObjSerializeData)，而不是通过PropertyData的方式进行存储
 	在序列化每一个Actor/Object的时候，会将指向外部的指针部分，保存其应该对应的FObjSerializeData的KeyID，同时将该Property的PropertyName保存，
 	这样加载的时候，就会去外部取得反序列化生成的Obj并重新指定指针的引用,还更加清晰明了。
@@ -43,6 +65,8 @@ public:
 	TArray<uint8> SerializeData;
 	/* Key 为一个FString的ID，该ID由Class_Name组成， Value 为该ID对应的自身Obj的PropertyName */
 	TArray<FRefurrenceData> RefurrenceList;
+	/* 该结构用来存储，是否有需要进行TArray的序列化 */
+	TArray<FRefurrenceArrayData> ArrayRefurrenceList;
 
 	friend FArchive& operator<<(FArchive& Ar, FObjSerializeData& InData)
 	{
@@ -52,6 +76,7 @@ public:
 		Ar << InData.ActorTransForm;
 		Ar << InData.SerializeData;
 		Ar << InData.RefurrenceList;
+		Ar << InData.ArrayRefurrenceList;
 
 		return Ar;
 	}
@@ -124,8 +149,9 @@ protected:
 
 	/*  获取一个Actor上的所有UPROPERTY指针，如果是继承自ISaveableActorInterface的可保存项，保存它
 		并且把Object上的该PropertyName记录为需要外部加载
+		TArray<FRefurrenceData> &RefData 对应的引用list , TArray<FRefurrenceArrayData> &RefArrayData   对应的引用ArrayList
 	*/
-	TArray<FRefurrenceData> CheckSavableProject(UObject* InObj, TMap< FString, FObjSerializeData> &OutData, const TArray<AActor*> InSaveActor);
+	void CheckSavableProject(UObject* InObj, TMap< FString, FObjSerializeData> &OutData, TArray<FRefurrenceData> &RefData , TArray<FRefurrenceArrayData> &RefArrayData ,  const TArray<AActor*> InSaveActor);
 
 	/* 辅助函数，判断Object是否在TArray中 */
 	bool CheckObjInArray(UObject* InActor, const TArray<AActor*> InSaveActor);

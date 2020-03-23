@@ -1,5 +1,6 @@
 #include "BaseSerializeObj.h"
 #include "SerializeComponent.h"
+#include "Serialize/testObj/ChildSerializeObj.h"
 #include "Serialize/testObj/TestSerializeObj.h"
 
 ABaseSerializeObj::ABaseSerializeObj(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
@@ -37,6 +38,13 @@ void ABaseSerializeObj::AddTestSerializeObj()
 		TestOOOOO = NewObject<ATestSerializeObj>(this);
 
 	TestOOOOO->testText = " I COME FROM ABaseSerializeObj";
+	for (int32 count = 0 ; count < 3 ; count ++)
+	{
+		AChildSerializeObj* Obj = NewObject< AChildSerializeObj>(this);
+		Obj->testTextChild = FString::FromInt(count);
+		TestOOOOO->ChildObj.Add(Obj);
+	}
+	
 }
 //
 //void ABaseSerializeObj::RePointRefurrence(TArray< FRefurrenceData> InRefurrenceData, TMap<FString, UObject *> InSerializeObjList)

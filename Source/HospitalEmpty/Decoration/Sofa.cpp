@@ -1,12 +1,12 @@
 ﻿#include "Sofa.h"
 /*
 #include "DecorationGridMgrComponent.h"
-#include "GroundObj.h"
+#include "GameBase/GroundObject/GroundObj.h"
 #include "Components/StaticMeshComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "DtSceneComponentBase.h"
 #include "Engine/StaticMesh.h"
-#include "GroundUtil.h"*/
+#include "GameBase/RTSUtil/GroundUtil.h"*/
 
 ASofa::ASofa(const FObjectInitializer& ObjectInitializer) :Super(ObjectInitializer)
 {

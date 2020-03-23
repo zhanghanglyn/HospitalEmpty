@@ -5,8 +5,8 @@
 #include "Serialization/MemoryWriter.h"
 #include "Engine.h"
 #include "Misc/DateTime.h"
-#include "GroundObj.h"
-#include "RTSMode/Public/GroundObject/GroundGridMgrComponent.h"
+#include "GameBase/GroundObject/GroundObj.h"
+#include "GameBase/GroundObject/GroundGridMgrComponent.h"
 #include "Serialize/SaveableActorInterface.h"
 #include "Misc/FileHelper.h"
 #include "UObject/UnrealType.h"
@@ -100,6 +100,7 @@ TArray<FRefurrenceData> USerializeSystemNew::CheckSavableProject(UObject* InObj,
 	for (TFieldIterator<UProperty> PropertyIterator(ObjClass); PropertyIterator; ++PropertyIterator)
 	{
 		UProperty* OneProperty = *PropertyIterator;
+		/* 如果该Property是一个Object类型的 */
 		if (UObjectProperty* ObjProperty = Cast<UObjectProperty>(OneProperty))
 		{
 			UObject* subObject = ObjProperty->GetObjectPropertyValue_InContainer(InObj);
@@ -113,7 +114,6 @@ TArray<FRefurrenceData> USerializeSystemNew::CheckSavableProject(UObject* InObj,
 				}
 				//!然后，将该属性标记为需要外部进行设置！
 				FName PropertyName = *OneProperty->GetNameCPP();
-				//FString FullName = OneProperty->GetName();
 				FRefurrenceData TempData;
 				FString RefurrenceSerializeDataID = subObject->GetClass()->GetName() + "_" + subObject->GetName();
 				TempData.SerializeDataID = RefurrenceSerializeDataID;//SerializeDataID;
@@ -121,6 +121,12 @@ TArray<FRefurrenceData> USerializeSystemNew::CheckSavableProject(UObject* InObj,
 				RefurrenceList.Add(TempData);//*OneProperty->GetNameCPP());
 			}
 		}
+		/* 20.3.23 如果是一个TArray类型的！ */
+		else if (UArrayProperty* ArrayProperty = Cast<UArrayProperty>(OneProperty))
+		{
+
+		}
+
 	}
 
 	return RefurrenceList;
@@ -262,7 +268,7 @@ bool USerializeSystemNew::LoadActorData(const UObject* WorldContextObject, FStri
 		ISaveableActorInterface* SavableActor = Cast<ISaveableActorInterface>(Iterator->Value);
 		if (SavableActor)
 		{
-			SavableActor->RePointRefurrence(RefurrenceData[Iterator->Key], SerializeObjList);
+			SavableActor->RePointRefurrence(Iterator->Value,RefurrenceData[Iterator->Key], SerializeObjList);
 		}
 	}
 

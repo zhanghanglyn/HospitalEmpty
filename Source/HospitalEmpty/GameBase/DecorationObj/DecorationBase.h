@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "ActorBase.h"
-#include "GridSystemMgrBase.h"
+#include "GameBase/ObjectBase/ActorBase.h"
+#include "GameBase/GridMgr/GridSystemMgrBase.h"
 #include "DecorationBase.generated.h"
 
 USTRUCT(BlueprintType)
@@ -77,7 +77,7 @@ public:
 	该类也充当一个Mgr的作用
 */
 UCLASS(BlueprintType, Blueprintable)
-class RTSMODE_API ADecorationBase : public AActorBase
+class ADecorationBase : public AActorBase
 {
 	GENERATED_BODY()
 

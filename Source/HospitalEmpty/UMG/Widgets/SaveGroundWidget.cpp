@@ -3,7 +3,7 @@
 #include "PlayerController/HptPlayerCameraPawn.h"
 #include "Serialize/testObj/TestSerializeObj.h"
 #include "Serialize/testObj/ChildSerializeObj.h"
-#include "GroundObj.h"
+#include "GameBase/GroundObject/GroundObj.h"
 #include "Engine.h"
 #include "Base/HptGameInstance.h"
 #include "Serialize/SerializeSystemNew.h"

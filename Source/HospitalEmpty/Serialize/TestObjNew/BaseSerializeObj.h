@@ -34,6 +34,6 @@ protected:
 	class ATestSerializeObj* TestOOOOO;
 
 	//先暂时这么写，之后把插件的东西移出来
-	virtual void RePointRefurrence(TArray< FRefurrenceData> InRefurrenceData, TMap<FString, UObject *> InSerializeObjList) override;
+	//virtual void RePointRefurrence(TArray< FRefurrenceData> InRefurrenceData, TMap<FString, UObject *> InSerializeObjList) override;
 
 };

@@ -1,12 +1,13 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "Serialize/SaveableActorInterface.h"
 #include "ChildSerializeObj.generated.h"
 /*
 	序列化测试OBJ
 */
 UCLASS(BlueprintType, Blueprintable)
-class AChildSerializeObj : public AActor
+class AChildSerializeObj : public AActor , public ISaveableActorInterface
 {
 	GENERATED_BODY()
 public:

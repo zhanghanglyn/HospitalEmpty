@@ -1,5 +1,5 @@
 ﻿#include "DecorationGridMgrComponent.h"
-#include "GroundGridMgrComponent.h"
+#include "GameBase/GroundObject/GroundGridMgrComponent.h"
 #pragma optimize("",off)
 void UDecorationGridMgrComponent::Serialize(FArchive& Ar)
 {

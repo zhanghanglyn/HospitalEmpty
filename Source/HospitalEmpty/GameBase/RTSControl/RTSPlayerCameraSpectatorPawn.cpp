@@ -1,8 +1,8 @@
 ﻿#include "RTSPlayerCameraSpectatorPawn.h"
 #include "Runtime/Engine/Classes/Components/SphereComponent.h"
 #include "Runtime/Engine/Public/Engine.h"
-#include "ActorBase.h"
-#include "CustomMesh/Private/CustomWall/CustomWall.h"
+#include "GameBase/ObjectBase/ActorBase.h"
+//#include "CustomMesh/Private/CustomWall/CustomWall.h"
 
 ARTSPlayerCameraSpectatorPawn::ARTSPlayerCameraSpectatorPawn(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -254,7 +254,7 @@ void ARTSPlayerCameraSpectatorPawn::TestCreateWall()
 					if (hitName == "Floor" || LableName == "Floor")
 					{
 						FVector CraetePos = temp_HitResult[i].Location;
-						ACustomWall* testWall = world->SpawnActor<ACustomWall>(ACustomWall::StaticClass(), CraetePos, FRotator(0, 0, 0));
+						//ACustomWall* testWall = world->SpawnActor<ACustomWall>(ACustomWall::StaticClass(), CraetePos, FRotator(0, 0, 0));
 					}
 				}
 			}

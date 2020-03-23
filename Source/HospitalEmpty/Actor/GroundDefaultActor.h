@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "ActorBase.h"
+#include "GameBase/ObjectBase/ActorBase.h"
 #include "GroundDefaultActor.generated.h"
 /*
 	包含格子信息的地面

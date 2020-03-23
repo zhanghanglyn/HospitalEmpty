@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "RTSMode/Private/RTSControl/RTSPlayerController.h"
+#include "GameBase/RTSControl/RTSPlayerController.h"
 #include "HptPlayerController.generated.h"
 
 UCLASS()

@@ -2,8 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "GridSystemMgrBase.h"
-#include "DecorationBase.h"
+#include "GameBase/GridMgr/GridSystemMgrBase.h"
+#include "GameBase/DecorationObj/DecorationBase.h"
 #include "DecorationGridMgrComponent.generated.h"
 
 /*

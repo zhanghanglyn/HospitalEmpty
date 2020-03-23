@@ -26,7 +26,7 @@ public:
 	bool LoadObjectFromFile(FString FilePath);
 
 	//先暂时这么写，之后把插件的东西移出来
-	virtual void RePointRefurrence(TArray< FRefurrenceData> InRefurrenceData, TMap<FString, UObject *> InSerializeObjList) override;
+	//virtual void RePointRefurrence(TArray< FRefurrenceData> InRefurrenceData, TMap<FString, UObject *> InSerializeObjList) override;
 
 protected:
 	//尝试存取Obj相关,Ar操作函数

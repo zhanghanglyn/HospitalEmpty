@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Util/StateEnum.h"
-#include "RTSMode/Private/RTSControl/RTSPlayerCameraSpectatorPawn.h"
+#include "GameBase/RTSControl/RTSPlayerCameraSpectatorPawn.h"
 #include "HptPlayerCameraPawn.generated.h"
 
 /*

@@ -11,7 +11,7 @@
 RTS视角操作方式APawn,上面会绑上组件作为一个玩家主逻辑的控件
 */
 UCLASS(BlueprintType, Blueprintable, meta = (ShortTooltip = "RTS视角操作方式APawn"))
-class RTSMODE_API ARTSPlayerCameraSpectatorPawn : public ASpectatorPawn
+class ARTSPlayerCameraSpectatorPawn : public ASpectatorPawn
 {
 	GENERATED_BODY()
 

@@ -1,7 +1,7 @@
 ﻿#include "StateIdle.h"
 #include "PlayerController/HptPlayerCameraPawn.h"
-#include "GroundObject/GroundObj.h"
-#include "DecorationObj/DecorationBase.h"
+#include "GameBase/GroundObject/GroundObj.h"
+#include "GameBase/DecorationObj/DecorationBase.h"
 //#include "GroundObject/GroundGridMgrComponent.h"
 #include "FSM/FSMMgr.h"
 

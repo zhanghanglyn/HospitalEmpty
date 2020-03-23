@@ -5,7 +5,7 @@
 #include "RTSPlayerController.generated.h"
 
 UCLASS()
-class RTSMODE_API ARTSPlayerController : public APlayerController
+class ARTSPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 public:

@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "GroundUtil.h"
+#include "GameBase/RTSUtil/GroundUtil.h"
 #include "Components/ActorComponent.h"
-#include "GridSystemMgrBase.h"
+#include "GameBase/GridMgr/GridSystemMgrBase.h"
 #include "GroundGridMgrComponent.generated.h"
 
 /* 

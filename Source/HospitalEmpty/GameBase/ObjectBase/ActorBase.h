@@ -8,7 +8,7 @@
 	场景中所有物体的基类，该物体有一个自定义的名字，并且响应Touch的三个阶段
 */
 UCLASS(BlueprintType, Blueprintable, meta = (ShortTooltip = "所有当前游戏物体的基类"))
-class RTSMODE_API AActorBase : public AActor
+class AActorBase : public AActor
 {
 	GENERATED_BODY()
 public:

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "RTSMode/Public/DecorationObj/DecorationBase.h"
+#include "GameBase/DecorationObj/DecorationBase.h"
 #include "Wall.generated.h"
 
 /*

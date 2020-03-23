@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "ActorBase.h"
+#include "GameBase/ObjectBase/ActorBase.h"
 #include "GroundObj.generated.h"
 
 //定义一个材质参数集所需的结构
@@ -32,7 +32,7 @@ public:
 	暂时先默认一个底面对应一个GridMgr
 */
 UCLASS(BlueprintType, Blueprintable)
-class RTSMODE_API AGroundObj : public AActorBase
+class AGroundObj : public AActorBase
 {
 	GENERATED_BODY()
 public:

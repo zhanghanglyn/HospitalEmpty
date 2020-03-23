@@ -22,10 +22,10 @@ public:
 
 protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "创建UI参数")
-	FString CreateUIPath = "WidgetBlueprint'/Game/StoryTest/UI/UI_NoticeDurationTip.UI_NoticeDurationTip_C'";
+	FString CreateUIPath = "WidgetBlueprint'/Game/HospitalProject/Blueprints/UI/WBP_CreateUI.WBP_CreateUI_C'";
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "创建UI参数")
-	FString SaveUIPath = "WidgetBlueprint'/Game/StoryTest/UI/UI_NoticeDurationTip.UI_NoticeDurationTip_C'";
+	FString SaveUIPath = "WidgetBlueprint'/Game/HospitalProject/Blueprints/UI/WBP_SaveTestUI.WBP_SaveTestUI_C'";
 
 protected:
 	UPROPERTY()

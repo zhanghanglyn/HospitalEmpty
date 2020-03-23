@@ -1,7 +1,7 @@
-﻿#include "GroundGridMgrComponent.h"
-#include "DecorationBase.h"
+﻿#include "GameBase/GroundObject/GroundGridMgrComponent.h"
+#include "GameBase/DecorationObj/DecorationBase.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "GroundObj.h"
+#include "GameBase/GroundObject/GroundObj.h"
 
 UGroundGridMgrComponent::UGroundGridMgrComponent()
 {

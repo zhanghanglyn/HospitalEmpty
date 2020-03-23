@@ -18,10 +18,11 @@ class ISaveableActorInterface
 public:
 	/* 
 		重定向所有的指针引用 
-		Param :  InRefurrenceData 自身的引用数据
+		Param :  Obj	因为在接口中取不到自身，所以传入
+			     InRefurrenceData 自身的引用数据
 				 InSerializeObjList 序列化出来的所有Obj
 	*/
 	UFUNCTION()
-	virtual void RePointRefurrence( TArray<FRefurrenceData> InRefurrenceData ,TMap<FString, UObject* > InSerializeObjList);
+	virtual void RePointRefurrence( UObject* Obj, TArray<FRefurrenceData> InRefurrenceData ,TMap<FString, UObject* > InSerializeObjList);
 
 };

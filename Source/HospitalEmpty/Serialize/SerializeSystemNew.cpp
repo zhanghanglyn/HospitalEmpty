@@ -76,13 +76,13 @@ void USerializeSystemNew::SaveObjToData(UObject* InObj, TMap< FString, FObjSeria
 	FSaveOjbArchive Ar(MemoryWriter, true);
 	InObj->Serialize(Ar);
 	//20.3.23 将GetClass->GetName换成
-	ActorRecord.ID = InObj->GetClass()->GetName() + "_" + ActorRecord.Name.ToString();//ActorRecord.Class + "_" + ActorRecord.Name.ToString();
+	ActorRecord.ID = InObj->GetClass()->GetName() + "_" + InObj->GetOuter()->GetName() + "_" + ActorRecord.Name.ToString();//ActorRecord.Class + "_" + ActorRecord.Name.ToString();
 
 	//将当前以保存ID记录
 	CurrentFObjSerializeDataID.Add(ActorRecord.ID);
 
 	/* 将该Actor上的所有继承自可保存接口的Obj保存 */
-	CheckSavableProject(InObj, OutData, ActorRecord.RefurrenceList , ActorRecord.ArrayRefurrenceList, InSaveActor);
+	CheckSavableProject(InObj, OutData, ActorRecord.RefurrenceList , ActorRecord.ArrayRefurrenceList, ActorRecord.MapRefurrenceList, InSaveActor);
 
 	//在输出列表中添加上当前项
 	OutData.Add(ActorRecord.ID, ActorRecord);
@@ -90,7 +90,7 @@ void USerializeSystemNew::SaveObjToData(UObject* InObj, TMap< FString, FObjSeria
 }
 #pragma optimize("",off)
 void USerializeSystemNew::CheckSavableProject(UObject* InObj, TMap<FString, FObjSerializeData> &OutData, TArray<FRefurrenceData> &RefData ,
-	TArray<FRefurrenceArrayData> &RefArrayData , const TArray<AActor *> InSaveActor)
+	TArray<FRefurrenceArrayData> &RefArrayData , TArray<FRefurrenceMapData> &RefMapData, const TArray<AActor *> InSaveActor)
 {
 	//用来存储输出的Ojb引用的list
 	//TArray< FRefurrenceData> RefurrenceList;
@@ -98,7 +98,7 @@ void USerializeSystemNew::CheckSavableProject(UObject* InObj, TMap<FString, FObj
 	//TArray<FRefurrenceArrayData> RefurrenceArrayList;
 
 	//设置一下当前Obj的ID
-	FString SerializeDataID = InObj->GetClass()->GetName() + "_" + InObj->GetName();//InObj->GetClass()->GetPathName() + "_" + InObj->GetName();
+	FString SerializeDataID = InObj->GetClass()->GetName() + "_" + InObj->GetOuter()->GetName() + "_" + InObj->GetName();//InObj->GetClass()->GetPathName() + "_" + InObj->GetName();
 
 	UClass* ObjClass = InObj->GetClass();
 	/* 遍历该Obj的所有属性 */
@@ -120,7 +120,7 @@ void USerializeSystemNew::CheckSavableProject(UObject* InObj, TMap<FString, FObj
 				//!然后，将该属性标记为需要外部进行设置！
 				FName PropertyName = *OneProperty->GetNameCPP();
 				FRefurrenceData TempData; 
-				FString RefurrenceSerializeDataID = subObject->GetClass()->GetName() + "_" + subObject->GetName();
+				FString RefurrenceSerializeDataID = subObject->GetClass()->GetName() + "_" + subObject->GetOuter()->GetName() + "_" + subObject->GetName();
 				TempData.SerializeDataID = RefurrenceSerializeDataID;//SerializeDataID;
 				TempData.PropertyName = PropertyName;
 				RefData.Add(TempData);//*OneProperty->GetNameCPP());
@@ -152,7 +152,6 @@ void USerializeSystemNew::CheckSavableProject(UObject* InObj, TMap<FString, FObj
 			TArray<UObject*> OuterObject = *ArrayProperty->ContainerPtrToValuePtr<TArray<UObject*>>(InObj);
 			if (BCanSave && OuterObject.Num() > 0 )//&& OuterObject[0]->GetArchetype ->IsA<UObject>())
 			{
-				//if (ISaveableActorInterface* AllSavableActor = Cast<ISaveableActorInterface>(OuterObject[0]))
 				{
 					/* 先生成一个保存对象 */
 					FRefurrenceArrayData TempData;
@@ -167,7 +166,7 @@ void USerializeSystemNew::CheckSavableProject(UObject* InObj, TMap<FString, FObj
 								SaveObjToData(EachObj, OutData, InSaveActor);
 							}
 							//!然后，将该属性标记为需要外部进行设置！
-							FString RefurrenceSerializeDataID = EachObj->GetClass()->GetName() + "_" + EachObj->GetName();
+							FString RefurrenceSerializeDataID = EachObj->GetClass()->GetName() + "_" + EachObj->GetOuter()->GetName() + "_" + EachObj->GetName();
 							TempData.SerializeListID.Add(RefurrenceSerializeDataID);
 						}
 					}
@@ -175,7 +174,42 @@ void USerializeSystemNew::CheckSavableProject(UObject* InObj, TMap<FString, FObj
 				}
 			}
 		}
-
+		/* 20.3.24 如果是一个Map类型的 */
+		else if (UMapProperty* MapProperty = Cast<UMapProperty>(OneProperty))
+		{
+			bool BCanSave = false;
+			//test
+			void* ValuePtr = MapProperty->ContainerPtrToValuePtr<void>(InObj);
+			// We need the helper to get to the items of the array            
+			FScriptMapHelper Helper(MapProperty, ValuePtr);
+			//如果Value的值是可以保存的Object,循环遍历每一个并保存
+			if (UObjectProperty* InnerProperty = Cast<UObjectProperty>(MapProperty->ValueProp))
+			{
+				for (int32 i = 0, n = Helper.Num(); i < n; ++i)
+				{
+					UObject* Ojb = InnerProperty->GetPropertyValue(Helper.GetValuePtr(i));
+					if (ISaveableActorInterface* AllSavableActor = Cast<ISaveableActorInterface>(Ojb))
+					{
+						FRefurrenceMapData TempData;
+						TempData.PropertyName = *OneProperty->GetNameCPP();
+						/* 为可以保存的部分，才进行保存的循环 */
+						
+						if (ISaveableActorInterface* SavableActor = Cast<ISaveableActorInterface>(Ojb))
+						{
+							if (!CheckObjInArray(Ojb, InSaveActor) && !CheckObjectBeSerialized(Ojb))
+							{
+								SaveObjToData(Ojb, OutData, InSaveActor);
+							}
+							//!然后，将该属性标记为需要外部进行设置！
+							FString RefurrenceSerializeDataID = Ojb->GetClass()->GetName() + "_" + Ojb->GetOuter()->GetName() + "_" + Ojb->GetName();
+							TempData.SerializeListID.Add(RefurrenceSerializeDataID);
+						}
+						
+						RefMapData.Add(TempData);
+					}
+				}
+			}
+		}
 	}
 	//return RefurrenceList;
 }
@@ -198,7 +232,7 @@ bool USerializeSystemNew::CheckObjectBeSerialized(UObject* InObject)
 	FName Name = FName(*InObject->GetName());
 	FString Class = InObject->GetClass()->GetName();//GetPathName();
 	
-	FString CurId = Class +"_" + Name.ToString() ;
+	FString CurId = Class + "_" + InObject->GetOuter()->GetName() +"_" + Name.ToString() ;
 	if (CurrentFObjSerializeDataID.Contains(CurId))
 	{
 		return true;
@@ -260,6 +294,7 @@ bool USerializeSystemNew::LoadActorData(const UObject* WorldContextObject, FStri
 	TMap<FString, UObject* > SerializeObjList;
 	TMap<FString, TArray<FRefurrenceData> > RefurrenceData;
 	TMap<FString, TArray<FRefurrenceArrayData>> RefurrenceArrayData;
+	TMap<FString, TArray<FRefurrenceMapData>> RefurrenceMapData;
 
 	for (TMap< FString, FObjSerializeData>::TConstIterator Iterator(LoadGameData.SerializeObj); Iterator; ++Iterator)
 	{
@@ -290,6 +325,7 @@ bool USerializeSystemNew::LoadActorData(const UObject* WorldContextObject, FStri
 					SerializeObjList.Add(CurSerializeData.ID, Obj);
 					RefurrenceData.Add(CurSerializeData.ID, CurSerializeData.RefurrenceList);
 					RefurrenceArrayData.Add(CurSerializeData.ID, CurSerializeData.ArrayRefurrenceList);
+					RefurrenceMapData.Add(CurSerializeData.ID, CurSerializeData.MapRefurrenceList);
 				}
 			}
 			//如果是Actor

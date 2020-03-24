@@ -45,6 +45,13 @@ void ABaseSerializeObj::AddTestSerializeObj()
 		TestOOOOO->ChildObj.Add(Obj);
 	}
 	
+	//3.24 
+	for (int32 count1 = 0; count1 < 3; count1++)
+	{
+		AChildSerializeObj* Obj = NewObject< AChildSerializeObj>(this);
+		Obj->testTextChild = FString::FromInt(count1);
+		MapTest.Add(count1,Obj);
+	}
 }
 //
 //void ABaseSerializeObj::RePointRefurrence(TArray< FRefurrenceData> InRefurrenceData, TMap<FString, UObject *> InSerializeObjList)

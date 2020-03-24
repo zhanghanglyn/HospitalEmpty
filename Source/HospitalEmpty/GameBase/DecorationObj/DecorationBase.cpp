@@ -40,8 +40,8 @@ void ADecorationBase::OnConstruction(const FTransform& Transform)
 	//添加格子MGR
 	if (GridMgr == nullptr)
 	{
-		FName GridMgrName = *(this->GetName() + "UDecorationGridMgrComponent");
-		GridMgr = NewObject<UDecorationGridMgrComponent>(this, GridMgrName);
+		//FName GridMgrName = *(this->GetName() + "UDecorationGridMgrComponent");
+		GridMgr = NewObject<UDecorationGridMgrComponent>(this, TEXT("DecGridMgr"));
 		GridMgr->RegisterComponent();
 		GridMgr->InitGridMgr( ParamData, this);
 	}

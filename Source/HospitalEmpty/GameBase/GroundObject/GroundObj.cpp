@@ -41,8 +41,8 @@ void AGroundObj::OnConstruction(const FTransform& Transform)
 
 	if (GridMgr == nullptr)
 	{
-		FName GridMgrName = *(this->GetName() + "UDecorationGridMgrComponent");
-		GridMgr = NewObject<UGroundGridMgrComponent>(this , GridMgrName);
+		//FName GridMgrName = *(this->GetName() + "UDecorationGridMgrComponent");
+		GridMgr = NewObject<UGroundGridMgrComponent>(this , TEXT("GroundGridMgr"));
 		GridMgr->RegisterComponent();
 		//GridMgr->(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 		GridMgr->InitGridStartLocation(GetTopRightLocation());

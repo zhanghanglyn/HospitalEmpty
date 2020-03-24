@@ -6,8 +6,8 @@ USaveableActorInterface::USaveableActorInterface(const class FObjectInitializer&
 
 }
 #pragma optimize("",off)
-void ISaveableActorInterface::RePointRefurrence(UObject* Obj, TArray<FRefurrenceData> InRefurrenceData ,
-	TArray<FRefurrenceArrayData> InRefurrenceArrayData, TMap<FString, UObject *> InSerializeObjList)
+void ISaveableActorInterface::RePointRefurrence(UObject* Obj, TArray<FRefurrenceData> InRefurrenceData , TArray<FRefurrenceArrayData> InRefurrenceArrayData,
+	TArray<FRefurrenceMapData> InRefurrenceMapData, TMap<FString, UObject *> InSerializeObjList)
 {
 	UClass* ObjClass = Obj->GetClass();
 
@@ -33,23 +33,6 @@ void ISaveableActorInterface::RePointRefurrence(UObject* Obj, TArray<FRefurrence
 		{
 			TArray<UObject*> OuterObject = *ArrayProperty->ContainerPtrToValuePtr<TArray<UObject*>>(Obj);
 			TArray<UObject*> ResultObjList;
-			//for (int32 count = 0 ; count < OuterObject.Num() ; count++)
-			//{
-			//	OuterObject[count] = InSerializeObjList.Find()[count];
-			//}
-			//int32 count = 0;
-			//for (FString RefData : RefArrayData.SerializeListID)
-			//{
-			//	if (InSerializeObjList.Contains(RefData))
-			//	{
-			//		OuterObject[count] = InSerializeObjList[RefData];
-			//		count++;
-			//	}
-			//	ResultObjList.Add(InSerializeObjList[RefData]);
-			//}
-			////ArrayProperty->SetPropertyValue_InContainer(Obj, ResultObjList);
-			//FScriptArrayHelper Helper(ArrayProperty, NULL);
-			//ArrayProperty->SetPropertyValue_InContainer(Obj, ResultObjList.);
 			void* ValuePtr = ArrayProperty->ContainerPtrToValuePtr<void>(Obj);
 			// We need the helper to get to the items of the array            
 			FScriptArrayHelper Helper(ArrayProperty, ValuePtr);
@@ -62,6 +45,29 @@ void ISaveableActorInterface::RePointRefurrence(UObject* Obj, TArray<FRefurrence
 					if (InSerializeObjList.Contains(RefData))
 					{
 						InnerProperty->SetObjectPropertyValue(Helper.GetRawPtr(i), InSerializeObjList[RefData]);
+					}
+				}
+			}
+		}
+	}
+	//遍历一下Map的引用
+	for (FRefurrenceMapData RefMapData : InRefurrenceMapData)
+	{
+		UProperty* OneProperty = ObjClass->FindPropertyByName(RefMapData.PropertyName);
+		if (UMapProperty* MapProperty = Cast<UMapProperty>(OneProperty))
+		{
+			void* ValuePtr = MapProperty->ContainerPtrToValuePtr<void>(Obj);
+			// We need the helper to get to the items of the array            
+			FScriptMapHelper Helper(MapProperty, ValuePtr);
+			for (int32 i = 0, n = Helper.Num(); i < n; ++i)
+			{
+				if (UObjectProperty* InnerProperty = Cast<UObjectProperty>(MapProperty->ValueProp))
+				{
+					UObject* Ojb = InnerProperty->GetPropertyValue(Helper.GetValuePtr(i));
+					FString RefData = RefMapData.SerializeListID[i];
+					if (InSerializeObjList.Contains(RefData))
+					{
+						InnerProperty->SetObjectPropertyValue(Helper.GetValuePtr(i), InSerializeObjList[RefData]);
 					}
 				}
 			}

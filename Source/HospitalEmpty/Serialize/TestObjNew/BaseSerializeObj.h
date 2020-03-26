@@ -34,5 +34,5 @@ protected:
 	class ATestSerializeObj* TestOOOOO;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "测试用")
-	TMap<int32, AChildSerializeObj> MapTest;
+	TMap<int32, class AChildSerializeObj*> MapTest;
 };

@@ -91,6 +91,8 @@ public:
 	TArray<FRefurrenceArrayData> ArrayRefurrenceList;
 	/* 该结构用来存储，是否有需要进行TMap的序列化 */
 	TArray< FRefurrenceMapData> MapRefurrenceList;
+	/* 新添加字段，用来记录Outer的ID */
+	FString OuterID;
 
 	friend FArchive& operator<<(FArchive& Ar, FObjSerializeData& InData)
 	{
@@ -102,6 +104,7 @@ public:
 		Ar << InData.RefurrenceList;
 		Ar << InData.ArrayRefurrenceList;
 		Ar << InData.MapRefurrenceList;
+		Ar << InData.OuterID;
 
 		return Ar;
 	}

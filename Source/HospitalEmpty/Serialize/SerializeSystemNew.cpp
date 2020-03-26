@@ -182,6 +182,10 @@ void USerializeSystemNew::CheckSavableProject(UObject* InObj, TMap<FString, FObj
 			void* ValuePtr = MapProperty->ContainerPtrToValuePtr<void>(InObj);
 			// We need the helper to get to the items of the array            
 			FScriptMapHelper Helper(MapProperty, ValuePtr);
+
+			FRefurrenceMapData TempData;
+			TempData.PropertyName = *OneProperty->GetNameCPP();
+
 			//如果Value的值是可以保存的Object,循环遍历每一个并保存
 			if (UObjectProperty* InnerProperty = Cast<UObjectProperty>(MapProperty->ValueProp))
 			{
@@ -190,8 +194,8 @@ void USerializeSystemNew::CheckSavableProject(UObject* InObj, TMap<FString, FObj
 					UObject* Ojb = InnerProperty->GetPropertyValue(Helper.GetValuePtr(i));
 					if (ISaveableActorInterface* AllSavableActor = Cast<ISaveableActorInterface>(Ojb))
 					{
-						FRefurrenceMapData TempData;
-						TempData.PropertyName = *OneProperty->GetNameCPP();
+						//FRefurrenceMapData TempData;
+						//TempData.PropertyName = *OneProperty->GetNameCPP();
 						/* 为可以保存的部分，才进行保存的循环 */
 						
 						if (ISaveableActorInterface* SavableActor = Cast<ISaveableActorInterface>(Ojb))
@@ -205,10 +209,11 @@ void USerializeSystemNew::CheckSavableProject(UObject* InObj, TMap<FString, FObj
 							TempData.SerializeListID.Add(RefurrenceSerializeDataID);
 						}
 						
-						RefMapData.Add(TempData);
+						//RefMapData.Add(TempData);
 					}
 				}
 			}
+			RefMapData.Add(TempData);
 		}
 	}
 	//return RefurrenceList;
@@ -343,6 +348,7 @@ bool USerializeSystemNew::LoadActorData(const UObject* WorldContextObject, FStri
 					SerializeObjList.Add(CurSerializeData.ID, NewActor);
 					RefurrenceData.Add(CurSerializeData.ID, CurSerializeData.RefurrenceList);
 					RefurrenceArrayData.Add(CurSerializeData.ID, CurSerializeData.ArrayRefurrenceList);
+					RefurrenceMapData.Add(CurSerializeData.ID, CurSerializeData.MapRefurrenceList);
 				}
 			}
 			
@@ -355,7 +361,8 @@ bool USerializeSystemNew::LoadActorData(const UObject* WorldContextObject, FStri
 		ISaveableActorInterface* SavableActor = Cast<ISaveableActorInterface>(Iterator->Value);
 		if (SavableActor)
 		{
-			SavableActor->RePointRefurrence(Iterator->Value,RefurrenceData[Iterator->Key], RefurrenceArrayData[Iterator->Key], SerializeObjList);
+			SavableActor->RePointRefurrence(Iterator->Value,RefurrenceData[Iterator->Key], RefurrenceArrayData[Iterator->Key],
+				RefurrenceMapData[Iterator->Key], SerializeObjList);
 			SavableActor->RefreshAfterRePoint();
 		}
 	}

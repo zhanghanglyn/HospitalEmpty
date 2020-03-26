@@ -91,8 +91,9 @@ public:
 	TArray<FRefurrenceArrayData> ArrayRefurrenceList;
 	/* 该结构用来存储，是否有需要进行TMap的序列化 */
 	TArray< FRefurrenceMapData> MapRefurrenceList;
-	/* 新添加字段，用来记录Outer的ID */
+	/* 新添加字段，用来记录Outer的ID和TYPE */
 	FString OuterID;
+	FString OuterType;
 
 	friend FArchive& operator<<(FArchive& Ar, FObjSerializeData& InData)
 	{
@@ -105,6 +106,7 @@ public:
 		Ar << InData.ArrayRefurrenceList;
 		Ar << InData.MapRefurrenceList;
 		Ar << InData.OuterID;
+		Ar << InData.OuterType;
 
 		return Ar;
 	}
@@ -192,6 +194,22 @@ protected:
 	/* 辅助函数，判断当前需要序列化的Object是否已经序列化过了 */
 	bool CheckObjectBeSerialized(UObject* InObject);
 
+	/*
+		20.3.26 LoadActorData使用的函数，遍历所有的要生成的Actor并找到对应的Outer进行生成，如果该Outer还没有生成，
+		则递归调用自身生成Outer
+
+		Param: 
+	*/
+	UObject* CreateActorDeperOuter(const UObject* WorldContextObject , FObjSerializeData InSerializeData ,
+		TMap< FString, FObjSerializeData> AllSerializeObj,
+		TMap<FString, UObject* > &SerializeObjList,
+		TMap<FString, TArray<FRefurrenceData>> &RefurrenceData , TMap<FString, TArray<FRefurrenceArrayData>> &RefurrenceArrayData,
+		TMap<FString, TArray<FRefurrenceMapData>> &RefurrenceMapData);
+
+public:
+	static FString OUTER_TYPE_WORLD;// = "WORLD"
+	static FString OUTER_TYPE_LEVEL;// = "LEVEL"
+
 protected:
 	/* 存档文件的保存路径 */
 	UPROPERTY()
@@ -202,4 +220,8 @@ protected:
 
 	/* 当前保存的所有的ObjID,每次SaveALL时会重置 */
 	TArray<FString> CurrentFObjSerializeDataID;
+
+	/* 当前已经创建的Outer Object列表，每次SaveAll的时候会重置 */
+	//TMap<
+
 };

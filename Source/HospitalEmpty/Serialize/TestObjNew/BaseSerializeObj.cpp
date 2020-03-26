@@ -38,7 +38,7 @@ void ABaseSerializeObj::AddTestSerializeObj()
 		TestOOOOO = NewObject<ATestSerializeObj>(this);
 
 	TestOOOOO->testText = " I COME FROM ABaseSerializeObj";
-	for (int32 count = 0 ; count < 3 ; count ++)
+	for (int32 count = 0 ; count < 1 ; count ++)
 	{
 		AChildSerializeObj* Obj = NewObject< AChildSerializeObj>(this);
 		Obj->testTextChild = FString::FromInt(count);
@@ -46,7 +46,7 @@ void ABaseSerializeObj::AddTestSerializeObj()
 	}
 	
 	//3.24 
-	for (int32 count1 = 0; count1 < 3; count1++)
+	for (int32 count1 = 0; count1 < 1; count1++)
 	{
 		AChildSerializeObj* Obj = NewObject< AChildSerializeObj>(this);
 		Obj->testTextChild = FString::FromInt(count1);

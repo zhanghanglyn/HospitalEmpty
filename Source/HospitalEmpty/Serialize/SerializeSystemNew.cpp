@@ -11,6 +11,11 @@
 #include "Misc/FileHelper.h"
 #include "Serialize/testObj/ChildSerializeObj.h"
 #include "UObject/UnrealType.h"
+#include "Engine/Level.h"
+
+FString USerializeSystemNew::OUTER_TYPE_WORLD = "WORLD";
+FString USerializeSystemNew::OUTER_TYPE_LEVEL = "LEVEL";
+
 
 USerializeSystemNew* USerializeSystemNew::Get(const UObject* WorldContextObject)
 {
@@ -77,6 +82,20 @@ void USerializeSystemNew::SaveObjToData(UObject* InObj, TMap< FString, FObjSeria
 	InObj->Serialize(Ar);
 	//20.3.23 将GetClass->GetName换成
 	ActorRecord.ID = InObj->GetClass()->GetName() + "_" + InObj->GetOuter()->GetName() + "_" + ActorRecord.Name.ToString();//ActorRecord.Class + "_" + ActorRecord.Name.ToString();
+	/* 记录Outer */
+	UObject* OjbOuter = InObj->GetOuter();
+	if (UWorld* world = Cast<UWorld>(OjbOuter))
+		ActorRecord.OuterType = OUTER_TYPE_WORLD;
+	else if (ULevel* level = Cast<ULevel>(OjbOuter))
+	{
+		ActorRecord.OuterType = OUTER_TYPE_LEVEL;
+		ActorRecord.OuterID = OjbOuter->GetName();
+	}
+	else
+	{
+		ActorRecord.OuterID = OjbOuter->GetClass()->GetName() + "_" + OjbOuter->GetOuter()->GetName() + "_" + OjbOuter->GetName();
+	}
+	
 
 	//将当前以保存ID记录
 	CurrentFObjSerializeDataID.Add(ActorRecord.ID);
@@ -269,6 +288,11 @@ bool USerializeSystemNew::SaveGameSerializeDataToFile(FGameSerializeData &InData
 /************************************************************************/
 /*                              Load相关                                */
 /************************************************************************/
+/*
+	20.3.26 修改添加Outer部分，如果不为Actor，则需要使用Outer来进行NewObject,如果Outer尚未创建，则新New一个Outer放置
+	也有可能出现，需要的Outer也需要其他Outer的情况，使用函数遍历。
+
+*/
 bool USerializeSystemNew::LoadActorData(const UObject* WorldContextObject, FString LoadPath)
 {
 	TArray<uint8> BinaryData;
@@ -300,59 +324,68 @@ bool USerializeSystemNew::LoadActorData(const UObject* WorldContextObject, FStri
 	TMap<FString, TArray<FRefurrenceData> > RefurrenceData;
 	TMap<FString, TArray<FRefurrenceArrayData>> RefurrenceArrayData;
 	TMap<FString, TArray<FRefurrenceMapData>> RefurrenceMapData;
+	//已经生成出来的OuterList
+	//TMap<FString, UObject*> OuterList;
 
 	for (TMap< FString, FObjSerializeData>::TConstIterator Iterator(LoadGameData.SerializeObj); Iterator; ++Iterator)
 	{
 		FObjSerializeData CurSerializeData = (Iterator->Value);
 
-		FVector SpawnPos = CurSerializeData.ActorTransForm.GetLocation();
-		FRotator SpawnRot = CurSerializeData.ActorTransForm.Rotator();
-		FActorSpawnParameters SpawnParam;
-		SpawnParam.Name = CurSerializeData.Name;
-		UClass* SpawnClass = FindObject<UClass>(ANY_PACKAGE, *CurSerializeData.Class);
-		//是有可能找不到的！如果未加载的话
-		if (SpawnClass == nullptr)
-			SpawnClass = LoadObject<UClass>(NULL, *CurSerializeData.Class);
-		//如果是Actor，则生成到场景中，如果不是，则使用NewObject生成
-		if (SpawnClass)
-		{
-			//AActor* DefaultActor = SpawnClass->GetDefaultObject<AActor>();
-			UObject *Ret = SpawnClass->GetDefaultObject();
-			if ( !Ret->IsA(AActor::StaticClass()))
-			{
-				UWorld* CurWorld = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
-				if (SpawnClass && CurWorld)
-				{
-					UObject* Obj = NewObject<UObject>(CurWorld , SpawnClass);
-					FMemoryReader MemoryReader(CurSerializeData.SerializeData, true);
-					FSaveOjbArchive Ar(MemoryReader, true);
-					Obj->Serialize(Ar);
-					SerializeObjList.Add(CurSerializeData.ID, Obj);
-					RefurrenceData.Add(CurSerializeData.ID, CurSerializeData.RefurrenceList);
-					RefurrenceArrayData.Add(CurSerializeData.ID, CurSerializeData.ArrayRefurrenceList);
-					RefurrenceMapData.Add(CurSerializeData.ID, CurSerializeData.MapRefurrenceList);
-				}
-			}
-			//如果是Actor
-			else
-			{
-				UWorld* CurWorld = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
-				if (SpawnClass && CurWorld)
-				{
-					AActor* NewActor = CurWorld->SpawnActor(SpawnClass, &SpawnPos, &SpawnRot, SpawnParam);
-					FMemoryReader MemoryReader(CurSerializeData.SerializeData, true);
-					FSaveOjbArchive Ar(MemoryReader, true);
-					NewActor->Serialize(Ar);
-					NewActor->SetActorTransform(CurSerializeData.ActorTransForm);
+		/* 20.3.26 修改为递归 */
+		if (SerializeObjList.Contains(CurSerializeData.ID))
+			continue;
+		else
+			CreateActorDeperOuter(WorldContextObject ,CurSerializeData , LoadGameData.SerializeObj,
+				SerializeObjList, RefurrenceData , RefurrenceArrayData, RefurrenceMapData);
 
-					SerializeObjList.Add(CurSerializeData.ID, NewActor);
-					RefurrenceData.Add(CurSerializeData.ID, CurSerializeData.RefurrenceList);
-					RefurrenceArrayData.Add(CurSerializeData.ID, CurSerializeData.ArrayRefurrenceList);
-					RefurrenceMapData.Add(CurSerializeData.ID, CurSerializeData.MapRefurrenceList);
-				}
-			}
-			
-		}
+		//FVector SpawnPos = CurSerializeData.ActorTransForm.GetLocation();
+		//FRotator SpawnRot = CurSerializeData.ActorTransForm.Rotator();
+		//FActorSpawnParameters SpawnParam;
+		//SpawnParam.Name = CurSerializeData.Name;
+		//UClass* SpawnClass = FindObject<UClass>(ANY_PACKAGE, *CurSerializeData.Class);
+		//FString OuterID = CurSerializeData.OuterID;
+		////是有可能找不到的！如果未加载的话
+		//if (SpawnClass == nullptr)
+		//	SpawnClass = LoadObject<UClass>(NULL, *CurSerializeData.Class);
+		////如果是Actor，则生成到场景中，如果不是，则使用NewObject生成
+		//if (SpawnClass)
+		//{
+		//	UObject *Ret = SpawnClass->GetDefaultObject();
+		//	if ( !Ret->IsA(AActor::StaticClass()))
+		//	{
+		//		UWorld* CurWorld = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
+		//		if (SpawnClass && CurWorld)
+		//		{
+		//			UObject* Obj = NewObject<UObject>(CurWorld, SpawnClass);
+		//			FMemoryReader MemoryReader(CurSerializeData.SerializeData, true);
+		//			FSaveOjbArchive Ar(MemoryReader, true);
+		//			Obj->Serialize(Ar);
+		//			SerializeObjList.Add(CurSerializeData.ID, Obj);
+		//			RefurrenceData.Add(CurSerializeData.ID, CurSerializeData.RefurrenceList);
+		//			RefurrenceArrayData.Add(CurSerializeData.ID, CurSerializeData.ArrayRefurrenceList);
+		//			RefurrenceMapData.Add(CurSerializeData.ID, CurSerializeData.MapRefurrenceList);
+		//		}
+		//	}
+		//	//如果是Actor
+		//	else
+		//	{
+		//		UWorld* CurWorld = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
+		//		if (SpawnClass && CurWorld)
+		//		{
+		//			AActor* NewActor = CurWorld->SpawnActor(SpawnClass, &SpawnPos, &SpawnRot, SpawnParam);
+		//			FMemoryReader MemoryReader(CurSerializeData.SerializeData, true);
+		//			FSaveOjbArchive Ar(MemoryReader, true);
+		//			NewActor->Serialize(Ar);
+		//			NewActor->SetActorTransform(CurSerializeData.ActorTransForm);
+
+		//			SerializeObjList.Add(CurSerializeData.ID, NewActor);
+		//			RefurrenceData.Add(CurSerializeData.ID, CurSerializeData.RefurrenceList);
+		//			RefurrenceArrayData.Add(CurSerializeData.ID, CurSerializeData.ArrayRefurrenceList);
+		//			RefurrenceMapData.Add(CurSerializeData.ID, CurSerializeData.MapRefurrenceList);
+		//		}
+		//	}
+		//	
+		//}
 	}
 
 	//所有需要序列化的OBJ生成完毕之后，进行引用指针的重定向,所有能够保存的OBJ，都继承了保存接口
@@ -370,4 +403,130 @@ bool USerializeSystemNew::LoadActorData(const UObject* WorldContextObject, FStri
 	UE_LOG(LogTemp ,Warning , TEXT("Load Object OVer~!"));
 
 	return true;
+}
+
+UObject* USerializeSystemNew::CreateActorDeperOuter(const UObject* WorldContextObject, FObjSerializeData InSerializeData,
+	TMap< FString, FObjSerializeData> AllSerializeObj,
+	TMap<FString, UObject *> &SerializeObjList,
+	TMap<FString, TArray<FRefurrenceData>> &RefurrenceData, TMap<FString, TArray<FRefurrenceArrayData>> &RefurrenceArrayData,
+	TMap<FString, TArray<FRefurrenceMapData>> &RefurrenceMapData)
+{
+	FVector SpawnPos = InSerializeData.ActorTransForm.GetLocation();
+	FRotator SpawnRot = InSerializeData.ActorTransForm.Rotator();
+	FActorSpawnParameters SpawnParam;
+	SpawnParam.Name = InSerializeData.Name;
+	UClass* SpawnClass = FindObject<UClass>(ANY_PACKAGE, *InSerializeData.Class);
+	FString OuterID = InSerializeData.OuterID;
+	FString OuterType = InSerializeData.OuterType;
+	//是有可能找不到的！如果未加载的话
+	if (SpawnClass == nullptr)
+		SpawnClass = LoadObject<UClass>(NULL, *InSerializeData.Class);
+	//如果是Actor，则生成到场景中，如果不是，则使用NewObject生成
+	if (SpawnClass)
+	{
+		UObject *Ret = SpawnClass->GetDefaultObject();
+		if (!Ret->IsA(AActor::StaticClass()))
+		{
+			UWorld* CurWorld = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
+			if (SpawnClass && CurWorld)
+			{
+				UObject* NewObj;
+
+				UObject* CurOuter = nullptr;
+				if (OuterType.Equals(OUTER_TYPE_WORLD))
+					CurOuter = CurWorld;
+				else if(OuterType.Equals(OUTER_TYPE_LEVEL))
+				{
+					TArray<ULevel*> Levels = CurWorld->GetLevels();
+					for (ULevel* level : Levels)
+					{
+						if (OuterID.Equals(level->GetName()))
+						{
+							CurOuter = level;
+							break;
+						}
+					}
+				}
+				else
+				{
+					/* 如果该Outer已经生成出来，直接取用即可 */
+					if (SerializeObjList.Contains(OuterID))
+						CurOuter = SerializeObjList[OuterID];
+					/* 如果该Outer并未生成 */
+					else
+					{
+						if (AllSerializeObj.Contains(OuterID))
+							CurOuter = CreateActorDeperOuter(WorldContextObject, AllSerializeObj[OuterID], AllSerializeObj,
+							SerializeObjList, RefurrenceData, RefurrenceArrayData, RefurrenceMapData);
+					}
+				}
+
+				NewObj = NewObject<UObject>(CurOuter, SpawnClass);
+				FMemoryReader MemoryReader(InSerializeData.SerializeData, true);
+				FSaveOjbArchive Ar(MemoryReader, true);
+				NewObj->Serialize(Ar);
+				SerializeObjList.Add(InSerializeData.ID, NewObj);
+				RefurrenceData.Add(InSerializeData.ID, InSerializeData.RefurrenceList);
+				RefurrenceArrayData.Add(InSerializeData.ID, InSerializeData.ArrayRefurrenceList);
+				RefurrenceMapData.Add(InSerializeData.ID, InSerializeData.MapRefurrenceList);
+
+				return NewObj;
+			}
+		}
+		//如果是Actor
+		else
+		{
+			UWorld* CurWorld = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
+			if (SpawnClass && CurWorld)
+			{
+				//如果是通过Spawn方法创建出来的，则需要设置位置等
+				bool BCreateWithSpawn = false;
+				AActor* NewActor = nullptr;
+				//如果该Obj已经作为Outer被生成出来了，则直接取用其指针即可
+				if (SerializeObjList.Contains(InSerializeData.ID))
+					NewActor = Cast<AActor>(SerializeObjList[InSerializeData.ID]);
+				/* @!! 重要说明，
+					Actor的SpawnActor生成，是生成在当前world对应的Level上的！所以通过Outer生成Actor时，
+					如果该Actor的Outer不是Level的话，那么就不应该使用SpawnActor而是应该使用普通的NewOjbect方法去生成他的Outer
+				*/
+				else
+				{
+					if (OuterType.Equals(OUTER_TYPE_LEVEL))
+					{
+						ULevel* level = CurWorld->GetCurrentLevel();
+						if (OuterID.Equals(level->GetName()))
+						{
+							NewActor = CurWorld->SpawnActor(SpawnClass, &SpawnPos, &SpawnRot, SpawnParam);
+							BCreateWithSpawn = true;
+						}	
+					}
+					/* 如果Outer不是Level的话，要对应生成在对应的Object上 */
+					if(NewActor == nullptr)
+					{
+						if (AllSerializeObj.Contains(OuterID))
+						{
+							UObject* CurOuter = CreateActorDeperOuter(WorldContextObject, AllSerializeObj[OuterID], AllSerializeObj,
+								SerializeObjList, RefurrenceData, RefurrenceArrayData, RefurrenceMapData);
+							NewActor = NewObject<AActor>(CurOuter, SpawnClass);
+						}
+					}
+				}
+					
+				FMemoryReader MemoryReader(InSerializeData.SerializeData, true);
+				FSaveOjbArchive Ar(MemoryReader, true);
+				NewActor->Serialize(Ar);
+				if(BCreateWithSpawn)
+					NewActor->SetActorTransform(InSerializeData.ActorTransForm);
+
+				SerializeObjList.Add(InSerializeData.ID, NewActor);
+				RefurrenceData.Add(InSerializeData.ID, InSerializeData.RefurrenceList);
+				RefurrenceArrayData.Add(InSerializeData.ID, InSerializeData.ArrayRefurrenceList);
+				RefurrenceMapData.Add(InSerializeData.ID, InSerializeData.MapRefurrenceList);
+
+				return Cast<UObject>(NewActor);
+			}
+		}
+	}
+
+	return nullptr;
 }

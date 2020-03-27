@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "SaveGameSystem/SaveableActorInterface.h"
+#include "GameFrame/SaveGameSystem/SaveableActorInterface.h"
 #include "Components/ActorComponent.h"
 #include "SerializeComponent.generated.h"
 

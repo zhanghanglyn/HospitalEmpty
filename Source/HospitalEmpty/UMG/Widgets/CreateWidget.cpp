@@ -1,12 +1,12 @@
 #include "CreateWidget.h"
 #include "GridSystem/DecorationSystemMgr.h"
 #include "PlayerController/HptPlayerCameraPawn.h"
-#include "SaveGameSystem/testObj/TestSerializeObj.h"
-#include "SaveGameSystem/testObj/ChildSerializeObj.h"
+#include "GameFrame/SaveGameSystem/testObj/TestSerializeObj.h"
+#include "GameFrame/SaveGameSystem/testObj/ChildSerializeObj.h"
 #include "Base/HptGameInstance.h"
-#include "SaveGameSystem/SerializeSystemNew.h"
+#include "GameFrame/SaveGameSystem/SaveGameSystem.h"
 #include "Engine.h"
-#include "SaveGameSystem/TestObjNew/BaseSerializeObj.h"
+#include "GameFrame/SaveGameSystem/TestObjNew/BaseSerializeObj.h"
 
 UCreateWidget::UCreateWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -91,11 +91,13 @@ void UCreateWidget::OnClickedListItem2()
 void UCreateWidget::OnClickedListItem3()
 {
 
-	USerializeSystemNew* SerializeSystem = USerializeSystemNew::Get(this);
-	if (SerializeSystem)
-	{
-		SerializeSystem->LoadActorData(this,"11");
-	}
+	//USerializeSystemNew* SerializeSystem = USerializeSystemNew::Get(this);
+	//if (SerializeSystem)
+	//{
+	//	SerializeSystem->LoadActorData(this,"11");
+	//}
+	if(USaveGameSystem* SaveGameSystem = USaveGameSystem::Get(this))
+		SaveGameSystem->LoadGame(this, "Save11");
 
 	//CreateObjAndSerialize();
 }

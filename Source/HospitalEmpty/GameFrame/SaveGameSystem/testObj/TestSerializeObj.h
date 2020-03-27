@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "SaveGameSystem/SaveableActorInterface.h"
+#include "GameFrame/SaveGameSystem/SaveableActorInterface.h"
 #include "TestSerializeObj.generated.h"
 /*
 	序列化测试OBJ

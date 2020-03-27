@@ -165,17 +165,21 @@ public:
 
 	/* 保存所有场景中可存储的Actor */
 	UFUNCTION()
-	bool SaveAllActorData(const UObject* WorldContextObject);
+	bool SaveAllActorData(const UObject* WorldContextObject, FString GameID , FGameSerializeData &OutData);
 
 	/*	从配置中加载
 		Note：该函数还有一个很大的效率问题，因为是当所有的Object生成完了之后，遍历所有的Object去重定向指针，多出了一倍的循环消耗，
 		之后可以使用更好的算法优化。
+		3.27 注，之后可以再其中添加回调，已达到每一阶段不同处理的效果
 	*/
-	bool LoadActorData(const UObject* WorldContextObject, FString LoadPath);
+	bool LoadActorData(const UObject* WorldContextObject, FString GameID);
 
 protected:
-	/* 存储FGameSerializeData至本地文件中 */
-	bool SaveGameSerializeDataToFile(FGameSerializeData &InData);
+	/* 
+		存储FGameSerializeData至本地文件中 
+		Param : GameID  会以GameID当做文件名进行存储
+	*/
+	bool SaveGameSerializeDataToFile(FGameSerializeData &InData , FString GameID);
 
 	/*  
 		将一个Actor/Object生成为一份序列化数据  
@@ -219,7 +223,7 @@ protected:
 	FString SavePath;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (DisplayName = "保存文件路径"))
-	FString SaveFileName = "HospitalProject/SaveData/Test2";
+	FString SaveFileName = "HospitalProject/SaveData/DataList/";
 
 	/* 当前保存的所有的ObjID,每次SaveALL时会重置 */
 	TArray<FString> CurrentFObjSerializeDataID;

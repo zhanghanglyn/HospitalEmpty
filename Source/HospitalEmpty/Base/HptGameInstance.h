@@ -35,6 +35,16 @@ public:
 		return SerializeSystem;
 	}
 
+	class USaveGameSystem* GetSaveGameSystem()
+	{
+		return SaveGameSystem;
+	}
+
+	class ULoadMapSystem* GetULoadMapSystem()
+	{
+		return LoadMapSystem;
+	}
+
 protected:
 
 	UPROPERTY()
@@ -46,4 +56,12 @@ protected:
 	/* 序列化系统 */
 	UPROPERTY()
 	class USerializeSystemNew* SerializeSystem;
+
+	/* 保存游戏系统 */
+	UPROPERTY()
+	class USaveGameSystem* SaveGameSystem;
+
+	/* 加载地图系统 */
+	UPROPERTY()
+	class ULoadMapSystem* LoadMapSystem;
 };

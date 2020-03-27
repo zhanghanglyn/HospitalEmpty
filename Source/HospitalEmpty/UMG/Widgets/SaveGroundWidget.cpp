@@ -1,12 +1,12 @@
 #include "SaveGroundWidget.h"
 #include "GridSystem/DecorationSystemMgr.h"
 #include "PlayerController/HptPlayerCameraPawn.h"
-#include "SaveGameSystem/testObj/TestSerializeObj.h"
-#include "SaveGameSystem/testObj/ChildSerializeObj.h"
+#include "GameFrame/SaveGameSystem/testObj/TestSerializeObj.h"
+#include "GameFrame/SaveGameSystem/testObj/ChildSerializeObj.h"
 #include "GameBase/GroundObject/GroundObj.h"
 #include "Engine.h"
 #include "Base/HptGameInstance.h"
-#include "SaveGameSystem/SerializeSystemNew.h"
+#include "GameFrame/SaveGameSystem/SaveGameSystem.h"
 
 USaveGroundWidget::USaveGroundWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -34,8 +34,10 @@ void USaveGroundWidget::NativeConstruct(){
 void USaveGroundWidget::SaveGround()
 {
 	//获取一下序列化System
-	USerializeSystemNew* SerializeSystem = USerializeSystemNew::Get(this);
-	SerializeSystem->SaveAllActorData(this);
+	//USerializeSystemNew* SerializeSystem = USerializeSystemNew::Get(this);
+	//SerializeSystem->SaveAllActorData(this);
+	if(USaveGameSystem* SaveGameSystem = USaveGameSystem::Get(this))
+		SaveGameSystem->SaveGame(this, "Save11");
 	return;
 
 	//if (DecorationSystemMgr)

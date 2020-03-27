@@ -4,7 +4,7 @@
 #include "Components/ActorComponent.h"
 #include "GameBase/GridMgr/GridSystemMgrBase.h"
 #include "GameBase/DecorationObj/DecorationBase.h"
-#include "SaveGameSystem/SaveableActorInterface.h"
+#include "GameFrame/SaveGameSystem/SaveableActorInterface.h"
 #include "DecorationGridMgrComponent.generated.h"
 
 /*

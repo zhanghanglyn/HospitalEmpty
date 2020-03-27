@@ -5,11 +5,9 @@
 #include "Serialization/MemoryWriter.h"
 #include "Engine.h"
 #include "Misc/DateTime.h"
-//#include "GameBase/GroundObject/GroundObj.h"
-//#include "GameBase/GroundObject/GroundGridMgrComponent.h"
-#include "SaveGameSystem/SaveableActorInterface.h"
+#include "GameFrame/SaveGameSystem/SaveableActorInterface.h"
 #include "Misc/FileHelper.h"
-#include "SaveGameSystem/testObj/ChildSerializeObj.h"
+#include "GameFrame/SaveGameSystem/testObj/ChildSerializeObj.h"
 #include "UObject/UnrealType.h"
 #include "Engine/Level.h"
 
@@ -38,7 +36,7 @@ USerializeSystemNew::USerializeSystemNew(const FObjectInitializer& ObjectInitial
 	SavePath = *FString::Printf(TEXT("%s%s"), *FPaths::ProjectContentDir(), *SaveFileName);
 }
 
-bool USerializeSystemNew::SaveAllActorData(const UObject* WorldContextObject)
+bool USerializeSystemNew::SaveAllActorData(const UObject* WorldContextObject , FString GameID, FGameSerializeData &OutData)
 {
 	/* 先把当前保存的ID清空 */
 	CurrentFObjSerializeDataID.Empty();
@@ -48,8 +46,18 @@ bool USerializeSystemNew::SaveAllActorData(const UObject* WorldContextObject)
 
 	//将当前数据添加到保存结构中
 	FGameSerializeData GameSaveSerializeData;
-	GameSaveSerializeData.GameID = "SaveData1";
+	GameSaveSerializeData.GameID = *GameID;//"SaveData1";
 	GameSaveSerializeData.Timestamp = FDateTime::Now();
+	/* 3.27 存一下当前的level名字 */
+	UWorld* MyWorld = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
+	if (MyWorld)
+	{
+		ULevel* CurrentLevel = MyWorld->GetCurrentLevel();
+		if (CurrentLevel)
+		{
+			GameSaveSerializeData.LevelName = CurrentLevel->GetName();
+		}
+	}
 
 	for (AActor* InActor : SaveActors)
 	{
@@ -60,7 +68,9 @@ bool USerializeSystemNew::SaveAllActorData(const UObject* WorldContextObject)
 		//GameSaveSerializeData.SerializeObj.Add(TempData);
 	}
 
-	return SaveGameSerializeDataToFile(GameSaveSerializeData);
+	OutData = GameSaveSerializeData;
+
+	return SaveGameSerializeDataToFile(GameSaveSerializeData , GameID);
 }
 
 /* 需要递归去取Obj身上的可保存结构 */
@@ -264,12 +274,14 @@ bool USerializeSystemNew::CheckObjectBeSerialized(UObject* InObject)
 	return false;
 }
 
-bool USerializeSystemNew::SaveGameSerializeDataToFile(FGameSerializeData &InData)
+bool USerializeSystemNew::SaveGameSerializeDataToFile(FGameSerializeData &InData , FString GameID)
 {
 	FBufferArchive BinaryData;
 	BinaryData << InData;
 
-	if (FFileHelper::SaveArrayToFile(BinaryData, *SavePath))
+	FString DataSavePath = SavePath + GameID;
+
+	if (FFileHelper::SaveArrayToFile(BinaryData, *DataSavePath))// *SavePath))
 	{
 		UE_LOG(LogTemp, Warning, TEXT(" SaveFileTo Over~~ "));
 	}
@@ -293,11 +305,13 @@ bool USerializeSystemNew::SaveGameSerializeDataToFile(FGameSerializeData &InData
 	也有可能出现，需要的Outer也需要其他Outer的情况，使用函数遍历。
 
 */
-bool USerializeSystemNew::LoadActorData(const UObject* WorldContextObject, FString LoadPath)
+bool USerializeSystemNew::LoadActorData(const UObject* WorldContextObject, FString GameID)
 {
+	FString DataLoadPath = SavePath + GameID;
+
 	TArray<uint8> BinaryData;
 	//先写死作为测试
-	if (FFileHelper::LoadFileToArray(BinaryData, *SavePath))
+	if (FFileHelper::LoadFileToArray(BinaryData, *DataLoadPath))
 	{
 		UE_LOG(LogTemp, Warning, TEXT(" LoadFileToArray Over~ "));
 	}

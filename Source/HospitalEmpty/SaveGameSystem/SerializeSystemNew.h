@@ -114,6 +114,7 @@ public:
 
 /*
 	用来保存所有序列化数据的GameDataSaveStruct
+	3.27扩展，将地图一起加入保存中，加载的时候，先加载地图再加载其余物品。
 */
 USTRUCT()
 struct FGameSerializeData
@@ -124,12 +125,14 @@ public:
 	FName GameID;
 	FDateTime Timestamp;
 	TMap< FString, FObjSerializeData> SerializeObj;
+	FString LevelName;	//保存当前存档对应的Level名称
 
 	friend FArchive& operator<<(FArchive& Ar, FGameSerializeData& InSerializeObj)
 	{
 		Ar << InSerializeObj.GameID;
 		Ar << InSerializeObj.Timestamp;
 		Ar << InSerializeObj.SerializeObj;
+		Ar << InSerializeObj.LevelName;
 
 		return Ar;
 	}

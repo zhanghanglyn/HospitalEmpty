@@ -7,9 +7,9 @@
 #include "Misc/DateTime.h"
 //#include "GameBase/GroundObject/GroundObj.h"
 //#include "GameBase/GroundObject/GroundGridMgrComponent.h"
-#include "Serialize/SaveableActorInterface.h"
+#include "SaveGameSystem/SaveableActorInterface.h"
 #include "Misc/FileHelper.h"
-#include "Serialize/testObj/ChildSerializeObj.h"
+#include "SaveGameSystem/testObj/ChildSerializeObj.h"
 #include "UObject/UnrealType.h"
 #include "Engine/Level.h"
 

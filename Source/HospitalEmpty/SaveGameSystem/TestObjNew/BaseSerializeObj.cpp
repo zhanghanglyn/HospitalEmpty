@@ -1,7 +1,7 @@
 #include "BaseSerializeObj.h"
 #include "SerializeComponent.h"
-#include "Serialize/testObj/ChildSerializeObj.h"
-#include "Serialize/testObj/TestSerializeObj.h"
+#include "SaveGameSystem/testObj/ChildSerializeObj.h"
+#include "SaveGameSystem/testObj/TestSerializeObj.h"
 
 ABaseSerializeObj::ABaseSerializeObj(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {

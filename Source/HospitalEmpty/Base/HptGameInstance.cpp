@@ -1,7 +1,7 @@
 ﻿#include "HptGameInstance.h"
 #include "HospitalEmpty/GridSystem/DecorationSystemMgr.h"
 #include "UMG/UMGManager.h"
-#include "Serialize/SerializeSystemNew.h"
+#include "SaveGameSystem/SerializeSystemNew.h"
 
 UHptGameInstance* UHptGameInstance::GetInstance(const UObject* WorldContextObject)
 {

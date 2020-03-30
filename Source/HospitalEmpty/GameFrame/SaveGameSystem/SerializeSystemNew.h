@@ -126,6 +126,7 @@ public:
 	FDateTime Timestamp;
 	TMap< FString, FObjSerializeData> SerializeObj;
 	FString LevelName;	//保存当前存档对应的Level名称
+	FName LevelPackageName;	//保存当前存档对应的Level的包
 
 	friend FArchive& operator<<(FArchive& Ar, FGameSerializeData& InSerializeObj)
 	{
@@ -133,6 +134,7 @@ public:
 		Ar << InSerializeObj.Timestamp;
 		Ar << InSerializeObj.SerializeObj;
 		Ar << InSerializeObj.LevelName;
+		Ar << InSerializeObj.LevelPackageName;
 
 		return Ar;
 	}

@@ -23,10 +23,13 @@ public:
 	FString DataPic;
 	/*一个存档对应的一个地图，放在外部把由外部加载并进行控制*/
 	FString MapData;
+	/* 地图包名 */
+	FName MapPackageName;
 	/*玩家身上的数据可能会存成不同的文件，因此，在此先添加一个对应关系*/
 	FString PlayerConfig;
 	/* 保存时间 */
 	FString SaveTime;
+
 
 	friend FArchive& operator<<(FArchive &Ar, FSaveDataListStruct &InData)
 	{
@@ -36,6 +39,7 @@ public:
 		Ar << InData.NameData;
 		Ar << InData.PlayerConfig;
 		Ar << InData.SaveTime;
+		Ar << InData.MapPackageName;
 
 		return Ar;
 	}
@@ -60,6 +64,18 @@ public:
 
 		return Ar;
 	}
+};
+
+/*
+	当前Load地图的参数
+*/
+USTRUCT()
+struct FLoadGameParam
+{
+	GENERATED_USTRUCT_BODY()
+
+public:
+	FString GameID;
 };
 
 /*
@@ -99,6 +115,9 @@ protected:
 	/* 将当前Data保存到本地 */
 	bool SaveDataToFile();
 
+	UFUNCTION()
+	void LoadDataAfterLoaded(FName LevelName, const UObject* WorldContextObject);
+
 protected:
 	/* 存档数量 */
 	UPROPERTY()
@@ -107,6 +126,10 @@ protected:
 	/* 当前的存档数据 */
 	UPROPERTY()
 	FGameSaveData GameSaveData;
+
+	/* 当前加载地图的数据 */
+	UPROPERTY()
+	FLoadGameParam LoadParam;
 
 	/* 序列化系统 */
 	UPROPERTY()

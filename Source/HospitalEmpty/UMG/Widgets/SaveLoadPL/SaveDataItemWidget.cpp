@@ -15,14 +15,13 @@ void USaveDataItemWidget::NativeConstruct() {
 
 };
 
-//FEventReply USaveDataItemWidget::OnMouseButtonDown(FGeometry MyGeometry, const FPointerEvent& MouseEvent)
-//{
-//	FEventReply Reply = new FEventReply();
-//	Reply.NativeReply = FReply::Handled();
-//
-//	if (MouseClickDelegate.IsBound())
-//		MouseClickDelegate.Execute(GameID);
-//
-//
-//	return Reply;
-//}
+FReply USaveDataItemWidget::NativeOnMouseButtonDown( const FGeometry& InGeometry, const FPointerEvent& InMouseEvent )
+{
+	FReply Reply = FReply::Handled();
+
+	if (MouseClickDelegate.IsBound())
+		MouseClickDelegate.Execute(GameID);
+
+
+	return Reply;
+}

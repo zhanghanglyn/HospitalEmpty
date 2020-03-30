@@ -24,7 +24,8 @@ ULoadMapSystem::ULoadMapSystem(const FObjectInitializer& ObjectInitializer) : Su
 	OnPackageLoaded.BindUFunction(this, "AsynLoadPackageCall");
 }
 
-void ULoadMapSystem::LoadLevel(const UObject* WorldContextObject, FString LevelName, bool BAsyn /* = true */)
+void ULoadMapSystem::LoadLevel(const UObject* WorldContextObject , FName LevelName , bool BAsyn /* = true  */,
+	UObject* DelegateOuterObj /* = nullptr */, FName OuterFunctionName /* = "" */)
 {
 	UWorld* CurWorld = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
 	if (CurWorld == nullptr)
@@ -33,29 +34,56 @@ void ULoadMapSystem::LoadLevel(const UObject* WorldContextObject, FString LevelN
 		return;
 	}
 
+	if (OnPackageLoadedOuter.IsBound())
+		OnPackageLoadedOuter.Unbind();
+	if (DelegateOuterObj != nullptr && !OuterFunctionName.IsEqual(""))
+		OnPackageLoadedOuter.BindUFunction(DelegateOuterObj, OuterFunctionName);
+
 	if (BAsyn == false)
 	{
-		UGameplayStatics::OpenLevel(WorldContextObject, *LevelName, false);
+		UGameplayStatics::OpenLevel(WorldContextObject, LevelName, false);
+		OnPackageLoadedOuter.Execute("", WorldContextObject);
 	}
 	/* 异步加载地图对应的包，加载完成后调用OpenLevel */
 	else
 	{
-
 		FTimerHandle* TimerHandle = nullptr;
 
-		LoadPackageAsync(LevelName,
+		LoadWorldContextObject = WorldContextObject;
+
+		LoadPackageAsync(LevelName.ToString(),
 			FLoadPackageAsyncDelegate::CreateLambda([=](const FName& PackageName, UPackage* LoadedPackage,
 			EAsyncLoadingResult::Type Result) {
 				OnPackageLoaded.ExecuteIfBound(PackageName , LoadedPackage, int32(Result));
 			}),
 			0, PKG_ContainsMap);
-
+		//EAsyncLoadingResult::Type
 	}
 }
 
 void ULoadMapSystem::AsynLoadPackageCall(const FName& PackageName, UPackage* LoadedPackage, int32 InResult)
 {
+	if (InResult == 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT(" 异步加载地图完毕~"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT(" 异步加载地图失败！！！ "));
+		if (OnPackageLoadedOuter.IsBound())
+			OnPackageLoadedOuter.Unbind();
+		LoadWorldContextObject = nullptr;
+		return;
+	}
+		
 
-	UE_LOG(LogTemp , Warning , TEXT(" 异步加载完毕~ "));
+	if (OnPackageLoadedOuter.IsBound())
+	{
+		UGameplayStatics::OpenLevel(LoadWorldContextObject, PackageName, false);
+		OnPackageLoadedOuter.Execute(PackageName, LoadWorldContextObject);
+
+		LoadWorldContextObject = nullptr;
+	}
+		
 
 }

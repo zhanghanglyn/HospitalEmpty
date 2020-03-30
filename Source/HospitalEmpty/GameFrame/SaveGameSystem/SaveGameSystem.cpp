@@ -107,10 +107,11 @@ bool USaveGameSystem::SaveGame(const UObject* WorldContextObject , FString GameI
 		FSaveDataListStruct ListStruct;
 		ListStruct.GameID = SaveGameID;
 		ListStruct.MapData = CurSaveDataTemp.LevelName;
-		ListStruct.NameData = "随便乱写个名字";
+		ListStruct.NameData = L"随便乱写个名字";
 		ListStruct.PlayerConfig = "PlayerData";
 		ListStruct.DataPic = "Picture";
 		ListStruct.SaveTime = CurSaveDataTemp.Timestamp.ToString();
+		ListStruct.MapPackageName = CurSaveDataTemp.LevelPackageName;
 
 		GameSaveData.StructData.Add(SaveGameID , ListStruct);
 
@@ -136,11 +137,22 @@ bool USaveGameSystem::LoadGame(const UObject* WorldContextObject ,FString GameID
 		/* 先加载地图  先测试一下 */
 		//DataListStruct.MapData
 		if (ULoadMapSystem* LoadMapSystem = ULoadMapSystem::Get(WorldContextObject))
-			LoadMapSystem->LoadLevel(WorldContextObject, GameID);
+		{
+			//准备参数
+			LoadParam.GameID = GameID;
+			LoadMapSystem->LoadLevel(WorldContextObject, DataListStruct.MapPackageName, false, this, "LoadDataAfterLoaded");
+
+		}
+			
 
 		/* 加载完毕地图后再加载Actor */
 		//SerializeSystem->LoadActorData(WorldContextObject, GameID);
 	}
 
 	return false;
+}
+
+void USaveGameSystem::LoadDataAfterLoaded(FName LevelName, const UObject* WorldContextObject)
+{
+	SerializeSystem->LoadActorData(WorldContextObject, LoadParam.GameID);
 }

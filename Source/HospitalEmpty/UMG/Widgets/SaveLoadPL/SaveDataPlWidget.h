@@ -35,7 +35,10 @@ public:
 
 
 public:
-	UPROPERTY(VisibleAnyWhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	UHpTestListView *SaveList;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Item蓝图路径" ,  meta = ( Category = "BindWidget"))
+	FString ItemPath;
 
 };

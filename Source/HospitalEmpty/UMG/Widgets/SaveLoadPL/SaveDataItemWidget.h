@@ -30,7 +30,7 @@ public:
 		Super::NativeTick(MyGeometry , InDeltaTime);
 	};
 	
-	//virtual FEventReply OnMouseButtonDown( const FGeometry& InGeometry, const FPointerEvent& InMouseEvent )override;
+	virtual FReply NativeOnMouseButtonDown( const FGeometry& InGeometry, const FPointerEvent& InMouseEvent )override;
 
 public:
 	/* 存档缩略图 */
@@ -45,5 +45,8 @@ public:
 
 	UPROPERTY()
 	FString GameID = "";
+
+	UPROPERTY()
+	FString LevelName = "";
 
 };

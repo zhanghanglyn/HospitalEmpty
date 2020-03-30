@@ -3,6 +3,7 @@
 #include "GameFrame/LoadMapSystem/LoadMapSystem.h"
 #include "GameFrame/SaveGameSystem/SaveGameSystem.h"
 #include "UMG/Widgets/SaveLoadPL/SaveDataItemWidget.h"
+#include "Engine.h"
 
 USaveDataPlWidget::USaveDataPlWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -19,21 +20,32 @@ void USaveDataPlWidget::AddSaveItemToList()
 	//根据有多少个存档显示档位ITEM
 	if (USaveGameSystem* SaveGameSystem = USaveGameSystem::Get(this))
 	{
-		FGameSaveData CurrentData = SaveGameSystem->GetGameSaveData();
-		for (TMap<FString, FSaveDataListStruct>::TConstIterator Iter(CurrentData.StructData) ; Iter; ++Iter)
+		UWorld* MyWorld = GEngine->GetWorldFromContextObject(this, EGetWorldErrorMode::LogAndReturnNull);
+		if (MyWorld)
 		{
-			USaveDataItemWidget* item = CreateWidget<USaveDataItemWidget>(this, USaveDataItemWidget::StaticClass());
-			
-			FSaveDataListStruct ItemData = Iter->Value;
 
-			item->DataName->SetText(FText::FromString(ItemData.NameData));
-			item->SaveTime->SetText(FText::FromString(ItemData.SaveTime));
-			//item->DataPic->SetBrushFromTexture();
-			item->GameID = ItemData.GameID;
+			FGameSaveData CurrentData = SaveGameSystem->GetGameSaveData();
+			for (TMap<FString, FSaveDataListStruct>::TConstIterator Iter(CurrentData.StructData); Iter; ++Iter)
+			{
+				UClass* Temp_Widget = LoadClass<UUserWidgetBase>(NULL, ItemPath.GetCharArray().GetData());
+				if (Temp_Widget != nullptr)
+				{
 
-			item->MouseClickDelegate.BindUFunction(this, "ClickDataCall");
+					USaveDataItemWidget* item = CreateWidget<USaveDataItemWidget>(MyWorld, Temp_Widget);//USaveDataItemWidget::StaticClass());
 
-			SaveList->AddChildToList(item);
+					FSaveDataListStruct ItemData = Iter->Value;
+
+					item->DataName->SetText(FText::FromString(ItemData.NameData));
+					item->SaveTime->SetText(FText::FromString(ItemData.SaveTime));
+					//item->DataPic->SetBrushFromTexture();
+					item->GameID = ItemData.GameID;
+					item->LevelName = ItemData.MapData;
+
+					item->MouseClickDelegate.BindUFunction(this, "ClickDataCall");
+
+					SaveList->AddChildToList(item);
+				}
+			}
 		}
 		
 	}

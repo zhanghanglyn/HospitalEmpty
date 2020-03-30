@@ -10,6 +10,8 @@
 #include "GameFrame/SaveGameSystem/testObj/ChildSerializeObj.h"
 #include "UObject/UnrealType.h"
 #include "Engine/Level.h"
+//#include "AssetRegistryModule.h"
+//#include "AssetData.h"
 
 FString USerializeSystemNew::OUTER_TYPE_WORLD = "WORLD";
 FString USerializeSystemNew::OUTER_TYPE_LEVEL = "LEVEL";
@@ -48,6 +50,7 @@ bool USerializeSystemNew::SaveAllActorData(const UObject* WorldContextObject , F
 	FGameSerializeData GameSaveSerializeData;
 	GameSaveSerializeData.GameID = *GameID;//"SaveData1";
 	GameSaveSerializeData.Timestamp = FDateTime::Now();
+
 	/* 3.27 存一下当前的level名字 */
 	UWorld* MyWorld = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
 	if (MyWorld)
@@ -55,8 +58,16 @@ bool USerializeSystemNew::SaveAllActorData(const UObject* WorldContextObject , F
 		ULevel* CurrentLevel = MyWorld->GetCurrentLevel();
 		if (CurrentLevel)
 		{
-			GameSaveSerializeData.LevelName = CurrentLevel->GetName();
+			GameSaveSerializeData.LevelName = MyWorld->GetName();//CurrentLevel->GetName();
 		}
+
+		//FString FullNamePath = MyWorld->GetFullName();
+		//FString LeftString;
+		//FString RightString;
+		//FullNamePath.Split("/", &LeftString, &RightString, ESearchCase::IgnoreCase, ESearchDir::FromEnd);
+		//FName PackageNameFinal = *(LeftString + "/" + MyWorld->GetName() + ".umap");
+
+		GameSaveSerializeData.LevelPackageName = *(MyWorld->GetName());
 	}
 
 	for (AActor* InActor : SaveActors)

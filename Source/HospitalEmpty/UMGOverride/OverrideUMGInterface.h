@@ -21,11 +21,6 @@ public:
 */
 class UMGInterFace
 {
-
-	DECLARE_DELEGATE_ThreeParams(DMouseBtnDownCall, const FGeometry&, const FPointerEvent& , UUMGParamBase*)
-	DECLARE_DELEGATE_ThreeParams(DMouseBtnDownMoveCall, const FGeometry&, const FPointerEvent&, UUMGParamBase*)
-	DECLARE_DELEGATE_ThreeParams(DMouseBtnUpCall, const FGeometry&, const FPointerEvent&, UUMGParamBase*)
-
 public:
 	UMGInterFace() {};
 
@@ -33,6 +28,10 @@ public:
 	//void XXXX;
 
 public:
+	DECLARE_DELEGATE_ThreeParams(DMouseBtnDownCall, const FGeometry&, const FPointerEvent&, UUMGParamBase*)
+	DECLARE_DELEGATE_ThreeParams(DMouseBtnDownMoveCall, const FGeometry&, const FPointerEvent&, UUMGParamBase*)
+	DECLARE_DELEGATE_ThreeParams(DMouseBtnUpCall, const FGeometry&, const FPointerEvent&, UUMGParamBase*)
+
 	//开始点击的委托
 	DMouseBtnDownCall DelegateMouseBtnDownCall;
 

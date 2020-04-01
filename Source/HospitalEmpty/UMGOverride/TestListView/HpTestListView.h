@@ -17,6 +17,9 @@ class UHpTestListView : public UPanelWidget
 {
 	GENERATED_UCLASS_BODY()
 
+	DECLARE_DELEGATE_OneParam( FDelegateMouseButtonDown , FString )
+	FDelegateMouseButtonDown DelegateMouseButtonDown;
+
 public:
 #if WITH_EDITOR
 	/* 返回一个在UMG对应列表中的分类 */
@@ -51,6 +54,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Canvas Panel")
 	UHpListViewSlot* AddChildToList(UWidget* Content);
 
+	/* 外部调用，为ListView绑定鼠标按下事件 */
+	UFUNCTION(BlueprintCallable)
+	void BindMouseButtonDownCall(UObject* InObj, FName InFunctionName, FString Param);
+
 	/* 点击ListView的回调 */
 	void MouseDownListViewCall(const FGeometry&, const FPointerEvent&, UUMGParamBase* Param);
 
@@ -68,9 +75,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ListView参数", meta = (DisplayName = "是否ITEM起始不加Offset"))
 	bool BStartNotOffset = false; 
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ListView参数", meta = (DisplayName = "是否裁切"))
+	bool BClipping = false;
+
 protected:
 	/* 对应的SlistView Widget */
 	TSharedPtr<SHpListView> HpListView;
+
+	/* 该ListView的DesignSize */
+	FVector2D DesignSize = FVector2D::ZeroVector;
 
 	//UPROPERTY()
 	//USlateWidgetStyleAsset* Style_DEPRECATED;

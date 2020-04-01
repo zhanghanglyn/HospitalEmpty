@@ -20,7 +20,7 @@ void UCreateWidget::NativeConstruct(){
 	DecorationSystemMgr = UDecorationSystemMgr::Get(this);
 
 	//加载两个button并且添加到List中并且设置点击函数  测试函数，先为不同的ITEM设置不同的回调函数
-	for (int32 BtnCount = 0; BtnCount < 4; BtnCount++)
+	for (int32 BtnCount = 0; BtnCount < 14; BtnCount++)
 	{
 		UButton* item = NewObject<UButton>(this);
 		FScriptDelegate Del;
@@ -31,7 +31,18 @@ void UCreateWidget::NativeConstruct(){
 		item->OnClicked.Add(Del);
 		ListView->AddChildToList(item);
 	}
+
+	ListView->BindMouseButtonDownCall(this, FName("OnClickListView"),"test param");
+
 };
+
+void UCreateWidget::OnClickListView(FString Param, FString TestParam)
+{
+	
+	FString aaa = TestParam;
+	int32 aaa1 = 1;
+	//UE_LOG(LogTemp, Warning, TEXT("OnClickListView :  TestParam : %s" ), TestParam);
+}
 
 void UCreateWidget::AddToListView(UWidget* Content)
 {

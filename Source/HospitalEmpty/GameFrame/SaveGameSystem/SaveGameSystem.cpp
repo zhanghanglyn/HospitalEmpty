@@ -136,17 +136,17 @@ bool USaveGameSystem::LoadGame(const UObject* WorldContextObject ,FString GameID
 		FSaveDataListStruct DataListStruct = GameSaveData.StructData[GameID];
 		/* 先加载地图  先测试一下 */
 		//DataListStruct.MapData
-		if (ULoadMapSystem* LoadMapSystem = ULoadMapSystem::Get(WorldContextObject))
+		/*if (ULoadMapSystem* LoadMapSystem = ULoadMapSystem::Get(WorldContextObject))
 		{
 			//准备参数
 			LoadParam.GameID = GameID;
 			LoadMapSystem->LoadLevel(WorldContextObject, DataListStruct.MapPackageName, false, this, "LoadDataAfterLoaded");
 
-		}
+		}*/
 			
 
 		/* 加载完毕地图后再加载Actor */
-		//SerializeSystem->LoadActorData(WorldContextObject, GameID);
+		SerializeSystem->LoadActorData(WorldContextObject, GameID);
 	}
 
 	return false;

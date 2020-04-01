@@ -32,6 +32,9 @@ public:
 	void AddToListView(UWidget* Content);
 
 protected:
+	UFUNCTION(BlueprintCallable)
+	void OnClickListView(FString Param, FString TestParam);
+	
 	//测试对应点击3个不同的家具
 	UFUNCTION(BlueprintCallable)
 	void OnClickedListItem0();

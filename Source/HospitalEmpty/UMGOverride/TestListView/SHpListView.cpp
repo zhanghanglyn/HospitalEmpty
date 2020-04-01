@@ -16,8 +16,8 @@ void SHpListView::Construct(const FArguments& InArgs)
 	ColorAndOpacity = InArgs._ColorAndOpacity;
 	BStartNotOffset = InArgs._InBStartNotOffset;
 	LayoutDirection = InArgs._InLayoutDirection;
-	//DelegateMouseBtnDownCall = InArgs._InMouseBtnDownCall;
-
+	//DelegateMouseBtnDownCall = InArgs._CMouseBtnDownCallBack;
+	BClipping = InArgs._InBClipping;
 
 
 	/* 初始化Slot */  
@@ -75,6 +75,7 @@ void SHpListView::Init()
 
 }
 #pragma optimize("",off)
+/* 但其实这个函数，在Scanvas.cpp里面，是返回的Zero */
 FVector2D SHpListView::ComputeDesiredSize(float) const
 {
 	FVector2D FinalDesiredSize(0, 0);
@@ -135,8 +136,8 @@ FVector2D SHpListView::ComputeDesiredSize(float) const
 
 		}
 	}
-
-	return FinalDesiredSize;
+	/* 4.1 */return DesignSize;
+	//return FinalDesiredSize;
 }
 
 void SHpListView::OnArrangeChildren(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren) const
@@ -198,7 +199,7 @@ void SHpListView::OnArrangeChildren(const FGeometry& AllottedGeometry, FArranged
 				// The child widget being arranged
 				CurSlot.GetWidget(),
 				// Child's local position (i.e. position within parent)
-				StartLocation,
+				StartLocation + DragMoveOffset,
 				// Child's size
 				CurWidgetSize
 			));
@@ -210,17 +211,9 @@ void SHpListView::OnArrangeChildren(const FGeometry& AllottedGeometry, FArranged
 int32 SHpListView::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect,
 	FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
 {
-	/* 在底下画一个背景图 */
-	/*const FGeometry FlippedGeometry = AllottedGeometry.MakeChild(FSlateRenderTransform(FScale2D(1, 1)));
-	FSlateDrawElement::MakeBox(
-		OutDrawElements,
-		LayerId,
-		FlippedGeometry.ToPaintGeometry(),
-		GetBackgroundImage(),
-		ESlateDrawEffect::DisabledEffect,
-		GetBackgroundImage()->GetTint(InWidgetStyle)
-		//GetBackgroundImage()->GetTint(InWidgetStyle) * InWidgetStyle.GetColorAndOpacityTint() * FLinearColor::White
-	);*/
+	if(BClipping)
+		OutDrawElements.PushClip(FSlateClippingZone(AllottedGeometry));
+
 	const FSlateBrush* ImageBrush = GetBackgroundImage();
 	//画背景图2.0 
 	if ((ImageBrush != nullptr) && (ImageBrush->DrawAs != ESlateBrushDrawType::NoDrawType))
@@ -256,6 +249,9 @@ int32 SHpListView::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeom
 			MaxLayerId = FMath::Max(MaxLayerId, CurWidgetsMaxLayerId);
 		}
 	}
+
+	if (BClipping)
+		OutDrawElements.PopClip();
 
 	return MaxLayerId;
 }
@@ -332,6 +328,11 @@ void SHpListView::SetColorAndOpacity(FLinearColor InColorAndOpacity)
 	}
 }
 
+void SHpListView::SetDesignSize(FVector2D InDesignSize)
+{
+	DesignSize = InDesignSize;
+}
+
 /************************************************************************/
 /*                           点击ListView相关                           */
 /************************************************************************/
@@ -339,11 +340,53 @@ void SHpListView::SetColorAndOpacity(FLinearColor InColorAndOpacity)
 /* 并不拦截，还是可以往下传递 */
 FReply SHpListView::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-	FReply Reply = FReply::Unhandled();
+	FReply Reply = FReply::Handled();
 
-	if (DelegateMouseBtnDownCall.IsBound())
-		DelegateMouseBtnDownCall.Execute(MyGeometry , MouseEvent , MouseDownParamBase.Get());
+	//if (DelegateMouseBtnDownCall.IsBound())
+		//DelegateMouseBtnDownCall.Execute(MyGeometry , MouseEvent , MouseDownParamBase.Get());
 
+	BMouseButtonDown = true;
+	FVector2D MouseScreenPos = MouseEvent.GetScreenSpacePosition();  //鼠标指针在屏幕上的位置
+	FVector2D absolutePos = MyGeometry.GetAbsolutePosition();	//该控件在屏幕上的位置，相减就是鼠标在该控件上的相对位置
+	DragLastPos = MouseScreenPos;
+
+	//DragMoveOffset = FVector2D::ZeroVector;
 
 	return Reply;
+}
+
+FReply SHpListView::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+{
+	FReply Reply = FReply::Handled();
+
+	/* 设置移动距离 */
+	if (BMouseButtonDown)
+	{
+		FVector2D MouseScreenPos = MouseEvent.GetScreenSpacePosition();
+
+		if (LayoutDirection == FLayoutDirection::Horizontal)
+			DragMoveOffset.X += (MouseScreenPos.X - DragLastPos.X);
+		else
+			DragMoveOffset.Y += (MouseScreenPos.Y - DragLastPos.Y);
+
+		DragLastPos = MouseScreenPos;
+	}
+
+	return Reply;
+}
+
+FReply SHpListView::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+{
+	FReply Reply = FReply::Unhandled();
+
+	BMouseButtonDown = false;
+
+	return Reply;
+}
+
+void SHpListView::OnMouseLeave(const FPointerEvent& MouseEvent)
+{
+	UE_LOG( LogTemp , Warning , TEXT("SHpListView::OnMouseLeave") );
+	BMouseButtonDown = false;
+
 }

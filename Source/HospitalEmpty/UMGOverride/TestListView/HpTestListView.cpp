@@ -88,13 +88,21 @@ void UHpTestListView::SynchronizeProperties()
 	HpListView.Get()->SetRow(Row);
 	HpListView.Get()->SetBStartNotOffset(BStartNotOffset);
 	HpListView.Get()->SetItemOffSet(ItemOffSet);
+	HpListView.Get()->SetBClipping(BClipping);
+
+	/* 获取DesignSize并且进行设置 */
+	if (UCanvasPanelSlot* CanvasPanelSlot = Cast<UCanvasPanelSlot>(Slot))
+	{
+		DesignSize = CanvasPanelSlot->GetSize();
+	}
+	HpListView.Get()->SetDesignSize(DesignSize);
 }
 
 TSharedRef<SWidget> UHpTestListView::RebuildWidget()
 {
 	//在这里为他绑定上点击回调参数
-	HpListView = SNew(SHpListView)
-		.InRow(5).InColumn(5);//.InBGImage()
+	HpListView = SNew(SHpListView) //
+		.InRow(5).InColumn(5).InBClipping(BClipping);//.InBGImage()
 
 	for (UPanelSlot* PanelSlot : Slots)
 	{
@@ -102,16 +110,14 @@ TSharedRef<SWidget> UHpTestListView::RebuildWidget()
 		{
 			TypedSlot->Parent = this;
 
-			//SConstraintCanvas* MyCanvas = Cast<SConstraintCanvas>(HpListView.Get());
-			//TSharedPtr< SConstraintCanvas> aAAAA = MakeShareable(MyCanvas);
-			//TypedSlot->BuildSlot(aAAAA.ToSharedRef());
 			TypedSlot->BuildSlot(HpListView.ToSharedRef());
 		}
 	}
 
 	HpListView.Get()->SetMouseDownParam(nullptr);
 
-	HpListView.Get()->DelegateMouseBtnDownCall.BindUObject(this, &UHpTestListView::MouseDownListViewCall);
+	//用蓝图去进行事件的绑定，没有必要在这里设置了
+	//HpListView.Get()->DelegateMouseBtnDownCall.BindUObject(this, &UHpTestListView::MouseDownListViewCall);
 
 	return HpListView.ToSharedRef();
 }
@@ -119,7 +125,16 @@ TSharedRef<SWidget> UHpTestListView::RebuildWidget()
 /*******************************************************************/
 /*                        点击回调相关                             */
 /*******************************************************************/
+void UHpTestListView::BindMouseButtonDownCall(UObject* InObj, FName InFunctionName, FString Param)
+{
+	DelegateMouseButtonDown.BindUFunction(InObj, InFunctionName,Param);
+}
+
+
 void UHpTestListView::MouseDownListViewCall(const FGeometry&, const FPointerEvent&, UUMGParamBase* Param)
 {
 	UE_LOG(LogTemp, Warning, TEXT("  MouseDownListViewCall   !!!!!!!!!"));
+	if (DelegateMouseButtonDown.IsBound())
+		DelegateMouseButtonDown.Execute("1");
 }
+

@@ -16,6 +16,7 @@
 /*
 	自定义一个简单的ListView，此为Slate部分
 	后续涉及到拖动   20.2.28 再继承一个InterFace接口来实现回调等
+	4.1 其实list的大小不应该由内部多少个Child来决定，而是应该由外部设置的宽高来决定
 */
 class SHpListView : public SPanel , public UMGInterFace
 {
@@ -98,12 +99,14 @@ public:
 		, _InOffset(FVector2D::ZeroVector)
 		, _InBStartNotOffset(false)
 		, _InLayoutDirection(FLayoutDirection::Vertical)
+		, _InBClipping(true)
 	{
 		_Visibility = EVisibility::SelfHitTestInvisible;
 	}
 	SLATE_SUPPORTS_SLOT(SHpListView::FSlot)  //会在自身注册一个Slots，所以在Construct中，可以获取Slots
 
 	SLATE_STYLE_ARGUMENT(FHpListViewStyle, Style)
+	//SLATE_EVENT(DMouseBtnDownCall , CMouseBtnDownCallBack)
 	SLATE_ATTRIBUTE( const FSlateBrush* , InBGImage)
 	SLATE_ATTRIBUTE(FSlateColor, ColorAndOpacity)
 	SLATE_ARGUMENT( int32, InRow)
@@ -111,7 +114,7 @@ public:
 	SLATE_ARGUMENT(FVector2D, InOffset)
 	SLATE_ARGUMENT(bool, InBStartNotOffset)
 	SLATE_ARGUMENT(FLayoutDirection, InLayoutDirection)	//排列方向
-
+	SLATE_ARGUMENT(bool , InBClipping)
 	//SLATE_EVENT(DMouseBtnDownCall, InMouseBtnDownCall)
 
 	SLATE_END_ARGS()
@@ -133,8 +136,9 @@ public:
 	//virtual bool SupportsKeyboardFocus() const override { return true; };
 	//virtual void OnFocusLost(const FFocusEvent& InFocusEvent) override;
 	virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
-	//virtual FReply OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
-	//virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
+	virtual FReply OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
+	virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
+	virtual void OnMouseLeave(const FPointerEvent& MouseEvent) override;
 	virtual FVector2D ComputeDesiredSize(float) const override;
 	/** virtual end **/
 
@@ -179,12 +183,18 @@ public:
 	void SetColorAndOpacity(const TAttribute<FSlateColor>& InColorAndOpacity);
 	/** See the ColorAndOpacity attribute */
 	void SetColorAndOpacity(FLinearColor InColorAndOpacity);
-
+	/* 设置ComputeDesiredSize的Size,该Size以外部拖动的大小为主 */
+	void SetDesignSize( FVector2D InDesignSize );
 	/* 设置点击回调的参数 */
 	void SetMouseDownParam(UUMGParamBase* InClcikParam)
 	{
 		MouseDownParamBase = InClcikParam;
 	};
+	/* 设置是否裁切 */
+	void SetBClipping(bool InBClipping)
+	{
+		BClipping = InBClipping;
+	}
 protected:
 	/*先做一些初始化的计算，因为Arrange是每一帧都在跑的*/
 	void Init();
@@ -203,7 +213,24 @@ protected:
 	/** Color and opacity scale for this image */
 	TAttribute<FSlateColor> ColorAndOpacity;
 
-protected:
+	/* 设计大小 */
+	FVector2D DesignSize;
+
+	/* 鼠标是否按下 */
+	bool BMouseButtonDown = false;
+
+	/********************      拖动内部相关， ********************/
+	/* 对应方向上的移动距离，鼠标拖动内部时，根据一个移动的加速度来设置Offset，该Offset设置最终的List内部位置 */
+	FVector2D DragMoveOffset = FVector2D::ZeroVector;
+	/* 当拖动开始时的鼠标位置 */
+	FVector2D DragLastPos = FVector2D::ZeroVector;
+	/* 当前拖动的鼠标位置 */
+	FVector2D DragCurPos = FVector2D::ZeroVector;
+	/* 加速度,通过一个递减的加速度，可以来实现List拖动完毕后继续滑行的功能 */
+	float ASpeed = 0;
+
+	/********************     ***********     ********************/
+
 	//背景图片
 	TAttribute<const FSlateBrush*> BgImage;
 
@@ -221,5 +248,8 @@ protected:
 
 	//排布方向
 	FLayoutDirection LayoutDirection;
+
+	/* 是否开启裁剪 */
+	bool BClipping;
 
 };

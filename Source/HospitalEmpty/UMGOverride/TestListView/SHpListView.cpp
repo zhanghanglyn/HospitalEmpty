@@ -1,6 +1,8 @@
 ﻿#include "SHpListView.h"
 #include "Layout/ArrangedChildren.h"
 #include "GenericPlatform/GenericPlatformMath.h"
+#include "Runtime/Engine/Public/Engine.h"
+#include "Base/HptGameInstance.h"
 
 SHpListView::SHpListView() : Children(this)
 {
@@ -386,7 +388,15 @@ FReply SHpListView::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerE
 
 void SHpListView::OnMouseLeave(const FPointerEvent& MouseEvent)
 {
-	UE_LOG( LogTemp , Warning , TEXT("SHpListView::OnMouseLeave") );
+	//UE_LOG( LogTemp , Warning , TEXT("SHpListView::OnMouseLeave") );
 	BMouseButtonDown = false;
 
+}
+
+/************************************************************************/
+/*                           Tick 相关                                  */
+/************************************************************************/
+void SHpListView::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
+{
+	
 }

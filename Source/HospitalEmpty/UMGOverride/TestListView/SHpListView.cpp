@@ -359,7 +359,7 @@ FReply SHpListView::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent
 
 	return Reply;
 }
-#pragma optimize("",off)
+
 FReply SHpListView::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
 	FReply Reply = FReply::Unhandled();
@@ -379,7 +379,7 @@ FReply SHpListView::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerE
 
 	return Reply;
 }
-#pragma optimize("",off)
+
 void SHpListView::OnMouseLeave(const FPointerEvent& MouseEvent)
 {
 	FReply Reply = FReply::Unhandled();

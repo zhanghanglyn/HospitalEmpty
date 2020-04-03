@@ -89,11 +89,18 @@ void UHpTestListView::SynchronizeProperties()
 	HpListView.Get()->SetBStartNotOffset(BStartNotOffset);
 	HpListView.Get()->SetItemOffSet(ItemOffSet);
 	HpListView.Get()->SetBClipping(BClipping);
+	HpListView.Get()->SetBSetListViewSizeWithContent(BSetListViewSizeWithContent);
+	HpListView.Get()->SetBaseASpeed(BaseASpeed);
+	HpListView.Get()->SetLayOut(LayoutDirection);
+	HpListView.Get()->SetDownASpeed(DownASpeed);
 
 	/* 获取DesignSize并且进行设置 */
 	if (UCanvasPanelSlot* CanvasPanelSlot = Cast<UCanvasPanelSlot>(Slot))
 	{
-		DesignSize = CanvasPanelSlot->GetSize();
+		//if (CanvasPanelSlot->bAutoSize)
+		//	DesignSize = HpListView->GetDesiredSize();
+		//else
+			DesignSize = CanvasPanelSlot->GetSize();
 	}
 	HpListView.Get()->SetDesignSize(DesignSize);
 }
@@ -102,7 +109,7 @@ TSharedRef<SWidget> UHpTestListView::RebuildWidget()
 {
 	//在这里为他绑定上点击回调参数
 	HpListView = SNew(SHpListView) //
-		.InRow(5).InColumn(5).InBClipping(BClipping);//.InBGImage()
+		.InRow(5).InColumn(5).InBClipping(BClipping).InLayoutDirection(LayoutDirection);//.InBGImage()
 
 	for (UPanelSlot* PanelSlot : Slots)
 	{

@@ -78,6 +78,19 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ListView参数", meta = (DisplayName = "是否裁切"))
 	bool BClipping = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ListView参数", meta = (DisplayName = "是否用内容大小设置ListView,与SizeToContent配合使用"))
+	bool BSetListViewSizeWithContent = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ListView参数", meta = (DisplayName = "基础移动加速度"))
+	float BaseASpeed = 500;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ListView参数", meta = (DisplayName = "加速度递减值"))
+	float DownASpeed = 0.1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ListView参数", meta = (DisplayName = "LayOut方向"))
+	FLayoutDirection LayoutDirection = FLayoutDirection::Vertical;
+
+
 protected:
 	/* 对应的SlistView Widget */
 	TSharedPtr<SHpListView> HpListView;

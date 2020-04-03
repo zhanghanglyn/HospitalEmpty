@@ -100,6 +100,7 @@ public:
 		, _InBStartNotOffset(false)
 		, _InLayoutDirection(FLayoutDirection::Vertical)
 		, _InBClipping(true)
+		, _InExtremOffset(0)
 	{
 		_Visibility = EVisibility::SelfHitTestInvisible;
 	}
@@ -115,6 +116,7 @@ public:
 	SLATE_ARGUMENT(bool, InBStartNotOffset)
 	SLATE_ARGUMENT(FLayoutDirection, InLayoutDirection)	//排列方向
 	SLATE_ARGUMENT(bool , InBClipping)
+	SLATE_ARGUMENT(float , InExtremOffset)
 	//SLATE_EVENT(DMouseBtnDownCall, InMouseBtnDownCall)
 
 	SLATE_END_ARGS()
@@ -140,6 +142,8 @@ public:
 	virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual void OnMouseLeave(const FPointerEvent& MouseEvent) override;
 	virtual FVector2D ComputeDesiredSize(float) const override;
+	virtual FReply OnFocusReceived(const FGeometry& MyGeometry, const FFocusEvent& InFocusEvent) override;
+	virtual void OnFocusLost(const FFocusEvent& InFocusEvent) override;
 
 	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
 	/** virtual end **/
@@ -197,9 +201,34 @@ public:
 	{
 		BClipping = InBClipping;
 	}
+	/* 设置可继续拖动的距离 */
+	void SetExtremOffset(float InExtremOffset)
+	{
+		ExtremOffset = InExtremOffset;
+	}
+	/* 设置基础移动加速度 */
+	void SetBaseASpeed(float InBaseASpeed) { BaseASpeed = InBaseASpeed; };
+	/* 设置加速度递减值 */
+	void SetDownASpeed(float InDownASpeed) {
+		DownASpeed = InDownASpeed;
+	};
+	/* 设置LayOut */
+	void SetLayOut(FLayoutDirection InLayOut) { LayoutDirection = InLayOut; };
+
+	/* 是否用内容大小设置ListView */
+	void SetBSetListViewSizeWithContent(bool InBSetListViewSizeWithContent) { BSetListViewSizeWithContent = InBSetListViewSizeWithContent; };
 protected:
 	/*先做一些初始化的计算，因为Arrange是每一帧都在跑的*/
 	void Init();
+
+	/* 根据当前拖动的DragMoveOffset计算一下，拖动的最大距离和最小距离等 */
+	void CalculateDragMoveOffset(FVector2D &InDragOffset );
+
+	/* 计算一个当前所有ITEM的总大小(计算一次就好) */
+	FVector2D ComputeAllItemSize() const;
+
+	/* 根据时间计算加速度 */
+	void CalculateASpeed();
 
 public:
 	//开始点击的委托
@@ -220,18 +249,6 @@ protected:
 
 	/* 鼠标是否按下 */
 	bool BMouseButtonDown = false;
-
-	/********************      拖动内部相关， ********************/
-	/* 对应方向上的移动距离，鼠标拖动内部时，根据一个移动的加速度来设置Offset，该Offset设置最终的List内部位置 */
-	FVector2D DragMoveOffset = FVector2D::ZeroVector;
-	/* 当拖动开始时的鼠标位置 */
-	FVector2D DragLastPos = FVector2D::ZeroVector;
-	/* 当前拖动的鼠标位置 */
-	FVector2D DragCurPos = FVector2D::ZeroVector;
-	/* 加速度,通过一个递减的加速度，可以来实现List拖动完毕后继续滑行的功能 */
-	float ASpeed = 0;
-
-	/********************     ***********     ********************/
 
 	//背景图片
 	TAttribute<const FSlateBrush*> BgImage;
@@ -254,4 +271,37 @@ protected:
 	/* 是否开启裁剪 */
 	bool BClipping;
 
+	/* 是否使用内容大小来设置ListView的大小 */
+	bool BSetListViewSizeWithContent = false;
+
+	/*
+			********  以下为新添加，对于拖动相关的变量  ********
+	*/
+	/* 对应方向上的移动距离，鼠标拖动内部时，根据一个移动的加速度来设置Offset，该Offset设置最终的List内部位置 */
+	FVector2D DragMoveOffset = FVector2D::ZeroVector;
+	/* 当拖动开始时的鼠标位置 */
+	FVector2D DragLastPos = FVector2D::ZeroVector;
+	/* 当前拖动的鼠标位置 */
+	FVector2D DragCurPos = FVector2D::ZeroVector;
+	/* 用来计算加速度的点击位置 */
+	FVector2D DragClickPos = FVector2D::ZeroVector;
+	/* 加速度,通过一个递减的加速度，可以来实现List拖动完毕后继续滑行的功能 */
+	float ASpeed = 0;
+	/* 加速度的基数 */
+	float BaseASpeed = 100;
+	float DownASpeed = 1;
+
+	/* 当到达拖动边界时，还可以拖动的一段距离 */
+	float ExtremOffset = 0;
+	/* 最大以及最小可以拖动的距离 */
+	float MaxUp = 0;
+	float MaxDown = 0;
+	/* 当前所有Item的最大设计大小 */
+	FVector2D FinalDesiredSize = FVector2D::ZeroVector;
+	/* 本次拖动所使用的时间 */
+	int64 DragTimestamp = 0 ;
+	/* 因为用FTime获取的时间有问题，所以自己在Tick中增加 */
+	float DragTime = 0;
+	bool BStartCountTime = false;
+	/*************************	END	***********************/
 };

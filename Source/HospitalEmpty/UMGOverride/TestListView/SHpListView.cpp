@@ -20,7 +20,7 @@ void SHpListView::Construct(const FArguments& InArgs)
 	LayoutDirection = InArgs._InLayoutDirection;
 	//DelegateMouseBtnDownCall = InArgs._CMouseBtnDownCallBack;
 	BClipping = InArgs._InBClipping;
-
+	ExtremOffset = InArgs._InExtremOffset;
 
 	/* 初始化Slot */  
 	const int32 NumSlots = InArgs.Slots.Num();
@@ -80,66 +80,15 @@ void SHpListView::Init()
 /* 但其实这个函数，在Scanvas.cpp里面，是返回的Zero */
 FVector2D SHpListView::ComputeDesiredSize(float) const
 {
-	FVector2D FinalDesiredSize(0, 0);
 
-	FVector2D StartLocation = FVector2D::ZeroVector;//Offset;
-	if (!BStartNotOffset)
-		StartLocation.Y = Offset.Y;
-	int32 LineCount = 1;
+	//如果当前还未计算过总大小，计算一次
+	//if (FinalDesiredSize.IsZero())
+	//	FinalDesiredSize = FVector2D(ComputeAllItemSize());
 
-	//上一个Item的坐标
-	FVector2D LastItemLocation = FVector2D::ZeroVector;
-	//当前行的最大宽度
-	float LastWidth = 0;
-	float MaxHeight = 0;
-	float MaxWidth = 0;
+	if (BSetListViewSizeWithContent)
+		return ComputeAllItemSize();
 
-	for (int32 ChildIndex = 0; ChildIndex < Children.Num(); ChildIndex++)
-	{
-		const SHpListView::FSlot& CurSlot = Children[ChildIndex];
-		const EVisibility ChildVisibilty = CurSlot.GetWidget()->GetVisibility();
-		if (ChildVisibilty != EVisibility::Collapsed)
-		{
-			//const FVector2D CurWidgetSize = CurSlot.GetWidget()->GetDesiredSize();
-			bool BAutoSize = CurSlot.AutoSizeAttr.Get();
-			const FVector2D CurWidgetSize = BAutoSize ? CurSlot.GetWidget()->GetDesiredSize() : CurSlot.SizeAttr.Get(); //.GetWidget()->GetDesiredSize(); //20.2.27 修改
-
-			//根据行列计算位置
-			int32 RowOff = ChildIndex % Row;
-			StartLocation.X = LastItemLocation.X + (LastWidth + Offset.X);//(CurWidgetSize.X + Offset.X);
-			LastWidth = CurWidgetSize.X;
-			MaxWidth = StartLocation.X + CurWidgetSize.X;
-			if (BStartNotOffset && ChildIndex == 0)
-				StartLocation.X -= Offset.X;
-
-			if (LineCount > Row)
-			{
-				//返回成下一行第一个
-				StartLocation.Y += (MaxHeight + Offset.Y);//( CurWidgetSize.Y + Offset.Y);
-				StartLocation.X = Offset.X;
-				LineCount = 1;
-				// 20.2.28 换行后，当前行的最大距离要清空
-				MaxHeight = 0;
-				//换行后，清除当前行的X Offset
-				if (BStartNotOffset)
-					StartLocation.X -= Offset.X;
-			}
-
-			//记录下当前行的最大距离
-			MaxHeight = FGenericPlatformMath::Max(CurWidgetSize.Y, MaxHeight);
-			//换行的时候，才会判断最大X和最大Y
-			FinalDesiredSize.X = FGenericPlatformMath::Max(FinalDesiredSize.X, MaxWidth);
-			FinalDesiredSize.Y = FGenericPlatformMath::Max(FinalDesiredSize.Y, (StartLocation.Y + CurWidgetSize.Y));
-
-			LastItemLocation.X = StartLocation.X;
-			LastItemLocation.Y = StartLocation.Y; //FGenericPlatformMath::Max(LastItemLocation.Y, )
-
-			LineCount++;
-
-		}
-	}
-	/* 4.1 */return DesignSize;
-	//return FinalDesiredSize;
+	return DesignSize;
 }
 
 void SHpListView::OnArrangeChildren(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren) const
@@ -156,8 +105,6 @@ void SHpListView::OnArrangeChildren(const FGeometry& AllottedGeometry, FArranged
 	//当前行的最大高度
 	float MaxHeight = 0;
 
-	//UE_LOG(LogTemp, Warning, TEXT("Child Num :  %d" ));
-
 	for (int32 ChildIndex = 0; ChildIndex < Children.Num() ; ChildIndex++)
 	{
 		const SHpListView::FSlot& CurSlot = Children[ChildIndex];
@@ -167,38 +114,51 @@ void SHpListView::OnArrangeChildren(const FGeometry& AllottedGeometry, FArranged
 			bool BAutoSize = CurSlot.AutoSizeAttr.Get();
 			const FVector2D CurWidgetSize = BAutoSize? CurSlot.GetWidget()->GetDesiredSize() : CurSlot.SizeAttr.Get(); //.GetWidget()->GetDesiredSize(); //20.2.27 修改
 			
-
-			//根据行列计算位置
-			int32 RowOff = ChildIndex % Row;
-			StartLocation.X = LastItemLocation.X + (LastWidth + Offset.X);//(CurWidgetSize.X + Offset.X);
-			LastWidth = CurWidgetSize.X;
-			if (BStartNotOffset && ChildIndex == 0)
-				StartLocation.X -= Offset.X;
-
-			if (LineCount > Row)
+			/* 如果是纵向的排版 */
+			//if (LayoutDirection == FLayoutDirection::Vertical)
 			{
-				//返回成下一行第一个
-				StartLocation.Y += (MaxHeight + Offset.Y);//( CurWidgetSize.Y + Offset.Y);
-				StartLocation.X = Offset.X;
-				LineCount = 1;
-				// 20.2.28 换行后，当前行的最大距离要清空
-				MaxHeight = 0;
-				//换行后，清除当前行的X Offset
-				if (BStartNotOffset)
+				//根据行列计算位置
+				//int32 RowOff = ChildIndex % Row;
+				StartLocation.X = LastItemLocation.X + (LastWidth + Offset.X);//(CurWidgetSize.X + Offset.X);
+				LastWidth = CurWidgetSize.X;
+				if (BStartNotOffset && ChildIndex == 0)
 					StartLocation.X -= Offset.X;
+
+				if (LineCount > Row)
+				{
+					//返回成下一行第一个
+					StartLocation.Y += (MaxHeight + Offset.Y);//( CurWidgetSize.Y + Offset.Y);
+					StartLocation.X = Offset.X;
+					LineCount = 1;
+					// 20.2.28 换行后，当前行的最大距离要清空
+					MaxHeight = 0;
+					//换行后，清除当前行的X Offset
+					if (BStartNotOffset)
+						StartLocation.X -= Offset.X;
+				}
+
+				//记录下当前行的最大距离
+				MaxHeight = FGenericPlatformMath::Max(CurWidgetSize.Y, MaxHeight);
+
+				LastItemLocation.X = StartLocation.X;
+				LastItemLocation.Y = StartLocation.Y; //FGenericPlatformMath::Max(LastItemLocation.Y, )
+
+				LineCount++;
+
+				/* 4.3 如果要裁切，且当前ITEM已经位于显示区域之外了，直接不加入显示 */
+				if (BClipping)
+				{
+					//判断是不是超过了上面显示
+					if ((((StartLocation + DragMoveOffset) + Offset).Y + CurWidgetSize.Y) < 0)
+						continue;
+					//判断是不是超过了下面显示
+					if (((StartLocation + DragMoveOffset - Offset).Y) > DesignSize.Y)
+						continue;
+				}
 			}
-
-			//记录下当前行的最大距离
-			MaxHeight = FGenericPlatformMath::Max(CurWidgetSize.Y, MaxHeight);
-
-			LastItemLocation.X = StartLocation.X;
-			LastItemLocation.Y = StartLocation.Y; //FGenericPlatformMath::Max(LastItemLocation.Y, )
-
-			LineCount++;
-
+			
 			//添加绘制
 			ArrangedChildren.AddWidget(AllottedGeometry.MakeChild(
-				// The child widget being arranged
 				CurSlot.GetWidget(),
 				// Child's local position (i.e. position within parent)
 				StartLocation + DragMoveOffset,
@@ -209,6 +169,7 @@ void SHpListView::OnArrangeChildren(const FGeometry& AllottedGeometry, FArranged
 	}
 
 }
+
 #pragma optimize("",on)
 int32 SHpListView::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect,
 	FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
@@ -342,55 +303,236 @@ void SHpListView::SetDesignSize(FVector2D InDesignSize)
 /* 并不拦截，还是可以往下传递 */
 FReply SHpListView::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-	FReply Reply = FReply::Handled();
+	FReply Reply = FReply::Unhandled();
 
-	//if (DelegateMouseBtnDownCall.IsBound())
-		//DelegateMouseBtnDownCall.Execute(MyGeometry , MouseEvent , MouseDownParamBase.Get());
+	if (IsEnabled() && MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SHpListView::OnMouseButtonDown"));
 
-	BMouseButtonDown = true;
-	FVector2D MouseScreenPos = MouseEvent.GetScreenSpacePosition();  //鼠标指针在屏幕上的位置
-	FVector2D absolutePos = MyGeometry.GetAbsolutePosition();	//该控件在屏幕上的位置，相减就是鼠标在该控件上的相对位置
-	DragLastPos = MouseScreenPos;
+		//如果当前还未计算过总大小，计算一次
+		//if (FinalDesiredSize.IsZero())
+		FinalDesiredSize = ComputeAllItemSize();
 
-	//DragMoveOffset = FVector2D::ZeroVector;
+		Reply = FReply::Handled();
+
+		BMouseButtonDown = true;
+		FVector2D MouseScreenPos = MouseEvent.GetScreenSpacePosition();  //鼠标指针在屏幕上的位置
+		FVector2D absolutePos = MyGeometry.GetAbsolutePosition();	//该控件在屏幕上的位置，相减就是鼠标在该控件上的相对位置
+		DragLastPos = MouseScreenPos;
+
+		DragClickPos = MouseScreenPos;
+
+		/* 为列表计算一个加速度 */
+		{
+			BStartCountTime = true;
+			ASpeed = 0;
+		}
+	}
 
 	return Reply;
 }
 
 FReply SHpListView::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-	FReply Reply = FReply::Handled();
+	FReply Reply = FReply::Unhandled();
 
-	/* 设置移动距离 */
-	if (BMouseButtonDown)
+	//UE_LOG(LogTemp, Warning, TEXT("SHpListView::OnMouseMove"));
+	if (IsEnabled() && BMouseButtonDown)
 	{
-		FVector2D MouseScreenPos = MouseEvent.GetScreenSpacePosition();
+		Reply = FReply::Handled();
 
-		if (LayoutDirection == FLayoutDirection::Horizontal)
-			DragMoveOffset.X += (MouseScreenPos.X - DragLastPos.X);
-		else
-			DragMoveOffset.Y += (MouseScreenPos.Y - DragLastPos.Y);
+		/* 设置移动距离 */
+		//if (BMouseButtonDown)
+		{
+			FVector2D MouseScreenPos = MouseEvent.GetScreenSpacePosition();
 
-		DragLastPos = MouseScreenPos;
+			if (LayoutDirection == FLayoutDirection::Horizontal)
+				DragMoveOffset.X += (MouseScreenPos.X - DragLastPos.X);
+			else if(LayoutDirection == FLayoutDirection::Vertical)
+				DragMoveOffset.Y += (MouseScreenPos.Y - DragLastPos.Y);
+
+			DragLastPos = MouseScreenPos;
+
+			CalculateDragMoveOffset(DragMoveOffset);
+		}
 	}
 
 	return Reply;
 }
-
+#pragma optimize("",off)
 FReply SHpListView::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
 	FReply Reply = FReply::Unhandled();
 
-	BMouseButtonDown = false;
+	if (IsEnabled() && MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SHpListView::OnMouseButtonUp"));
+
+		Reply = FReply::Handled();
+
+		BMouseButtonDown = false;
+
+		ASpeed = 0;
+		CalculateASpeed();
+		BStartCountTime = false;
+	}
+
+	return Reply;
+}
+#pragma optimize("",off)
+void SHpListView::OnMouseLeave(const FPointerEvent& MouseEvent)
+{
+	FReply Reply = FReply::Unhandled();
+
+	if (IsEnabled() && BMouseButtonDown)//MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SHpListView::OnMouseLeave"));
+
+		Reply = FReply::Handled();
+		BMouseButtonDown = false;
+
+		ASpeed = 0;
+		CalculateASpeed();
+		BStartCountTime = false;
+	}
+
+}
+
+FReply SHpListView::OnFocusReceived(const FGeometry& MyGeometry, const FFocusEvent& InFocusEvent)
+{
+	UE_LOG(LogTemp, Warning, TEXT("SHpListView::OnFocusReceived"))
+	FReply Reply = FReply::Handled();
 
 	return Reply;
 }
 
-void SHpListView::OnMouseLeave(const FPointerEvent& MouseEvent)
+void SHpListView::OnFocusLost(const FFocusEvent& InFocusEvent)
 {
-	//UE_LOG( LogTemp , Warning , TEXT("SHpListView::OnMouseLeave") );
-	BMouseButtonDown = false;
+	UE_LOG(LogTemp, Warning, TEXT("SHpListView::OnFocusLost"))
+	
+}
 
+/************************************************************************/
+/*                           拖动 相关                                  */
+/************************************************************************/
+FVector2D SHpListView::ComputeAllItemSize() const 
+{
+	FVector2D TFinalDesiredSize = FVector2D::ZeroVector;
+
+	FVector2D StartLocation = FVector2D::ZeroVector;//Offset;
+	if (!BStartNotOffset)
+		StartLocation.Y = Offset.Y;
+	int32 LineCount = 1;
+
+	//上一个Item的坐标
+	FVector2D LastItemLocation = FVector2D::ZeroVector;
+	//当前行的最大宽度
+	float LastWidth = 0;
+	float MaxHeight = 0;
+	float MaxWidth = 0;
+	/* 4.3 最后一个记录的ITEM宽度的Width */
+	float LastItemWidth = 0;
+
+	for (int32 ChildIndex = 0; ChildIndex < Children.Num(); ChildIndex++)
+	{
+		const SHpListView::FSlot& CurSlot = Children[ChildIndex];
+		const EVisibility ChildVisibilty = CurSlot.GetWidget()->GetVisibility();
+		if (ChildVisibilty != EVisibility::Collapsed)
+		{
+			//const FVector2D CurWidgetSize = CurSlot.GetWidget()->GetDesiredSize();
+			bool BAutoSize = CurSlot.AutoSizeAttr.Get();
+			const FVector2D CurWidgetSize = BAutoSize ? CurSlot.GetWidget()->GetDesiredSize() : CurSlot.SizeAttr.Get(); //.GetWidget()->GetDesiredSize(); //20.2.27 修改
+
+			//根据行列计算位置
+			//int32 RowOff = ChildIndex % Row;
+			StartLocation.X = LastItemLocation.X + (LastWidth + Offset.X);//(CurWidgetSize.X + Offset.X);
+			LastWidth = CurWidgetSize.X;
+			MaxWidth = StartLocation.X + CurWidgetSize.X;
+			if (BStartNotOffset && ChildIndex == 0)
+				StartLocation.X -= Offset.X;
+
+			if (LineCount > Row)
+			{
+				//返回成下一行第一个
+				StartLocation.Y += (MaxHeight + Offset.Y);//( CurWidgetSize.Y + Offset.Y);
+				StartLocation.X = Offset.X;
+				LineCount = 1;
+				// 20.2.28 换行后，当前行的最大距离要清空
+				MaxHeight = 0;
+				//换行后，清除当前行的X Offset
+				if (BStartNotOffset)
+					StartLocation.X -= Offset.X;
+			}
+
+			//记录下当前行的最大距离
+			MaxHeight = FGenericPlatformMath::Max(CurWidgetSize.Y, MaxHeight);
+			//换行的时候，才会判断最大X和最大Y
+			/* 4.3 如果是最后把Size撑到最大的width，则记录下该Item的size */
+			if (MaxWidth > TFinalDesiredSize.X)
+				LastItemWidth = CurWidgetSize.X;
+			TFinalDesiredSize.X = FGenericPlatformMath::Max(TFinalDesiredSize.X, MaxWidth);
+			TFinalDesiredSize.Y = FGenericPlatformMath::Max(TFinalDesiredSize.Y, (StartLocation.Y + CurWidgetSize.Y));
+
+			LastItemLocation.X = StartLocation.X;
+			LastItemLocation.Y = StartLocation.Y; //FGenericPlatformMath::Max(LastItemLocation.Y, )
+
+			LineCount++;
+
+		}
+	}
+
+	TFinalDesiredSize.X -= LastItemWidth;
+
+	return TFinalDesiredSize;
+}
+
+void SHpListView::CalculateDragMoveOffset(FVector2D &InDragOffset)
+{
+	if (BSetListViewSizeWithContent)
+		DesignSize = ComputeDesiredSize(1);
+	
+	//可以往上拖的最小值
+	if (InDragOffset.Y < (-FinalDesiredSize.Y /*- ExtremOffset*/ + DesignSize.Y - Offset.Y))
+		InDragOffset.Y = (-FinalDesiredSize.Y + DesignSize.Y - Offset.Y);
+		//设置可拖动的最大值
+	if (InDragOffset.Y > 0)//ExtremOffset)
+		InDragOffset.Y = 0;
+	
+	if (InDragOffset.X < (-FinalDesiredSize.X + DesignSize.X))///*- ExtremOffset */ + Offset.X))
+		InDragOffset.X = (-FinalDesiredSize.X + DesignSize.X);//+ Offset.X);
+	if (InDragOffset.X > 0)
+		InDragOffset.X = 0;
+		
+}
+
+void SHpListView::CalculateASpeed()
+{
+	//根据加速度计算一个递减的移动
+	//if (FMath::Abs(DragLastPos.Y - DragClickPos.Y) > 0)
+	//{
+	DragTime *= 1000;
+	if (DragTime > 0)
+	{
+		if (LayoutDirection == FLayoutDirection::Vertical)
+		{
+			if (DragLastPos.Y - DragClickPos.Y == 0)
+				ASpeed = 0;
+			else
+				ASpeed = (DragLastPos.Y - DragClickPos.Y) / DragTime * BaseASpeed;
+			
+		}
+			
+		else if (LayoutDirection == FLayoutDirection::Horizontal)
+		{
+			if(DragLastPos.X - DragClickPos.X == 0)
+				ASpeed = 0;
+			else
+				ASpeed = (DragLastPos.X - DragClickPos.X) / DragTime * BaseASpeed;
+		}
+			
+	}
+	//}
+	DragTime = 0;
 }
 
 /************************************************************************/
@@ -399,4 +541,29 @@ void SHpListView::OnMouseLeave(const FPointerEvent& MouseEvent)
 void SHpListView::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
 {
 	
+	/* 递减加速度 */
+	if (FMath::Abs(ASpeed) > 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT(" ASpeed : %f"), ASpeed);
+
+		//DragMoveOffset = FVector2D(DragMoveOffset.X + ASpeed, DragMoveOffset.Y + ASpeed);
+		if (LayoutDirection == FLayoutDirection::Horizontal)
+			DragMoveOffset.X = DragMoveOffset.X + ASpeed;
+		else if(LayoutDirection == FLayoutDirection::Vertical)
+			DragMoveOffset.Y = DragMoveOffset.Y + ASpeed;
+
+		/* 计算一个加速度的递减 */
+		float TempAbs = FMath::Abs(ASpeed);
+		ASpeed = (TempAbs - DownASpeed) * (ASpeed / TempAbs);  //值乘上符号
+		if (TempAbs - DownASpeed < 0)
+			ASpeed = 0;
+
+		CalculateDragMoveOffset(DragMoveOffset);
+	}
+
+	/* 计算一个拖动时间 */
+	if (BStartCountTime)
+		DragTime++;
+	else
+		DragTime = 0;
 }

@@ -1,7 +1,7 @@
 ﻿#include "HpListViewSlot.h"
 
 UHpListViewSlot::UHpListViewSlot(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
+	: Super(ObjectInitializer), Slot(nullptr)
 {
 	LayoutData.Offsets = FMargin(0, 0, 100,100);
 	LayoutData.Anchors = FAnchors(0, 0);
@@ -12,11 +12,13 @@ UHpListViewSlot::UHpListViewSlot(const FObjectInitializer& ObjectInitializer)
 	ZOrder = 0;
 }
 
+#if WITH_EDITOR
 /****    UObject  属性变化接口     ****/
 void UHpListViewSlot::PreEditChange(UProperty* PropertyThatWillChange)
 {
 	Super::PreEditChange(PropertyThatWillChange);
 
+	Slot = nullptr;
 }
 
 void UHpListViewSlot::PostEditChangeChainProperty(struct FPropertyChangedChainEvent& PropertyChangedEvent)
@@ -25,7 +27,7 @@ void UHpListViewSlot::PostEditChangeChainProperty(struct FPropertyChangedChainEv
 
 	Super::PostEditChangeChainProperty(PropertyChangedEvent);
 }
-
+#endif
 /*********************/
 
 void UHpListViewSlot::SynchronizeProperties()
@@ -103,12 +105,12 @@ void UHpListViewSlot::SetZorder(int32 InZOrder)
 */
 bool UHpListViewSlot::NudgeByDesigner(const FVector2D& NudgeDirection, const TOptional<int32>& GridSnapSize)
 {
-	return false;
+	return true;
 }
 
 bool UHpListViewSlot::DragDropPreviewByDesigner(const FVector2D& LocalCursorPosition, const TOptional<int32>& XGridSnapSize, const TOptional<int32>& YGridSnapSize)
 {
-	return false;
+	return true;
 }
 
 void UHpListViewSlot::SynchronizeFromTemplate(const UPanelSlot* const TemplateSlot)
@@ -117,3 +119,43 @@ void UHpListViewSlot::SynchronizeFromTemplate(const UPanelSlot* const TemplateSl
 }
 
 #endif
+
+/* 测试新添加 测试能否开启拖动缩放等相关 */
+void UHpListViewSlot::SetLayout(const FHPAnchorData& InLayoutData)
+{
+	LayoutData = InLayoutData;
+
+	if (Slot)
+	{
+		Slot->Offset(LayoutData.Offsets);
+		Slot->Anchors(LayoutData.Anchors);
+		//Slot->Alignment(LayoutData.Alignment);
+	}
+}
+
+FHPAnchorData UHpListViewSlot::GetLayout() const
+{
+	return LayoutData;
+}
+
+void UHpListViewSlot::SetSize(FVector2D InSize)
+{
+	LayoutData.Offsets.Right = InSize.X;
+	LayoutData.Offsets.Bottom = InSize.Y;
+
+	if (Slot)
+	{
+		Slot->Offset(LayoutData.Offsets);
+	}
+}
+
+FVector2D UHpListViewSlot::GetSize() const
+{
+	if (Slot)
+	{
+		FMargin Offsets = Slot->AutoSizeAttr.Get();
+		return FVector2D(Offsets.Right, Offsets.Bottom);
+	}
+
+	return FVector2D(LayoutData.Offsets.Right, LayoutData.Offsets.Bottom);
+}

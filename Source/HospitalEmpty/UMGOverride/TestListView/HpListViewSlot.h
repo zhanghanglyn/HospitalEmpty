@@ -1,9 +1,14 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "UObject/ObjectMacros.h"
+#include "UObject/ScriptMacros.h"
+#include "Layout/Margin.h"
+#include "Layout/Geometry.h"
 #include "Components/PanelSlot.h"
 #include "Components/Widget.h"
 #include "SHpListView.h"
+//#include "Components/CanvasPanelSlot.h"
 #include "Widgets/Layout/Anchors.h"
 #include "HpListViewSlot.generated.h"
 
@@ -114,6 +119,23 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Layout|Canvas Slot")
 	bool BAutoSize;
 
+/* 4.3 测试添加，是否能开启拖动缩放等相关 */
+public:
+	/** Sets the layout data of the slot */
+	UFUNCTION(BlueprintCallable, Category = "Layout|Canvas Slot")
+	void SetLayout(const FHPAnchorData& InLayoutData);
+
+	/** Gets the layout data of the slot */
+	UFUNCTION(BlueprintCallable, Category = "Layout|Canvas Slot")
+	FHPAnchorData GetLayout() const;
+
+	/** Sets the size of the slot */
+	UFUNCTION(BlueprintCallable, Category = "Layout|Canvas Slot")
+	void SetSize(FVector2D InSize);
+
+	/** Gets the size of the slot */
+	UFUNCTION(BlueprintCallable, Category = "Layout|Canvas Slot")
+	FVector2D GetSize() const;
 
 protected:
 	SHpListView::FSlot* Slot;

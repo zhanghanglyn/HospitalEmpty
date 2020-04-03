@@ -12,6 +12,7 @@
 //#include "SConstraintCanvas.h"
 #include "UMGOverride/OverrideUMGUtil.h"
 #include "UMGOverride/OverrideUMGInterface.h"
+#include "Widgets/Layout/Anchors.h"
 
 /*
 	自定义一个简单的ListView，此为Slate部分
@@ -35,6 +36,11 @@ public:
 		FSlot& Size(const TAttribute<FVector2D>& InSize)
 		{
 			SizeAttr = InSize;
+			return *this;
+		}
+		FSlot& Anchors(const TAttribute<FAnchors>& InAnchors)
+		{
+			AnchorsAttr = InAnchors;
 			return *this;
 		}
 
@@ -62,12 +68,14 @@ public:
 			return *this;
 		}
 
-		FSlot& Offset(const TAttribute<bool>& InAutoSize)
+		FSlot& Offset(const TAttribute<FMargin>& InOffset)
 		{
-			AutoSizeAttr = InAutoSize;
+			OffsetAttr = InOffset;
 			return *this;
 		}
 
+		/** Offset */
+		TAttribute<FMargin> OffsetAttr;
 		/** Position */
 		TAttribute<FVector2D> PositionAttr;
 
@@ -77,6 +85,8 @@ public:
 		EHorizontalAlignment HAlignment;
 
 		EVerticalAlignment VAlignment;
+		/** Anchors */
+		TAttribute<FAnchors> AnchorsAttr;
 
 		TAttribute<bool> AutoSizeAttr;
 

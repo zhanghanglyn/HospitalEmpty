@@ -4,12 +4,26 @@
 
 #include "CoreMinimal.h"
 #include "UMG/UserWidgetBase.h"
+#include "Util/StateEnum.h"
 #include "UMGOverride/TestListView/HpTestListView.h"
 #include "CreateWidget.generated.h"
 
+/* æµ‹è¯•ç”¨Item Info ,åŒ…å«äº†èº«ä¸Šæ‰€æŒæœ‰çš„æ•°é‡ä»¥åŠè¯¥é“å…·çš„ç±»å‹ */
+USTRUCT(BlueprintType)
+struct FDecorationInfo
+{
+	GENERATED_USTRUCT_BODY()
+
+public:
+	UPROPERTY(BlueprintReadWrite , EditAnywhere , meta = (DisplayName = "å®¶å…·ç±»å‹"))
+	EDecorationType DecorationType = EDecorationType::None;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (DisplayName = "å®¶å…·æ•°é‡"))
+	int32 DecorationCount = 0;
+};
+
 /**
-	·ÅÖÃÎïÆ·µÄ²Ëµ¥£¬´ÓÅäÖÃÖĞÈ¡³ö¿ÉÒÔÌí¼Óµ½³¡¾°ÖĞµÄÎïÆ·£¬È»ºóÏÔÊ¾
-	µã»÷ÎïÆ·ºó£¬»áÖ±½Ó´´½¨Ò»¸ö
+	æ”¾ç½®ç‰©å“çš„èœå•ï¼Œä»é…ç½®ä¸­å–å‡ºå¯ä»¥æ·»åŠ åˆ°åœºæ™¯ä¸­çš„ç‰©å“ï¼Œç„¶åæ˜¾ç¤º
+	ç‚¹å‡»ç‰©å“åï¼Œä¼šç›´æ¥åˆ›å»ºä¸€ä¸ª
  */
 UCLASS()
 class UCreateWidget : public UUserWidgetBase
@@ -35,7 +49,7 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void OnClickListView(FString Param, FString TestParam);
 	
-	//²âÊÔ¶ÔÓ¦µã»÷3¸ö²»Í¬µÄ¼Ò¾ß
+	//æµ‹è¯•å¯¹åº”ç‚¹å‡»3ä¸ªä¸åŒçš„å®¶å…·
 	UFUNCTION(BlueprintCallable)
 	void OnClickedListItem0();
 	UFUNCTION(BlueprintCallable)
@@ -45,12 +59,21 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void OnClickedListItem3();
 
-	//3.10 ĞòÁĞ»¯ÓÃ²âÊÔ
+	//3.10 åºåˆ—åŒ–ç”¨æµ‹è¯•
 	void CreateSerializeObj();
 	void SaveSerialize();
 	void LoadSerialize();
 	void CreateObjAndSerialize();
 
+	/************************************************************************/
+	/*                      æ–°çš„ä»¥è“å›¾çš„æ–¹å¼æ¥å¤„ç†                          */
+	/************************************************************************/
+	/* æ›´æ–°å¹¶è¿”å›ç©å®¶èº«ä¸Šå½“å‰çš„å¯æ”¾ç½®é“å…·æ•°é‡ */
+	UFUNCTION(BlueprintCallable)
+	TArray<FDecorationInfo> UpdateDecInfo();
+	/* æ¸…é™¤å½“å‰List */
+	UFUNCTION(BlueprintCallable)
+	void ClearCurList();
 public:
 	UPROPERTY(VisibleAnyWhere, BlueprintReadWrite, meta = (BindWidget))
 	UHpTestListView *ListView;   
@@ -58,7 +81,7 @@ public:
 	UPROPERTY()
 	class UDecorationSystemMgr* DecorationSystemMgr;
 
-	//ĞòÁĞ»¯²âÊÔÓÃ
+	//åºåˆ—åŒ–æµ‹è¯•ç”¨
 	UPROPERTY()
 	class ATestSerializeObj* TestSerializeObj;
 };

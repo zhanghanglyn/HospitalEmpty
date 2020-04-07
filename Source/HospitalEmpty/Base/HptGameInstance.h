@@ -20,26 +20,27 @@ public:
 
 public:
 	//获取格子管理器
+	UFUNCTION(BlueprintCallable)
 	class UDecorationSystemMgr* GetDecorationSystemMgr()
 	{
 		return DecorationSystemMgr;
 	}
-
+	UFUNCTION(BlueprintCallable)
 	class UUMGManager* GetUMGManager()
 	{
 		return UMGManger;
 	}
-
+	UFUNCTION(BlueprintCallable)
 	class USerializeSystemNew* GetSerializeSystem()
 	{
 		return SerializeSystem;
 	}
-
+	UFUNCTION(BlueprintCallable)
 	class USaveGameSystem* GetSaveGameSystem()
 	{
 		return SaveGameSystem;
 	}
-
+	UFUNCTION(BlueprintCallable)
 	class ULoadMapSystem* GetULoadMapSystem()
 	{
 		return LoadMapSystem;

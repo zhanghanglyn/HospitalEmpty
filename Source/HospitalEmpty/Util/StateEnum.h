@@ -13,6 +13,7 @@ enum class EDecorationType : uint8
 	None,
 	DecorationBase				UMETA(DisplayName = "测试家具"),		//测试物品
 	Sofa						UMETA(DisplayName = "沙发"),
+	Table						UMETA(DisplayName = "餐桌"),
 };
 
 /*

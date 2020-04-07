@@ -16,10 +16,11 @@ UCreateWidget::UCreateWidget(const FObjectInitializer& ObjectInitializer) : Supe
 void UCreateWidget::NativeConstruct(){
 	Super::NativeConstruct();
 
-	//»ñÈ¡Ò»ÏÂ¼Ò¾ßµÄÏµÍ³
+	//è·å–ä¸€ä¸‹å®¶å…·çš„ç³»ç»Ÿ
 	DecorationSystemMgr = UDecorationSystemMgr::Get(this);
 
-	//¼ÓÔØÁ½¸öbutton²¢ÇÒÌí¼Óµ½ListÖĞ²¢ÇÒÉèÖÃµã»÷º¯Êı  ²âÊÔº¯Êı£¬ÏÈÎª²»Í¬µÄITEMÉèÖÃ²»Í¬µÄ»Øµ÷º¯Êı
+	/*
+	//åŠ è½½ä¸¤ä¸ªbuttonå¹¶ä¸”æ·»åŠ åˆ°Listä¸­å¹¶ä¸”è®¾ç½®ç‚¹å‡»å‡½æ•°  æµ‹è¯•å‡½æ•°ï¼Œå…ˆä¸ºä¸åŒçš„ITEMè®¾ç½®ä¸åŒçš„å›è°ƒå‡½æ•°
 	for (int32 BtnCount = 0; BtnCount < 14; BtnCount++)
 	{
 		UButton* item = NewObject<UButton>(this);
@@ -32,7 +33,7 @@ void UCreateWidget::NativeConstruct(){
 		ListView->AddChildToList(item);
 	}
 
-	ListView->BindMouseButtonDownCall(this, FName("OnClickListView"),"test param");
+	ListView->BindMouseButtonDownCall(this, FName("OnClickListView"),"test param");*/
 
 };
 
@@ -53,7 +54,7 @@ void UCreateWidget::AddToListView(UWidget* Content)
 }
 
 /*
-	ÉèÖÃDecorationSystemMgrµÄ×´Ì¬
+	è®¾ç½®DecorationSystemMgrçš„çŠ¶æ€
 */
 void UCreateWidget::OnClickedListItem0()
 {
@@ -113,7 +114,6 @@ void UCreateWidget::OnClickedListItem3()
 	//CreateObjAndSerialize();
 }
 
-#pragma optimize("",off)
 void UCreateWidget::CreateSerializeObj()
 {
 	//ATestSerializeObj
@@ -148,6 +148,34 @@ void UCreateWidget::CreateObjAndSerialize()
 	{
 		TestSerializeObj = world->SpawnActor<ATestSerializeObj>(ATestSerializeObj::StaticClass());
 	}
+}
+
+/************************************************************************/
+/*                      æ–°çš„ä»¥è“å›¾çš„æ–¹å¼æ¥å¤„ç†                          */
+/************************************************************************/
+#pragma optimize("",off)
+TArray<FDecorationInfo> UCreateWidget::UpdateDecInfo()
+{
+	TArray<FDecorationInfo> ReturnDecInfos;
+
+	UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EDecorationType"), true);
+	int32 DecorationTypes = EnumPtr->NumEnums();
+
+	for (int32 count = 0; count < (DecorationTypes - 1); count++)
+	{
+		FDecorationInfo CurInfo;
+		CurInfo.DecorationType = (EDecorationType)(EnumPtr->GetValueByIndex(count));
+		CurInfo.DecorationCount = 1;
+
+		ReturnDecInfos.Add(CurInfo);
+	}
+
+	return ReturnDecInfos;
+}
+
+void UCreateWidget::ClearCurList()
+{
+	ListView->ClearChildren();
 }
 
 #pragma optimize("",on)

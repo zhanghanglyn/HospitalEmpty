@@ -49,6 +49,7 @@ public:
 				GridGround      创建家具的地面,用来同步家具信息
 				BSetGroundData  如果是预创建的，输入False则不会设置格子等信息
 	*/
+	UFUNCTION(BlueprintCallable)
 	class ADecorationBase* CreateDecoration( FVector Location ,class AActorBase* GridGround , EDecorationType DecorationType , bool BSetGroundData = true);
 
 	void SetDecorationBPPath(FString InDecorationBPPath) {

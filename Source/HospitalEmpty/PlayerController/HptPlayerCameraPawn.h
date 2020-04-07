@@ -32,6 +32,7 @@ public:
 	virtual void OnMouseHover() override;
 
 public:
+	UFUNCTION(BlueprintCallable)
 	/* 获取当前鼠标点在地面上的位置 ,并且返回当前的格子地面
 	   地面即为GridGround，之后肯定会有多个地面，或是多个Ground某些不需要格子的情况
 	*/
@@ -40,9 +41,11 @@ public:
 	/*
 		切换状态机为预创建家具状态
 	*/
+	UFUNCTION(BlueprintCallable)
 	void SetStatePreArrange(EDecorationType InDecorationType);
 
 	/* 获取当前鼠标点是否有点中家具，如果有返回点中的家具 , InHitResult为射中的家具的射中信息 */
+	UFUNCTION(BlueprintCallable)
 	class AActorBase* GetMouseHitDecoration(FHitResult &InHitResult , FVector &GroundLocation) const;
 
 protected:

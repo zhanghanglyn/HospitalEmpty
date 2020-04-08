@@ -41,6 +41,7 @@ public:
 	/* virtual end */
 
 	//~ Begin UObject Interface
+	//在序列化 Actor 从磁盘加载完成后被调用。在此处可执行自定义版本化和修复操作。
 	//virtual void PostLoad() override;
 	//~ End UObject Interface
 

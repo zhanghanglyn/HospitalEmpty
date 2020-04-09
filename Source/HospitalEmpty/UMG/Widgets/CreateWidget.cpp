@@ -31,10 +31,10 @@ void UCreateWidget::NativeConstruct(){
 		Del.BindUFunction(this, FName(*AA));//"OnClickedListItem");
 		item->OnClicked.Add(Del);
 		ListView->AddChildToList(item);
-	}
+	}*/
 
-	ListView->BindMouseButtonDownCall(this, FName("OnClickListView"),"test param");*/
-
+	//ListView->BindMouseButtonDownCall(this, FName("OnClickListView"),"test param");
+	//ListView->BindMouseButtonDownCall(this, FName("OnClickListViewNoExParam"), "test param");
 };
 
 void UCreateWidget::OnClickListView(FString Param, FString TestParam)
@@ -43,6 +43,12 @@ void UCreateWidget::OnClickListView(FString Param, FString TestParam)
 	FString aaa = TestParam;
 	int32 aaa1 = 1;
 	//UE_LOG(LogTemp, Warning, TEXT("OnClickListView :  TestParam : %s" ), TestParam);
+}
+
+void UCreateWidget::OnClickListViewNoExParam(FString Param)
+{
+	FString aaa = Param;
+	int32 aaa1 = 1;
 }
 
 void UCreateWidget::AddToListView(UWidget* Content)

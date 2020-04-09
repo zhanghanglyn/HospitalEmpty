@@ -48,6 +48,8 @@ public:
 protected:
 	UFUNCTION(BlueprintCallable)
 	void OnClickListView(FString Param, FString TestParam);
+	UFUNCTION(BlueprintCallable)
+	void OnClickListViewNoExParam(FString Param);
 	
 	//测试对应点击3个不同的家具
 	UFUNCTION(BlueprintCallable)

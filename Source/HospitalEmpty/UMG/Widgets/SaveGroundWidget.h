@@ -28,10 +28,16 @@ public:
 	UFUNCTION()
 	void SaveGround();
 
+	UFUNCTION()
+	void LoadGround();
+
 
 public:
 	UPROPERTY(VisibleAnyWhere, BlueprintReadWrite, meta = (BindWidget))
-	UButton *SaveButton;   //一定会有一个根节点！
+	UButton *SaveButton;   
+
+	UPROPERTY(VisibleAnyWhere, BlueprintReadWrite, meta = (BindWidget))
+	UButton *LoadButton;   
 
 	UPROPERTY()
 	class UDecorationSystemMgr* DecorationSystemMgr;

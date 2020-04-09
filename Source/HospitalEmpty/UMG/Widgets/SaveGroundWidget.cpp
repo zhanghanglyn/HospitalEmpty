@@ -29,6 +29,13 @@ void USaveGroundWidget::NativeConstruct(){
 
 	}
 
+	if (LoadButton)
+	{
+		FScriptDelegate Del;
+		Del.BindUFunction(this, "LoadGround");
+		LoadButton->OnClicked.Add(Del);
+	}
+
 };
 
 void USaveGroundWidget::SaveGround()
@@ -54,4 +61,10 @@ void USaveGroundWidget::SaveGround()
 	//	}
 	//}
 		
+}
+
+void USaveGroundWidget::LoadGround()
+{
+	if (USaveGameSystem* SaveGameSystem = USaveGameSystem::Get(this))
+		SaveGameSystem->LoadGame(this, "Save11");
 }

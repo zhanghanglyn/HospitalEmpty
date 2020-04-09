@@ -109,6 +109,8 @@ void USerializeSystemNew::SaveObjToData(UObject* InObj, TMap< FString, FObjSeria
 		ActorRecord.OuterType = OUTER_TYPE_WORLD;
 	else if (ULevel* level = Cast<ULevel>(OjbOuter))
 	{
+		//4.9 可以获取正式的Level的Name！如果是streamLevel就会返回StreamLevel的Name , 而GetName永远都只返回Level最上层的那个
+		FString RealLevelName = level->GetFullGroupName(true);
 		ActorRecord.OuterType = OUTER_TYPE_LEVEL;
 		ActorRecord.OuterID = OjbOuter->GetName();
 	}
@@ -362,55 +364,6 @@ bool USerializeSystemNew::LoadActorData(const UObject* WorldContextObject, FStri
 		else
 			CreateActorDeperOuter(WorldContextObject ,CurSerializeData , LoadGameData.SerializeObj,
 				SerializeObjList, RefurrenceData , RefurrenceArrayData, RefurrenceMapData);
-
-		//FVector SpawnPos = CurSerializeData.ActorTransForm.GetLocation();
-		//FRotator SpawnRot = CurSerializeData.ActorTransForm.Rotator();
-		//FActorSpawnParameters SpawnParam;
-		//SpawnParam.Name = CurSerializeData.Name;
-		//UClass* SpawnClass = FindObject<UClass>(ANY_PACKAGE, *CurSerializeData.Class);
-		//FString OuterID = CurSerializeData.OuterID;
-		////是有可能找不到的！如果未加载的话
-		//if (SpawnClass == nullptr)
-		//	SpawnClass = LoadObject<UClass>(NULL, *CurSerializeData.Class);
-		////如果是Actor，则生成到场景中，如果不是，则使用NewObject生成
-		//if (SpawnClass)
-		//{
-		//	UObject *Ret = SpawnClass->GetDefaultObject();
-		//	if ( !Ret->IsA(AActor::StaticClass()))
-		//	{
-		//		UWorld* CurWorld = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
-		//		if (SpawnClass && CurWorld)
-		//		{
-		//			UObject* Obj = NewObject<UObject>(CurWorld, SpawnClass);
-		//			FMemoryReader MemoryReader(CurSerializeData.SerializeData, true);
-		//			FSaveOjbArchive Ar(MemoryReader, true);
-		//			Obj->Serialize(Ar);
-		//			SerializeObjList.Add(CurSerializeData.ID, Obj);
-		//			RefurrenceData.Add(CurSerializeData.ID, CurSerializeData.RefurrenceList);
-		//			RefurrenceArrayData.Add(CurSerializeData.ID, CurSerializeData.ArrayRefurrenceList);
-		//			RefurrenceMapData.Add(CurSerializeData.ID, CurSerializeData.MapRefurrenceList);
-		//		}
-		//	}
-		//	//如果是Actor
-		//	else
-		//	{
-		//		UWorld* CurWorld = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
-		//		if (SpawnClass && CurWorld)
-		//		{
-		//			AActor* NewActor = CurWorld->SpawnActor(SpawnClass, &SpawnPos, &SpawnRot, SpawnParam);
-		//			FMemoryReader MemoryReader(CurSerializeData.SerializeData, true);
-		//			FSaveOjbArchive Ar(MemoryReader, true);
-		//			NewActor->Serialize(Ar);
-		//			NewActor->SetActorTransform(CurSerializeData.ActorTransForm);
-
-		//			SerializeObjList.Add(CurSerializeData.ID, NewActor);
-		//			RefurrenceData.Add(CurSerializeData.ID, CurSerializeData.RefurrenceList);
-		//			RefurrenceArrayData.Add(CurSerializeData.ID, CurSerializeData.ArrayRefurrenceList);
-		//			RefurrenceMapData.Add(CurSerializeData.ID, CurSerializeData.MapRefurrenceList);
-		//		}
-		//	}
-		//	
-		//}
 	}
 
 	//所有需要序列化的OBJ生成完毕之后，进行引用指针的重定向,所有能够保存的OBJ，都继承了保存接口
@@ -429,7 +382,7 @@ bool USerializeSystemNew::LoadActorData(const UObject* WorldContextObject, FStri
 
 	return true;
 }
-
+#pragma optimize("",off)
 UObject* USerializeSystemNew::CreateActorDeperOuter(const UObject* WorldContextObject, FObjSerializeData InSerializeData,
 	TMap< FString, FObjSerializeData> AllSerializeObj,
 	TMap<FString, UObject *> &SerializeObjList,
@@ -440,6 +393,7 @@ UObject* USerializeSystemNew::CreateActorDeperOuter(const UObject* WorldContextO
 	FRotator SpawnRot = InSerializeData.ActorTransForm.Rotator();
 	FActorSpawnParameters SpawnParam;
 	SpawnParam.Name = InSerializeData.Name;
+
 	UClass* SpawnClass = FindObject<UClass>(ANY_PACKAGE, *InSerializeData.Class);
 	FString OuterID = InSerializeData.OuterID;
 	FString OuterType = InSerializeData.OuterType;
@@ -456,6 +410,8 @@ UObject* USerializeSystemNew::CreateActorDeperOuter(const UObject* WorldContextO
 			if (SpawnClass && CurWorld)
 			{
 				UObject* NewObj;
+				//4.09 test
+				ULevel* TTTTLevel = CurWorld->GetCurrentLevel();
 
 				UObject* CurOuter = nullptr;
 				if (OuterType.Equals(OUTER_TYPE_WORLD))
@@ -486,7 +442,13 @@ UObject* USerializeSystemNew::CreateActorDeperOuter(const UObject* WorldContextO
 					}
 				}
 
-				NewObj = NewObject<UObject>(CurOuter, SpawnClass);
+				//4.09 如果Find到了，直接把找到的指针赋予！ 第三个参数表示精确的Class
+				UObject* FindedObj = FindObject<UObject>(CurOuter, *(SpawnParam.Name.ToString()));
+				if (FindedObj != nullptr)
+					NewObj = FindedObj;
+				else
+					NewObj = NewObject<UObject>(CurOuter, SpawnClass);
+				
 				FMemoryReader MemoryReader(InSerializeData.SerializeData, true);
 				FSaveOjbArchive Ar(MemoryReader, true);
 				NewObj->Serialize(Ar);
@@ -521,7 +483,14 @@ UObject* USerializeSystemNew::CreateActorDeperOuter(const UObject* WorldContextO
 						ULevel* level = CurWorld->GetCurrentLevel();
 						if (OuterID.Equals(level->GetName()))
 						{
-							NewActor = CurWorld->SpawnActor(SpawnClass, &SpawnPos, &SpawnRot, SpawnParam);
+							//4.09 如果Find到了，直接把找到的指针赋予！ 第三个参数表示精确的Class
+							AActor* FindedObj = FindObject<AActor>(level, *(SpawnParam.Name.ToString()));
+							if (FindedObj != nullptr)
+								NewActor = FindedObj;
+							else
+								NewActor = CurWorld->SpawnActor(SpawnClass, &SpawnPos, &SpawnRot, SpawnParam);
+
+							//NewActor = CurWorld->SpawnActor(SpawnClass, &SpawnPos, &SpawnRot, SpawnParam);
 							BCreateWithSpawn = true;
 						}	
 					}
@@ -532,7 +501,14 @@ UObject* USerializeSystemNew::CreateActorDeperOuter(const UObject* WorldContextO
 						{
 							UObject* CurOuter = CreateActorDeperOuter(WorldContextObject, AllSerializeObj[OuterID], AllSerializeObj,
 								SerializeObjList, RefurrenceData, RefurrenceArrayData, RefurrenceMapData);
-							NewActor = NewObject<AActor>(CurOuter, SpawnClass);
+
+							//4.09 如果Find到了，直接把找到的指针赋予！ 第三个参数表示精确的Class
+							AActor* FindedObj = FindObject<AActor>(CurOuter, *(SpawnParam.Name.ToString()));
+							if (FindedObj != nullptr)
+								NewActor = FindedObj;
+							else
+								NewActor = NewObject<AActor>(CurOuter, SpawnClass);
+							//NewActor = NewObject<AActor>(CurOuter, SpawnClass);
 						}
 					}
 				}
@@ -555,3 +531,4 @@ UObject* USerializeSystemNew::CreateActorDeperOuter(const UObject* WorldContextO
 
 	return nullptr;
 }
+#pragma optimize("",on)

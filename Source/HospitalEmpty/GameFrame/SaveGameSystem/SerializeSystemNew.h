@@ -126,7 +126,11 @@ struct FGameSerializeData
 public:
 	FName GameID;
 	FDateTime Timestamp;
-	TMap< FString, FObjSerializeData> SerializeObj;
+	//以该Ojb存储生成的ID作为Key
+	TMap< FString, FObjSerializeData> SerializeObj;  
+	//4.10 存档的时候，根据StreamLevel的名字再分一下 , Key为StreamLevelName
+	TMap< FString, FObjSerializeData> SerializeObjByMap;
+
 	FString LevelName;	//保存当前存档对应的Level名称
 	FName LevelPackageName;	//保存当前存档对应的Level的包
 

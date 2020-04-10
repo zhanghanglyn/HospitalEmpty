@@ -37,6 +37,8 @@ void ADecorationBase::Serialize(FArchive& Ar)
 
 void ADecorationBase::OnConstruction(const FTransform& Transform)
 {
+	Super::OnConstruction(Transform);
+
 	//添加格子MGR
 	if (GridMgr == nullptr)
 	{

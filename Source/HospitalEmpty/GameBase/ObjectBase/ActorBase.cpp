@@ -5,7 +5,7 @@ AActorBase::AActorBase(FString InActorName) : Super()
 {
 	ActorName = InActorName;
 }
-
+#pragma optimize("",off)
 void AActorBase::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
@@ -18,3 +18,4 @@ void AActorBase::OnConstruction(const FTransform& Transform)
 		StreamLevelName = RealLevelName;
 	}
 }
+#pragma optimize("",on)

@@ -62,9 +62,14 @@ ADecorationBase* UDecorationSystemMgr::CreateDecoration(FVector Location, AActor
 				/* 4.10 如果该家具能保存，则为其设置对应的StreamLevelName */
 				if (ISaveableActorInterface* SaveAbleObj = Cast<ISaveableActorInterface>(Decoration))
 				{
-					FString seeseeName = SaveAbleObj->GetStreamLevelName(Decoration);
-					int32 a = 1;
-					//SaveAbleObj->SetStreamLevleName(Decoration, GridGround->StreamLevelName);
+					if (UObject* OuterLevel = UCommonLibrary::GetOuterLevel(GridGround))
+					{
+						SaveAbleObj->SetStreamLevleName(Decoration, OuterLevel->GetFullGroupName(true));
+						FString seeseeName = SaveAbleObj->GetStreamLevelName(Decoration);
+						int32 a = 1;
+
+					}
+					
 				}
 				
 				return Decoration;

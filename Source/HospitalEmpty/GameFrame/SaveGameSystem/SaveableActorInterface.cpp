@@ -75,3 +75,33 @@ void ISaveableActorInterface::RePointRefurrence(UObject* Obj, TArray<FRefurrence
 	}
 }
 #pragma optimize("",on)
+
+FString ISaveableActorInterface::GetStreamLevelName(UObject* Obj, FString InPropertyName)
+{
+	//找到对应的FStringProperty 并取出值
+	UClass* ObjClass = Obj->GetClass();
+
+	UProperty* OneProperty = ObjClass->FindPropertyByName(*InPropertyName);
+	if (UStrProperty* ObjProperty = Cast<UStrProperty>(OneProperty))
+	{
+		FString StreamLevelName = ObjProperty->GetPropertyValue_InContainer(Obj);
+		return StreamLevelName;
+	}
+
+	return "";
+}
+
+bool ISaveableActorInterface::SetStreamLevleName(UObject* Obj, FString InStreamLevelName , FString InPropertyName)
+{
+	//找到对应的FStringProperty 并取出值
+	UClass* ObjClass = Obj->GetClass();
+
+	UProperty* OneProperty = ObjClass->FindPropertyByName(*InPropertyName);
+	if (UStrProperty* ObjProperty = Cast<UStrProperty>(OneProperty))
+	{
+		ObjProperty->SetPropertyValue_InContainer(Obj , InStreamLevelName);
+		return true;
+	}
+
+	return false;
+}

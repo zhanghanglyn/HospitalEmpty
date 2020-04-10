@@ -18,6 +18,10 @@ public:
 	/** Constructor for AActor that takes an ObjectInitializer for backward compatibility */
 	AActorBase(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer) {};
 
+	/* virtual  */
+	virtual void OnConstruction(const FTransform& Transform);
+	/* end virtual  */
+
 	virtual FString GetActorName() {
 		return ActorName;
 	};
@@ -35,4 +39,8 @@ public:
 	/* 20.3.13 新添加是否用来进行保存 */
 	UPROPERTY()
 	int VariableToSave;
+
+	/* 20.4.10 新添加字段，该Actor属于哪一个StreamLevel */
+	UPROPERTY(BlueprintReadWrite , EditAnywhere , DisplayName = "对应的StreamLevel名字", meta = (Category = "ActorBase"))
+	FString StreamLevelName = "empty~";
 };

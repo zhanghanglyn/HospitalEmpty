@@ -83,7 +83,7 @@ bool USerializeSystemNew::SaveAllActorData(const UObject* WorldContextObject , F
 
 	return SaveGameSerializeDataToFile(GameSaveSerializeData , GameID);
 }
-
+#pragma optimize("",off)
 /* 需要递归去取Obj身上的可保存结构 */
 void USerializeSystemNew::SaveObjToData(UObject* InObj, TMap< FString, FObjSerializeData> &OutData, const TArray<AActor*> InSaveActor)
 {
@@ -113,6 +113,12 @@ void USerializeSystemNew::SaveObjToData(UObject* InObj, TMap< FString, FObjSeria
 		FString RealLevelName = level->GetFullGroupName(true);
 		ActorRecord.OuterType = OUTER_TYPE_LEVEL;
 		ActorRecord.OuterID = OjbOuter->GetName();
+
+		if (ISaveableActorInterface* SaveableObj = Cast<ISaveableActorInterface>(InObj))
+		{
+			FString StreamLevelName = SaveableObj->GetStreamLevelName(InObj);
+			ActorRecord.StreamLevelName = StreamLevelName;
+		}
 	}
 	else
 	{
@@ -130,7 +136,7 @@ void USerializeSystemNew::SaveObjToData(UObject* InObj, TMap< FString, FObjSeria
 	OutData.Add(ActorRecord.ID, ActorRecord);
 
 }
-#pragma optimize("",off)
+
 void USerializeSystemNew::CheckSavableProject(UObject* InObj, TMap<FString, FObjSerializeData> &OutData, TArray<FRefurrenceData> &RefData ,
 	TArray<FRefurrenceArrayData> &RefArrayData , TArray<FRefurrenceMapData> &RefMapData, const TArray<AActor *> InSaveActor)
 {
@@ -397,6 +403,34 @@ UObject* USerializeSystemNew::CreateActorDeperOuter(const UObject* WorldContextO
 	UClass* SpawnClass = FindObject<UClass>(ANY_PACKAGE, *InSerializeData.Class);
 	FString OuterID = InSerializeData.OuterID;
 	FString OuterType = InSerializeData.OuterType;
+	FString StreamLevelName = InSerializeData.StreamLevelName;
+
+	/* 4.10 根据当前的LevelName等 获取当前的Level */
+	ULevel* CurObjLevel = nullptr;
+	UWorld* CurWorld = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
+	TArray<ULevelStreaming*> LevelStreamings = CurWorld->GetStreamingLevels();
+	if (OuterType == OUTER_TYPE_LEVEL && LevelStreamings.Num() > 0)
+	{
+		for (int32 LevelCount = 0; LevelCount < LevelStreamings.Num(); LevelCount++)
+		{
+			//获取当前流关卡的加载状态，如果名字相等,看下对应的StreamLevel是否已经加载了
+			FName PackageNameToLoad = LevelStreamings[LevelCount]->PackageNameToLoad;
+			FString StreamLevelNameErr = (FPackageName::GetShortFName(PackageNameToLoad)).ToString();
+			
+			if (StreamLevelNameErr.Equals(StreamLevelName))
+			{
+				ULevelStreaming::ECurrentState CurStreamLevelState = LevelStreamings[LevelCount]->GetCurrentState();
+				if (CurStreamLevelState == ULevelStreaming::ECurrentState::LoadedVisible)
+				{
+					CurObjLevel = LevelStreamings[LevelCount]->GetLoadedLevel();
+					break;
+				}
+			}
+			
+		}
+	}
+
+
 	//是有可能找不到的！如果未加载的话
 	if (SpawnClass == nullptr)
 		SpawnClass = LoadObject<UClass>(NULL, *InSerializeData.Class);
@@ -406,7 +440,6 @@ UObject* USerializeSystemNew::CreateActorDeperOuter(const UObject* WorldContextO
 		UObject *Ret = SpawnClass->GetDefaultObject();
 		if (!Ret->IsA(AActor::StaticClass()))
 		{
-			UWorld* CurWorld = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
 			if (SpawnClass && CurWorld)
 			{
 				UObject* NewObj;
@@ -418,7 +451,7 @@ UObject* USerializeSystemNew::CreateActorDeperOuter(const UObject* WorldContextO
 					CurOuter = CurWorld;
 				else if(OuterType.Equals(OUTER_TYPE_LEVEL))
 				{
-					TArray<ULevel*> Levels = CurWorld->GetLevels();
+					/*TArray<ULevel*> Levels = CurWorld->GetLevels();
 					for (ULevel* level : Levels)
 					{
 						if (OuterID.Equals(level->GetName()))
@@ -426,7 +459,9 @@ UObject* USerializeSystemNew::CreateActorDeperOuter(const UObject* WorldContextO
 							CurOuter = level;
 							break;
 						}
-					}
+					}*/
+					if (CurObjLevel)
+						CurOuter = CurObjLevel;
 				}
 				else
 				{
@@ -463,7 +498,7 @@ UObject* USerializeSystemNew::CreateActorDeperOuter(const UObject* WorldContextO
 		//如果是Actor
 		else
 		{
-			UWorld* CurWorld = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
+			//UWorld* CurWorld = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
 			if (SpawnClass && CurWorld)
 			{
 				//如果是通过Spawn方法创建出来的，则需要设置位置等
@@ -480,11 +515,12 @@ UObject* USerializeSystemNew::CreateActorDeperOuter(const UObject* WorldContextO
 				{
 					if (OuterType.Equals(OUTER_TYPE_LEVEL))
 					{
-						ULevel* level = CurWorld->GetCurrentLevel();
-						if (OuterID.Equals(level->GetName()))
+						//ULevel* level = CurWorld->GetCurrentLevel();
+						//if (OuterID.Equals(level->GetName()))
+						if(CurObjLevel)
 						{
 							//4.09 如果Find到了，直接把找到的指针赋予！ 第三个参数表示精确的Class
-							AActor* FindedObj = FindObject<AActor>(level, *(SpawnParam.Name.ToString()));
+							AActor* FindedObj = FindObject<AActor>(CurObjLevel, *(SpawnParam.Name.ToString()));
 							if (FindedObj != nullptr)
 								NewActor = FindedObj;
 							else

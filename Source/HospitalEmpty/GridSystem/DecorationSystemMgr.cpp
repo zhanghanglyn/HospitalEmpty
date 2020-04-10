@@ -32,7 +32,7 @@ void UDecorationSystemMgr::SetPlayerPawn(AHptPlayerCameraPawn* InPlayerPawn)
 
 ADecorationBase* UDecorationSystemMgr::CreateDecoration(FVector Location, AActorBase* GridGround, EDecorationType DecorationType , bool BSetGroundData)
 {
-	FString DecorationName = FCommonLibrary::GetEnumValString((int)DecorationType, "EDecorationType");
+	FString DecorationName = UCommonLibrary::GetEnumValString((int)DecorationType, "EDecorationType");
 	//组合路径位置 Blueprint'/Game/XXX/NAME/BP_NAME.BP_NAME_C'
 	FString BPPath = DecorationBPPath + DecorationName + "/BP_" + DecorationName + ".BP_" + DecorationName + "_C'";
 	
@@ -45,7 +45,7 @@ ADecorationBase* UDecorationSystemMgr::CreateDecoration(FVector Location, AActor
 		{
 			if (ADecorationBase* Decoration = MyWorld->SpawnActor<ADecorationBase>(DecorationClass))
 			{
-
+				
 				Decoration->SetActorLocation(Location);
 
 				/* 为生成的家具设置地面等相关 */
@@ -57,6 +57,14 @@ ADecorationBase* UDecorationSystemMgr::CreateDecoration(FVector Location, AActor
 						//Decoration->UpdateGridByGround();
 						Decoration->MoveTo(Location);
 					}
+				}
+
+				/* 4.10 如果该家具能保存，则为其设置对应的StreamLevelName */
+				if (ISaveableActorInterface* SaveAbleObj = Cast<ISaveableActorInterface>(Decoration))
+				{
+					FString seeseeName = SaveAbleObj->GetStreamLevelName(Decoration);
+					int32 a = 1;
+					//SaveAbleObj->SetStreamLevleName(Decoration, GridGround->StreamLevelName);
 				}
 				
 				return Decoration;

@@ -94,6 +94,7 @@ public:
 	/* 新添加字段，用来记录Outer的ID和TYPE */
 	FString OuterID;
 	FString OuterType;
+	FString StreamLevelName;	//4.10 尝试用来记录StreamLevel的名字！从World中查找使用！
 
 	friend FArchive& operator<<(FArchive& Ar, FObjSerializeData& InData)
 	{
@@ -107,6 +108,7 @@ public:
 		Ar << InData.MapRefurrenceList;
 		Ar << InData.OuterID;
 		Ar << InData.OuterType;
+		Ar << InData.StreamLevelName;
 
 		return Ar;
 	}

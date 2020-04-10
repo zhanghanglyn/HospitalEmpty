@@ -33,4 +33,18 @@ public:
 	*/
 	UFUNCTION()
 	virtual void RefreshAfterRePoint(){};
+
+	/*  获取当前要保存的Ojb对应的StreamLevel名字
+		Param : UObject* Obj 传入自身
+				InPropertyName : 对应的StreamLevel字段名，默认就叫StreamLevelName
+	*/
+	UFUNCTION()//BlueprintCallable)
+	virtual FString GetStreamLevelName(UObject* Obj , FString InPropertyName = "StreamLevelName");
+
+	/*	设置当前要保存的Obj对应的StreamLevel名字
+		Param : UObject* Obj 传入自身
+	*/
+	UFUNCTION()//BlueprintCallable)
+	virtual bool SetStreamLevleName(UObject* Obj, FString InStreamLevelName , FString InPropertyName = "StreamLevelName");
+
 };

@@ -55,6 +55,6 @@ void USaveDataPlWidget::ClickDataCall(FString GameID)
 {
 	if (USaveGameSystem* SaveGameSystem = USaveGameSystem::Get(this))
 	{
-		SaveGameSystem->LoadGame(this, GameID);
+		SaveGameSystem->LoadGame(this, GameID,"Test_1");
 	}
 }

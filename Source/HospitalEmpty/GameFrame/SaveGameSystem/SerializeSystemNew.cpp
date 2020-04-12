@@ -43,6 +43,7 @@ bool USerializeSystemNew::SaveAllActorData(const UObject* WorldContextObject , F
 	/* 先把当前保存的ID清空 */
 	CurrentFObjSerializeDataID.Empty();
 
+	/* 4.12 思考是否需要考虑其显示问题？其实不用，没有显示的地图根本就不会加载，既然不会加载，也不需要判断，所有显示出来的保存即可 */
 	TArray<AActor*> SaveActors;
 	UGameplayStatics::GetAllActorsWithInterface(WorldContextObject, USaveableActorInterface::StaticClass(), SaveActors);
 
@@ -57,29 +58,57 @@ bool USerializeSystemNew::SaveAllActorData(const UObject* WorldContextObject , F
 	{
 		ULevel* CurrentLevel = MyWorld->GetCurrentLevel();
 		if (CurrentLevel)
-		{
 			GameSaveSerializeData.LevelName = MyWorld->GetName();//CurrentLevel->GetName();
-		}
-
-		//FString FullNamePath = MyWorld->GetFullName();
-		//FString LeftString;
-		//FString RightString;
-		//FullNamePath.Split("/", &LeftString, &RightString, ESearchCase::IgnoreCase, ESearchDir::FromEnd);
-		//FName PackageNameFinal = *(LeftString + "/" + MyWorld->GetName() + ".umap");
 
 		GameSaveSerializeData.LevelPackageName = *(MyWorld->GetName());
 	}
 
+	/* 4.12 修改为，先对所有的Actor根据StreamLevel进行分类！因为Actor上面的那些Mgr等，有些Outer并不属于Level，所以并没有StreamLevelName */
+	TMap< FString, TArray<AActor*>> OrderedActor;
 	for (AActor* InActor : SaveActors)
 	{
-		//最终需要保存的包含了所有序列化完成数据的Map
-		//TMap< FString, FObjSerializeData> TempData;
-		SaveObjToData(Cast<UObject>(InActor) , GameSaveSerializeData.SerializeObj, SaveActors);
-		
-		//GameSaveSerializeData.SerializeObj.Add(TempData);
+		if (ISaveableActorInterface* SaveAbleInterface = Cast<ISaveableActorInterface>(InActor))
+		{
+			FString StreamLevelName = SaveAbleInterface->GetStreamLevelName(InActor);
+			//如果已有该StreamLevelName
+			if (OrderedActor.Contains(StreamLevelName))
+			{
+				OrderedActor[StreamLevelName].Add(InActor);
+			}
+			else
+			{
+				TArray<AActor*> TempActor;
+				TempActor.Add(InActor);
+				OrderedActor.Add(StreamLevelName,TempActor);
+			}
+		}
+	}
+
+	//for (AActor* InActor : SaveActors)
+	//{
+	//	//最终需要保存的包含了所有序列化完成数据的Map
+	//	SaveObjToData(Cast<UObject>(InActor) , GameSaveSerializeData.SerializeObj, SaveActors);
+	//}
+	/* 4.12 修改为根据StreamLevelName进行加载 */
+	for (TMap< FString, TArray<AActor*>>::TConstIterator Iter = OrderedActor.CreateConstIterator(); Iter; ++Iter)
+	{
+		/* 如果不包含对应的StreamLevelName 添加一个 */
+		if (!GameSaveSerializeData.SerializeObjByMap.Contains(Iter->Key))
+		{
+			TMap< FString, FObjSerializeData> TempSerializeData;
+			GameSaveSerializeData.SerializeObjByMap.Add(Iter->Key, TempSerializeData);
+		}
+		for (AActor* InActor : Iter->Value)
+		{
+			//最终需要保存的包含了所有序列化完成数据的Map
+			SaveObjToData(Cast<UObject>(InActor) , GameSaveSerializeData.SerializeObjByMap[Iter->Key], SaveActors);
+		}
 	}
 
 	OutData = GameSaveSerializeData;
+
+	//4.12 在此新添加一个函数，将处理好的序列化数据，根据streamLevel进行分类
+	//ClassifySerializeDataByStreamLevelName(GameSaveSerializeData);
 
 	return SaveGameSerializeDataToFile(GameSaveSerializeData , GameID);
 }
@@ -316,6 +345,30 @@ bool USerializeSystemNew::SaveGameSerializeDataToFile(FGameSerializeData &InData
 	return true;
 }
 
+//void USerializeSystemNew::ClassifySerializeDataByStreamLevelName(FGameSerializeData &InGameSerialzieData)
+//{
+//	if (InGameSerialzieData.SerializeObj.Num() > 0)
+//	{
+//		for (TMap< FString, FObjSerializeData>::TConstIterator Iter = InGameSerialzieData.SerializeObj.CreateConstIterator();Iter ; ++Iter)
+//		{
+//			FObjSerializeData TTT = Iter->Value;
+//			FString StreamLevelName = Iter->Value.StreamLevelName;
+//			//如果该StreamLevelName已经存在了分类数据，则直接添加进去，否则创建新的
+//			if (InGameSerialzieData.SerializeObjByMap.Contains(StreamLevelName))
+//			{
+//				//[StreamLevelName].Add(ID, SerialzieData)   TMap< FString, TMap< FString, FObjSerializeData>>
+//				InGameSerialzieData.SerializeObjByMap[StreamLevelName].Add(Iter->Key, Iter->Value);//InGameSerialzieData.SerializeObj[Iter->Key], InGameSerialzieData.SerializeObj[Iter->Value]);
+//			}
+//			else
+//			{	//Add( StreamLevelName , TMap< ID, FObjSerializeData>)
+//				TMap< FString, FObjSerializeData> TempSerializeData;
+//				TempSerializeData.Add(Iter->Key, Iter->Value);
+//				InGameSerialzieData.SerializeObjByMap.Add(StreamLevelName, TempSerializeData);
+//			}
+//		}
+//	}
+//}
+
 /************************************************************************/
 /*                              Load相关                                */
 /************************************************************************/
@@ -324,7 +377,7 @@ bool USerializeSystemNew::SaveGameSerializeDataToFile(FGameSerializeData &InData
 	也有可能出现，需要的Outer也需要其他Outer的情况，使用函数遍历。
 
 */
-bool USerializeSystemNew::LoadActorData(const UObject* WorldContextObject, FString GameID)
+bool USerializeSystemNew::LoadActorData(const UObject* WorldContextObject, FString GameID , FString StreamLevelName)
 {
 	FString DataLoadPath = SavePath + GameID;
 
@@ -357,10 +410,15 @@ bool USerializeSystemNew::LoadActorData(const UObject* WorldContextObject, FStri
 	TMap<FString, TArray<FRefurrenceData> > RefurrenceData;
 	TMap<FString, TArray<FRefurrenceArrayData>> RefurrenceArrayData;
 	TMap<FString, TArray<FRefurrenceMapData>> RefurrenceMapData;
-	//已经生成出来的OuterList
-	//TMap<FString, UObject*> OuterList;
 
-	for (TMap< FString, FObjSerializeData>::TConstIterator Iterator(LoadGameData.SerializeObj); Iterator; ++Iterator)
+	/*4.12 修改为需要判断StreamLevel的名字了，那么，就需要判断当前StreamLevelName是否为空！ */
+	if (LoadGameData.SerializeObjByMap[StreamLevelName].Num() < 1)
+	{
+		UE_LOG(LogTemp, Warning, TEXT(" Cur StreamLevelName Serialize OBJ is Null!! "));
+		return false;
+	}
+	//for (TMap< FString, FObjSerializeData>::TConstIterator Iterator(LoadGameData.SerializeObj); Iterator; ++Iterator)
+	for (TMap< FString, FObjSerializeData>::TConstIterator Iterator(LoadGameData.SerializeObjByMap[StreamLevelName]); Iterator; ++Iterator)
 	{
 		FObjSerializeData CurSerializeData = (Iterator->Value);
 
@@ -368,7 +426,7 @@ bool USerializeSystemNew::LoadActorData(const UObject* WorldContextObject, FStri
 		if (SerializeObjList.Contains(CurSerializeData.ID))
 			continue;
 		else
-			CreateActorDeperOuter(WorldContextObject ,CurSerializeData , LoadGameData.SerializeObj,
+			CreateActorDeperOuter(WorldContextObject ,CurSerializeData , LoadGameData.SerializeObjByMap[StreamLevelName],//LoadGameData.SerializeObj,
 				SerializeObjList, RefurrenceData , RefurrenceArrayData, RefurrenceMapData);
 	}
 

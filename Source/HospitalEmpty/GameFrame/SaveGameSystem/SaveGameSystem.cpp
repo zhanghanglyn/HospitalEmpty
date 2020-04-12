@@ -29,6 +29,7 @@ USaveGameSystem* USaveGameSystem::Get(const UObject* WorldContextObject)
 
 USaveGameSystem::USaveGameSystem(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
+	SaveGamePath = "HospitalProject/SaveData/GameSaveCatalogue";
 	SaveGamePath = *FString::Printf(TEXT("%s%s"), *FPaths::ProjectContentDir(), *SaveGamePath);
 
 	/* 在此取一次数据，初始化例如存档数量等参数 */
@@ -123,7 +124,7 @@ bool USaveGameSystem::SaveGame(const UObject* WorldContextObject , FString GameI
 /************************************************************************/
 /*                           读取游戏相关                               */
 /************************************************************************/
-bool USaveGameSystem::LoadGame(const UObject* WorldContextObject ,FString GameID)
+bool USaveGameSystem::LoadGame(const UObject* WorldContextObject ,FString GameID, FString InStreamLevelName)
 {
 	//先从本地中取出所有数据对应表
 	RefreshGameSaveData();
@@ -146,7 +147,7 @@ bool USaveGameSystem::LoadGame(const UObject* WorldContextObject ,FString GameID
 			
 
 		/* 加载完毕地图后再加载Actor */
-		SerializeSystem->LoadActorData(WorldContextObject, GameID);
+		SerializeSystem->LoadActorData(WorldContextObject, GameID , InStreamLevelName);
 	}
 
 	return false;
@@ -154,5 +155,5 @@ bool USaveGameSystem::LoadGame(const UObject* WorldContextObject ,FString GameID
 
 void USaveGameSystem::LoadDataAfterLoaded(FName LevelName, const UObject* WorldContextObject)
 {
-	SerializeSystem->LoadActorData(WorldContextObject, LoadParam.GameID);
+	SerializeSystem->LoadActorData(WorldContextObject, LoadParam.GameID, "11");
 }

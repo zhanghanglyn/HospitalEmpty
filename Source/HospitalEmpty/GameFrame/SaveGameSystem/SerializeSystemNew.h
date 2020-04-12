@@ -129,7 +129,7 @@ public:
 	//以该Ojb存储生成的ID作为Key
 	TMap< FString, FObjSerializeData> SerializeObj;  
 	//4.10 存档的时候，根据StreamLevel的名字再分一下 , Key为StreamLevelName
-	TMap< FString, FObjSerializeData> SerializeObjByMap;
+	TMap< FString, TMap< FString, FObjSerializeData>> SerializeObjByMap;
 
 	FString LevelName;	//保存当前存档对应的Level名称
 	FName LevelPackageName;	//保存当前存档对应的Level的包
@@ -138,7 +138,8 @@ public:
 	{
 		Ar << InSerializeObj.GameID;
 		Ar << InSerializeObj.Timestamp;
-		Ar << InSerializeObj.SerializeObj;
+		//Ar << InSerializeObj.SerializeObj;  //4.12 这都不用存了~
+		Ar << InSerializeObj.SerializeObjByMap;
 		Ar << InSerializeObj.LevelName;
 		Ar << InSerializeObj.LevelPackageName;
 
@@ -178,9 +179,10 @@ public:
 	/*	从配置中加载
 		Note：该函数还有一个很大的效率问题，因为是当所有的Object生成完了之后，遍历所有的Object去重定向指针，多出了一倍的循环消耗，
 		之后可以使用更好的算法优化。
-		3.27 注，之后可以再其中添加回调，已达到每一阶段不同处理的效果
+		3.27 注，之后可以再其中添加回调，已达到每一阶段不同处理的效果 
+		4.12 新添加一个StreamLevelName ，只加载对应的StreamLevelName的Actor
 	*/
-	bool LoadActorData(const UObject* WorldContextObject, FString GameID);
+	bool LoadActorData(const UObject* WorldContextObject, FString GameID , FString StreamLevelName);
 
 protected:
 	/* 
@@ -220,6 +222,9 @@ protected:
 		TMap<FString, UObject* > &SerializeObjList,
 		TMap<FString, TArray<FRefurrenceData>> &RefurrenceData , TMap<FString, TArray<FRefurrenceArrayData>> &RefurrenceArrayData,
 		TMap<FString, TArray<FRefurrenceMapData>> &RefurrenceMapData);
+
+	/* 4.12 辅助函数，将处理好的序列化数据，根据StreamLevel进行分类 */
+	//void ClassifySerializeDataByStreamLevelName(FGameSerializeData &InGameSerialzieData);
 
 public:
 	static FString OUTER_TYPE_WORLD;// = "WORLD"

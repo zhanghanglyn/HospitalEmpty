@@ -100,7 +100,7 @@ public:
 	bool SaveGame(const UObject* WorldContextObject, FString GameID);
 
 	/* 根据存档ID读取游戏 */
-	bool LoadGame(const UObject* WorldContextObject , FString GameID);
+	bool LoadGame(const UObject* WorldContextObject , FString GameID , FString InStreamLevelName);
 
 	/* 获取当前的数据配置表 */
 	FGameSaveData GetGameSaveData()

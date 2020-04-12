@@ -87,3 +87,8 @@ void ULoadMapSystem::AsynLoadPackageCall(const FName& PackageName, UPackage* Loa
 		
 
 }
+
+void ULoadMapSystem::LoadStreamLevel(const UObject* WorldContextObject, FName LevelName, FName StreamLevelName)
+{
+
+}

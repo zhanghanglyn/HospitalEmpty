@@ -25,6 +25,8 @@ public:
 	void LoadLevel(const UObject* WorldContextObject , FName LevelName , bool BAsyn = true ,
 	UObject* DelegateOuterObj = nullptr, FName OuterFunctionName = "");
 
+	/* 4.12 原本的LoadLevel函数大概率要弃用，先添加一个LoadStreamLevel接口,用于地图块一块一块的加载 */
+	void LoadStreamLevel(const UObject* WorldContextObject, FName LevelName, FName StreamLevelName);
 protected:
 	/* 异步加载完成后的回调 */
 	UFUNCTION()

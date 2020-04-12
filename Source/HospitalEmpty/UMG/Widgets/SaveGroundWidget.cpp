@@ -66,5 +66,5 @@ void USaveGroundWidget::SaveGround()
 void USaveGroundWidget::LoadGround()
 {
 	if (USaveGameSystem* SaveGameSystem = USaveGameSystem::Get(this))
-		SaveGameSystem->LoadGame(this, "Save11");
+		SaveGameSystem->LoadGame(this, "Save11" , "Test_1");
 }

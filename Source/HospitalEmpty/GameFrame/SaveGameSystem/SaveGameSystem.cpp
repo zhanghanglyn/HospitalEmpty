@@ -113,6 +113,7 @@ bool USaveGameSystem::SaveGame(const UObject* WorldContextObject , FString GameI
 		ListStruct.DataPic = "Picture";
 		ListStruct.SaveTime = CurSaveDataTemp.Timestamp.ToString();
 		ListStruct.MapPackageName = CurSaveDataTemp.LevelPackageName;
+		ListStruct.ShowStreamLevelNames = CurSaveDataTemp.ShowStreamLevelNames;
 
 		GameSaveData.StructData.Add(SaveGameID , ListStruct);
 
@@ -124,6 +125,7 @@ bool USaveGameSystem::SaveGame(const UObject* WorldContextObject , FString GameI
 /************************************************************************/
 /*                           读取游戏相关                               */
 /************************************************************************/
+#pragma optimize("",off)
 bool USaveGameSystem::LoadGame(const UObject* WorldContextObject ,FString GameID, FString InStreamLevelName)
 {
 	//先从本地中取出所有数据对应表
@@ -136,18 +138,16 @@ bool USaveGameSystem::LoadGame(const UObject* WorldContextObject ,FString GameID
 	{
 		FSaveDataListStruct DataListStruct = GameSaveData.StructData[GameID];
 		/* 先加载地图  先测试一下 */
-		//DataListStruct.MapData
-		/*if (ULoadMapSystem* LoadMapSystem = ULoadMapSystem::Get(WorldContextObject))
+		if (ULoadMapSystem* LoadMapSystem = ULoadMapSystem::Get(WorldContextObject))
 		{
 			//准备参数
 			LoadParam.GameID = GameID;
-			LoadMapSystem->LoadLevel(WorldContextObject, DataListStruct.MapPackageName, false, this, "LoadDataAfterLoaded");
-
-		}*/
+			LoadMapSystem->LoadLevel(WorldContextObject, DataListStruct.MapPackageName);// , false, this, "LoadDataAfterLoaded");
+		}
 			
-
+		//4.13 修改为使用Level打开加载
 		/* 加载完毕地图后再加载Actor */
-		SerializeSystem->LoadActorData(WorldContextObject, GameID , InStreamLevelName);
+		//SerializeSystem->LoadActorData(WorldContextObject, GameID , InStreamLevelName);
 	}
 
 	return false;
@@ -157,3 +157,56 @@ void USaveGameSystem::LoadDataAfterLoaded(FName LevelName, const UObject* WorldC
 {
 	SerializeSystem->LoadActorData(WorldContextObject, LoadParam.GameID, "11");
 }
+
+bool USaveGameSystem::LoadAfterLoaded(const UObject* WorldContextObject)
+{
+	//此时不需要加载数据或是没有数据可加载
+	if (LoadParam.GameID.IsEmpty() || LoadParam.GameID.Equals(""))
+	{
+		return false;
+	}
+
+	if (SerializeSystem == nullptr)
+		SerializeSystem = USerializeSystemNew::Get(WorldContextObject);
+
+	//在此，根据存储的数据判断下当前需要加载的StreamLevelName是哪几个。
+	FSaveDataListStruct DataList = GameSaveData.StructData[LoadParam.GameID];
+	UWorld* CurWorld = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
+	if (!CurWorld)
+		return false;
+	ULoadMapSystem* LoadMapSystem = ULoadMapSystem::Get(WorldContextObject);
+	if (!LoadMapSystem)
+		return false;
+
+
+	//找到当前world中所有的StreamLevel，判断是否已经进行了加载
+	TArray<ULevelStreaming*> LevelStreamings = CurWorld->GetStreamingLevels();
+	for (int32 NameCount = 0; NameCount < LevelStreamings.Num(); ++NameCount)
+	{
+		FName PackageNameToLoad = LevelStreamings[NameCount]->PackageNameToLoad;
+		FString StreamLevelNameErr = (FPackageName::GetShortFName(PackageNameToLoad)).ToString();
+		//如果待显示的LevelName在该World中存在，则加载
+		if (DataList.ShowStreamLevelNames.Contains(StreamLevelNameErr))
+		{
+			ULoadStreamParam* TempParam = NewObject<ULoadStreamParam>();
+			TempParam->GameID = LoadParam.GameID;
+			TempParam->StreamLevelName = StreamLevelNameErr;
+			TempParam->WorldContextObject = WorldContextObject;
+			LoadMapSystem->LoadStreamLevel(WorldContextObject, *StreamLevelNameErr, this, "LoadStreamLevelOverCall" , TempParam);
+		}
+	}
+
+	LoadParam.GameID = "";
+	//return SerializeSystem->LoadActorData(WorldContextObject, GameID);
+
+	return true;
+}
+
+void USaveGameSystem::LoadStreamLevelOverCall(UObject* InParam)
+{
+	if (ULoadStreamParam* TempParam = Cast<ULoadStreamParam>(InParam))
+	{
+		SerializeSystem->LoadActorData(TempParam->WorldContextObject, TempParam->GameID, TempParam->StreamLevelName);
+	}
+}
+#pragma optimize("",on)

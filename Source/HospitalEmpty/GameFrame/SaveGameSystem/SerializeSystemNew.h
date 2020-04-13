@@ -134,6 +134,9 @@ public:
 	FString LevelName;	//保存当前存档对应的Level名称
 	FName LevelPackageName;	//保存当前存档对应的Level的包
 
+	//4.13 新添加当前显示保存的StreamLevelNames
+	TArray<FString> ShowStreamLevelNames;
+
 	friend FArchive& operator<<(FArchive& Ar, FGameSerializeData& InSerializeObj)
 	{
 		Ar << InSerializeObj.GameID;
@@ -142,6 +145,7 @@ public:
 		Ar << InSerializeObj.SerializeObjByMap;
 		Ar << InSerializeObj.LevelName;
 		Ar << InSerializeObj.LevelPackageName;
+		Ar << InSerializeObj.ShowStreamLevelNames;
 
 		return Ar;
 	}
@@ -181,9 +185,10 @@ public:
 		之后可以使用更好的算法优化。
 		3.27 注，之后可以再其中添加回调，已达到每一阶段不同处理的效果 
 		4.12 新添加一个StreamLevelName ，只加载对应的StreamLevelName的Actor
+		4.13 支持一个什么都不传的版本，会自动从数据中获取StreamLevelName一次性加载
 	*/
 	bool LoadActorData(const UObject* WorldContextObject, FString GameID , FString StreamLevelName);
-
+	bool LoadActorData(const UObject* WorldContextObject, FString GameID);
 protected:
 	/* 
 		存储FGameSerializeData至本地文件中 
@@ -222,9 +227,6 @@ protected:
 		TMap<FString, UObject* > &SerializeObjList,
 		TMap<FString, TArray<FRefurrenceData>> &RefurrenceData , TMap<FString, TArray<FRefurrenceArrayData>> &RefurrenceArrayData,
 		TMap<FString, TArray<FRefurrenceMapData>> &RefurrenceMapData);
-
-	/* 4.12 辅助函数，将处理好的序列化数据，根据StreamLevel进行分类 */
-	//void ClassifySerializeDataByStreamLevelName(FGameSerializeData &InGameSerialzieData);
 
 public:
 	static FString OUTER_TYPE_WORLD;// = "WORLD"

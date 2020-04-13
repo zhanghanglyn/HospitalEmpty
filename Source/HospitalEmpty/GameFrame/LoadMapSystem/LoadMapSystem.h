@@ -16,24 +16,47 @@ class ULoadMapSystem : public UObject
 	DECLARE_DELEGATE_TwoParams(FOnPackageLoadedOuter , FName ,const UObject*)
 	FOnPackageLoadedOuter OnPackageLoadedOuter;
 
+	/* 4.13 LoadStreamLevel使用，加载完毕后的回调 */
+	DECLARE_DELEGATE( FOnStreamLevelLoaded )
+	FOnStreamLevelLoaded OnStreamLevelLoaded;
+
 public:
 	ULoadMapSystem(const FObjectInitializer& ObjectInitializer);
 
 	static ULoadMapSystem* Get(const UObject* WorldContextObject);
 
-	/* 外部调用加载Level，可以选择是异步加载还是同步加载 */
-	void LoadLevel(const UObject* WorldContextObject , FName LevelName , bool BAsyn = true ,
+	/*	外部调用加载Level，可以选择是异步加载还是同步加载
+		4.13 修改为只直接加载地图，不需要后续的回调了，因为，加载了地图之后World变化，会造成很多问题
+	*/
+	UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"))
+	void LoadLevel(const UObject* WorldContextObject , FName LevelName , bool BAsyn = false ,
 	UObject* DelegateOuterObj = nullptr, FName OuterFunctionName = "");
 
-	/* 4.12 原本的LoadLevel函数大概率要弃用，先添加一个LoadStreamLevel接口,用于地图块一块一块的加载 */
-	void LoadStreamLevel(const UObject* WorldContextObject, FName LevelName, FName StreamLevelName);
+	/*	4.12 原本的LoadLevel函数大概率要弃用，先添加一个LoadStreamLevel接口,用于地图块一块一块的加载
+		该接口，先加载StreamLevelName对应的StreamLevel，之后再加载对应的StreamLevel上的序列化数据
+		Param : CallOuter外部需要回调的OBJ
+				CallBackName 外部需要回调的functionName,需要一个参数UObject*
+	*/
+	UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"))
+	void LoadStreamLevel(const UObject* WorldContextObject, FName InStreamLevelName , UObject* CallOuter , FName CallBackName , UObject* InParam);
+
 protected:
 	/* 异步加载完成后的回调 */
 	UFUNCTION()
 	void AsynLoadPackageCall(const FName& PackageName, UPackage* LoadedPackage, int32 InResult);
 
+	/* 4.13 加载StreamLevel完毕后的回调 */
+	UFUNCTION(BlueprintCallable)
+	void StreamLevelLoaded();
 protected:
 	/* 当加载地图时，在反射中使用的Object指针会丢失，应该是被回收了，所以保存记录下来使用 */
 	UPROPERTY()
 	const UObject* LoadWorldContextObject;
+
+	/* StreamLevel加载时使用的UID */
+	UPROPERTY()
+	int32 CallBackUID = 1;
+
+	/* StreamLevel加载时使用的保存参数集 , key 为UID，val 为对应的参数 */
+	TMap< int32, UObject*> StreamLevelCallBackParam;
 };

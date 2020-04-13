@@ -42,7 +42,6 @@ void ULoadMapSystem::LoadLevel(const UObject* WorldContextObject , FName LevelNa
 	if (BAsyn == false)
 	{
 		UGameplayStatics::OpenLevel(WorldContextObject, LevelName, false);
-		OnPackageLoadedOuter.Execute("", WorldContextObject);
 	}
 	/* 异步加载地图对应的包，加载完成后调用OpenLevel */
 	else
@@ -76,7 +75,6 @@ void ULoadMapSystem::AsynLoadPackageCall(const FName& PackageName, UPackage* Loa
 		return;
 	}
 		
-
 	if (OnPackageLoadedOuter.IsBound())
 	{
 		UGameplayStatics::OpenLevel(LoadWorldContextObject, PackageName, false);
@@ -84,11 +82,27 @@ void ULoadMapSystem::AsynLoadPackageCall(const FName& PackageName, UPackage* Loa
 
 		LoadWorldContextObject = nullptr;
 	}
-		
-
 }
 
-void ULoadMapSystem::LoadStreamLevel(const UObject* WorldContextObject, FName LevelName, FName StreamLevelName)
+void ULoadMapSystem::LoadStreamLevel(const UObject* WorldContextObject, FName InStreamLevelName ,
+	UObject* CallOuter , FName CallBackName , UObject* InParam)
 {
+	FLatentActionInfo info;
+	info.CallbackTarget = this;
+	info.ExecutionFunction = "StreamLevelLoaded";
+	info.UUID = CallBackUID;
+	info.Linkage = 0;
 
+	CallBackUID++;
+
+	if (OnStreamLevelLoaded.IsBound())
+		OnStreamLevelLoaded.Unbind();
+	OnStreamLevelLoaded.BindUFunction(CallOuter, CallBackName, InParam);
+
+	UGameplayStatics::LoadStreamLevel(WorldContextObject, InStreamLevelName, true, false, info);
+}
+
+void ULoadMapSystem::StreamLevelLoaded()
+{
+	OnStreamLevelLoaded.ExecuteIfBound();
 }

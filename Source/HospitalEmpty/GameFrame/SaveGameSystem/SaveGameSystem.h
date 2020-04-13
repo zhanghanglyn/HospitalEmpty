@@ -29,7 +29,8 @@ public:
 	FString PlayerConfig;
 	/* 保存时间 */
 	FString SaveTime;
-
+	//4.13 新添加当前显示保存的StreamLevelNames
+	TArray<FString> ShowStreamLevelNames;
 
 	friend FArchive& operator<<(FArchive &Ar, FSaveDataListStruct &InData)
 	{
@@ -40,6 +41,7 @@ public:
 		Ar << InData.PlayerConfig;
 		Ar << InData.SaveTime;
 		Ar << InData.MapPackageName;
+		Ar << InData.ShowStreamLevelNames;
 
 		return Ar;
 	}
@@ -75,8 +77,30 @@ struct FLoadGameParam
 	GENERATED_USTRUCT_BODY()
 
 public:
-	FString GameID;
+	UPROPERTY()
+	FString GameID = "";
 };
+
+/* 定义一个用来在加载StreamLevel时进行传递的参数 */
+UCLASS(BlueprintType)
+class ULoadStreamParam : public UObject
+{
+	GENERATED_BODY()
+
+public:
+	ULoadStreamParam(const FObjectInitializer& ObjectInitializer) :Super(ObjectInitializer) {};
+
+public:
+	UPROPERTY()
+	FString GameID;
+
+	UPROPERTY()
+	FString StreamLevelName;
+
+	UPROPERTY()
+	const UObject* WorldContextObject;
+};
+
 
 /*
 	正式用于游戏存档的系统
@@ -97,10 +121,16 @@ public:
 		保存游戏当前进度 
 		Param : GameID 是可以为空的，如果为空，说明是新存档，则重新设置一个GameID
 	*/
+	UFUNCTION(BlueprintCallable)
 	bool SaveGame(const UObject* WorldContextObject, FString GameID);
 
 	/* 根据存档ID读取游戏 */
+	UFUNCTION(BlueprintCallable)
 	bool LoadGame(const UObject* WorldContextObject , FString GameID , FString InStreamLevelName);
+
+	/* 由Level的Start调用，在地图加载完毕之后，根据之前选择的存档数据，加载地图上的数据 */
+	UFUNCTION(BlueprintCallable ,meta = (WorldContext = "WorldContextObject"))
+	bool LoadAfterLoaded(const UObject* WorldContextObject);
 
 	/* 获取当前的数据配置表 */
 	FGameSaveData GetGameSaveData()
@@ -117,6 +147,10 @@ protected:
 
 	UFUNCTION()
 	void LoadDataAfterLoaded(FName LevelName, const UObject* WorldContextObject);
+
+	/* 加载完成每一个StreamLevel之后的回调 */
+	UFUNCTION()
+	void LoadStreamLevelOverCall(UObject* InParam);
 
 protected:
 	/* 存档数量 */

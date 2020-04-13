@@ -8,8 +8,7 @@
 #include "SaveDataPlWidget.generated.h"
 
 /**
-	放置物品的菜单，从配置中取出可以添加到场景中的物品，然后显示
-	点击物品后，会直接创建一个
+	存档菜单界面
  */
 UCLASS()
 class USaveDataPlWidget : public UUserWidgetBase

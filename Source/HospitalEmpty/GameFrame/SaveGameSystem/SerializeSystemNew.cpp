@@ -80,15 +80,12 @@ bool USerializeSystemNew::SaveAllActorData(const UObject* WorldContextObject , F
 				TArray<AActor*> TempActor;
 				TempActor.Add(InActor);
 				OrderedActor.Add(StreamLevelName,TempActor);
+				//4.13 将当前显示的StreamLevelName加入保存
+				GameSaveSerializeData.ShowStreamLevelNames.Add(StreamLevelName);
 			}
 		}
 	}
 
-	//for (AActor* InActor : SaveActors)
-	//{
-	//	//最终需要保存的包含了所有序列化完成数据的Map
-	//	SaveObjToData(Cast<UObject>(InActor) , GameSaveSerializeData.SerializeObj, SaveActors);
-	//}
 	/* 4.12 修改为根据StreamLevelName进行加载 */
 	for (TMap< FString, TArray<AActor*>>::TConstIterator Iter = OrderedActor.CreateConstIterator(); Iter; ++Iter)
 	{
@@ -106,9 +103,6 @@ bool USerializeSystemNew::SaveAllActorData(const UObject* WorldContextObject , F
 	}
 
 	OutData = GameSaveSerializeData;
-
-	//4.12 在此新添加一个函数，将处理好的序列化数据，根据streamLevel进行分类
-	//ClassifySerializeDataByStreamLevelName(GameSaveSerializeData);
 
 	return SaveGameSerializeDataToFile(GameSaveSerializeData , GameID);
 }
@@ -169,11 +163,6 @@ void USerializeSystemNew::SaveObjToData(UObject* InObj, TMap< FString, FObjSeria
 void USerializeSystemNew::CheckSavableProject(UObject* InObj, TMap<FString, FObjSerializeData> &OutData, TArray<FRefurrenceData> &RefData ,
 	TArray<FRefurrenceArrayData> &RefArrayData , TArray<FRefurrenceMapData> &RefMapData, const TArray<AActor *> InSaveActor)
 {
-	//用来存储输出的Ojb引用的list
-	//TArray< FRefurrenceData> RefurrenceList;
-	//用来存储输出的TArray引用的List
-	//TArray<FRefurrenceArrayData> RefurrenceArrayList;
-
 	//设置一下当前Obj的ID
 	FString SerializeDataID = InObj->GetClass()->GetName() + "_" + InObj->GetOuter()->GetName() + "_" + InObj->GetName();//InObj->GetClass()->GetPathName() + "_" + InObj->GetName();
 
@@ -345,30 +334,6 @@ bool USerializeSystemNew::SaveGameSerializeDataToFile(FGameSerializeData &InData
 	return true;
 }
 
-//void USerializeSystemNew::ClassifySerializeDataByStreamLevelName(FGameSerializeData &InGameSerialzieData)
-//{
-//	if (InGameSerialzieData.SerializeObj.Num() > 0)
-//	{
-//		for (TMap< FString, FObjSerializeData>::TConstIterator Iter = InGameSerialzieData.SerializeObj.CreateConstIterator();Iter ; ++Iter)
-//		{
-//			FObjSerializeData TTT = Iter->Value;
-//			FString StreamLevelName = Iter->Value.StreamLevelName;
-//			//如果该StreamLevelName已经存在了分类数据，则直接添加进去，否则创建新的
-//			if (InGameSerialzieData.SerializeObjByMap.Contains(StreamLevelName))
-//			{
-//				//[StreamLevelName].Add(ID, SerialzieData)   TMap< FString, TMap< FString, FObjSerializeData>>
-//				InGameSerialzieData.SerializeObjByMap[StreamLevelName].Add(Iter->Key, Iter->Value);//InGameSerialzieData.SerializeObj[Iter->Key], InGameSerialzieData.SerializeObj[Iter->Value]);
-//			}
-//			else
-//			{	//Add( StreamLevelName , TMap< ID, FObjSerializeData>)
-//				TMap< FString, FObjSerializeData> TempSerializeData;
-//				TempSerializeData.Add(Iter->Key, Iter->Value);
-//				InGameSerialzieData.SerializeObjByMap.Add(StreamLevelName, TempSerializeData);
-//			}
-//		}
-//	}
-//}
-
 /************************************************************************/
 /*                              Load相关                                */
 /************************************************************************/
@@ -443,6 +408,80 @@ bool USerializeSystemNew::LoadActorData(const UObject* WorldContextObject, FStri
 	}
 
 	UE_LOG(LogTemp ,Warning , TEXT("Load Object OVer~!"));
+
+	return true;
+}
+bool USerializeSystemNew::LoadActorData(const UObject* WorldContextObject, FString GameID)
+{
+	FString DataLoadPath = SavePath + GameID;
+
+	TArray<uint8> BinaryData;
+	//先写死作为测试
+	if (FFileHelper::LoadFileToArray(BinaryData, *DataLoadPath))
+	{
+		UE_LOG(LogTemp, Warning, TEXT(" LoadFileToArray Over~ "));
+	}
+	else
+	{
+		return false;
+	}
+
+	FMemoryReader FromBinary = FMemoryReader(BinaryData, true);
+	FromBinary.Seek(0);
+
+	FGameSerializeData LoadGameData;
+	FromBinary << LoadGameData;
+
+	FromBinary.FlushCache();
+	BinaryData.Empty();
+	FromBinary.Close();
+
+	//将数据载入完之后进行正式的生成
+
+	//要将加载出来的所有包括Actor和Component和UObject之类的东西全都加入到这个列表中，用来进行每一个Actor反序列化时的指针查找。
+	//Key为对应的ID
+	TMap<FString, UObject* > SerializeObjList;
+	TMap<FString, TArray<FRefurrenceData> > RefurrenceData;
+	TMap<FString, TArray<FRefurrenceArrayData>> RefurrenceArrayData;
+	TMap<FString, TArray<FRefurrenceMapData>> RefurrenceMapData;
+
+	TArray<FString> ShowStreamLevelNames = LoadGameData.ShowStreamLevelNames;
+
+	/*4.12 修改为需要判断StreamLevel的名字了，那么，就需要判断当前StreamLevelName是否为空！ */
+	for (int32 StreamLevelNamesCount = 0; StreamLevelNamesCount < ShowStreamLevelNames.Num(); ++StreamLevelNamesCount)
+	{
+		if (LoadGameData.SerializeObjByMap[ShowStreamLevelNames[StreamLevelNamesCount]].Num() < 1)
+		{
+			UE_LOG(LogTemp, Warning, TEXT(" Cur ShowStreamLevelNames Serialize OBJ is Null!! "));
+			continue;
+		}
+		//for (TMap< FString, FObjSerializeData>::TConstIterator Iterator(LoadGameData.SerializeObj); Iterator; ++Iterator)
+		for (TMap< FString, FObjSerializeData>::TConstIterator Iterator(LoadGameData.SerializeObjByMap[ShowStreamLevelNames[StreamLevelNamesCount]]); Iterator; ++Iterator)
+		{
+			FObjSerializeData CurSerializeData = (Iterator->Value);
+
+			/* 20.3.26 修改为递归 */
+			if (SerializeObjList.Contains(CurSerializeData.ID))
+				continue;
+			else
+				CreateActorDeperOuter(WorldContextObject, CurSerializeData, LoadGameData.SerializeObjByMap[ShowStreamLevelNames[StreamLevelNamesCount]],//LoadGameData.SerializeObj,
+					SerializeObjList, RefurrenceData, RefurrenceArrayData, RefurrenceMapData);
+		}
+
+		//所有需要序列化的OBJ生成完毕之后，进行引用指针的重定向,所有能够保存的OBJ，都继承了保存接口
+		for (TMap<FString, UObject* >::TConstIterator Iterator(SerializeObjList); Iterator; ++Iterator)
+		{
+			ISaveableActorInterface* SavableActor = Cast<ISaveableActorInterface>(Iterator->Value);
+			if (SavableActor)
+			{
+				SavableActor->RePointRefurrence(Iterator->Value, RefurrenceData[Iterator->Key], RefurrenceArrayData[Iterator->Key],
+					RefurrenceMapData[Iterator->Key], SerializeObjList);
+				SavableActor->RefreshAfterRePoint();
+			}
+		}
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Load Object OVer~!"));
 
 	return true;
 }

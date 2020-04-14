@@ -87,22 +87,43 @@ void ULoadMapSystem::AsynLoadPackageCall(const FName& PackageName, UPackage* Loa
 void ULoadMapSystem::LoadStreamLevel(const UObject* WorldContextObject, FName InStreamLevelName ,
 	UObject* CallOuter , FName CallBackName , UObject* InParam)
 {
+	ULoadStreamCallOjb* TempCallObj = NewObject<ULoadStreamCallOjb>(this);
+	TempCallObj->CallParam = InParam;
+	TempCallObj->UUID = CallBackUID;
+	StreamLevelCallBackParamObj.Add(CallBackUID, TempCallObj);
+	TempCallObj->OnStreamLevelLoaded.BindUFunction(CallOuter, CallBackName, InParam);
+
 	FLatentActionInfo info;
-	info.CallbackTarget = this;
+	info.CallbackTarget = Cast<UObject>(TempCallObj);//this;
 	info.ExecutionFunction = "StreamLevelLoaded";
 	info.UUID = CallBackUID;
 	info.Linkage = 0;
 
 	CallBackUID++;
 
-	if (OnStreamLevelLoaded.IsBound())
-		OnStreamLevelLoaded.Unbind();
-	OnStreamLevelLoaded.BindUFunction(CallOuter, CallBackName, InParam);
+	//OnStreamLevelLoaded.BindUFunction(CallOuter, CallBackName, InParam);
 
 	UGameplayStatics::LoadStreamLevel(WorldContextObject, InStreamLevelName, true, false, info);
 }
 
-void ULoadMapSystem::StreamLevelLoaded()
+void ULoadMapSystem::StreamLevelLoaded(UObject* InParam)
 {
-	OnStreamLevelLoaded.ExecuteIfBound();
+	//OnStreamLevelLoaded.ExecuteIfBound();
+	//OnStreamLevelLoaded.Broadcast( nullptr );
+}
+
+/**************      ParamObj   ***************/
+void ULoadStreamCallOjb::StreamLevelLoaded()
+{
+	OnStreamLevelLoaded.ExecuteIfBound(CallParam);
+	OnStreamLevelLoaded.Unbind();
+
+	CallParam = nullptr;
+
+	if (ULoadMapSystem* LoadMapSystem = ULoadMapSystem::Get(this))
+	{
+		LoadMapSystem->StreamLevelCallBackParamObj[UUID]->RemoveFromRoot();
+		LoadMapSystem->StreamLevelCallBackParamObj.Remove(UUID);
+	}
+		
 }

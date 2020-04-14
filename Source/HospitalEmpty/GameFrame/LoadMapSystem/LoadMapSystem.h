@@ -3,6 +3,31 @@
 #include "CoreMinimal.h"
 #include "LoadMapSystem.generated.h"
 
+/* 4.14  test 创建一个专门用来回调的UObject试试！*/
+UCLASS(BlueprintType)
+class ULoadStreamCallOjb : public UObject
+{
+	GENERATED_BODY()
+
+public:
+	/* 4.13 LoadStreamLevel使用，加载完毕后的回调 */
+	DECLARE_DELEGATE_OneParam(FOnStreamLevelLoaded, UObject*)
+	FOnStreamLevelLoaded OnStreamLevelLoaded;
+
+public:
+	ULoadStreamCallOjb(const FObjectInitializer& ObjectInitializer) :Super(ObjectInitializer) {};
+
+	UFUNCTION(BlueprintCallable)
+	void StreamLevelLoaded();
+
+	UPROPERTY()
+	int32 UUID = -1;
+
+public:
+	UPROPERTY()
+	UObject* CallParam;
+};
+
 UCLASS(BlueprintType)
 class ULoadMapSystem : public UObject
 {
@@ -17,7 +42,7 @@ class ULoadMapSystem : public UObject
 	FOnPackageLoadedOuter OnPackageLoadedOuter;
 
 	/* 4.13 LoadStreamLevel使用，加载完毕后的回调 */
-	DECLARE_DELEGATE( FOnStreamLevelLoaded )
+	DECLARE_DELEGATE_OneParam( FOnStreamLevelLoaded ,UObject*)
 	FOnStreamLevelLoaded OnStreamLevelLoaded;
 
 public:
@@ -47,7 +72,7 @@ protected:
 
 	/* 4.13 加载StreamLevel完毕后的回调 */
 	UFUNCTION(BlueprintCallable)
-	void StreamLevelLoaded();
+	void StreamLevelLoaded(UObject* InParam);
 protected:
 	/* 当加载地图时，在反射中使用的Object指针会丢失，应该是被回收了，所以保存记录下来使用 */
 	UPROPERTY()
@@ -57,6 +82,9 @@ protected:
 	UPROPERTY()
 	int32 CallBackUID = 1;
 
+public:
 	/* StreamLevel加载时使用的保存参数集 , key 为UID，val 为对应的参数 */
-	TMap< int32, UObject*> StreamLevelCallBackParam;
+	UPROPERTY()
+	TMap< int32, ULoadStreamCallOjb*> StreamLevelCallBackParamObj;
+
 };

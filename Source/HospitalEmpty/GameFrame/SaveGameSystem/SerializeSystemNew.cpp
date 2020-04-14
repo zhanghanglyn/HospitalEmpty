@@ -520,6 +520,7 @@ UObject* USerializeSystemNew::CreateActorDeperOuter(const UObject* WorldContextO
 				if (CurStreamLevelState == ULevelStreaming::ECurrentState::LoadedVisible)
 				{
 					CurObjLevel = LevelStreamings[LevelCount]->GetLoadedLevel();
+
 					break;
 				}
 			}

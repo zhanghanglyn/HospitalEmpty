@@ -106,7 +106,7 @@ bool USerializeSystemNew::SaveAllActorData(const UObject* WorldContextObject , F
 
 	return SaveGameSerializeDataToFile(GameSaveSerializeData , GameID);
 }
-#pragma optimize("",off)
+//#pragma optimize("",off)
 /* 需要递归去取Obj身上的可保存结构 */
 void USerializeSystemNew::SaveObjToData(UObject* InObj, TMap< FString, FObjSerializeData> &OutData, const TArray<AActor*> InSaveActor)
 {
@@ -284,7 +284,7 @@ void USerializeSystemNew::CheckSavableProject(UObject* InObj, TMap<FString, FObj
 	}
 	//return RefurrenceList;
 }
-#pragma optimize("",on)
+//#pragma optimize("",on)
 bool USerializeSystemNew::CheckObjInArray(UObject* InActor, const TArray<AActor*> InSaveActor)
 {
 	for (AActor* Each : InSaveActor)
@@ -377,7 +377,7 @@ bool USerializeSystemNew::LoadActorData(const UObject* WorldContextObject, FStri
 	TMap<FString, TArray<FRefurrenceMapData>> RefurrenceMapData;
 
 	/*4.12 修改为需要判断StreamLevel的名字了，那么，就需要判断当前StreamLevelName是否为空！ */
-	if (LoadGameData.SerializeObjByMap[StreamLevelName].Num() < 1)
+	if ( !LoadGameData.SerializeObjByMap.Contains(StreamLevelName))//LoadGameData.SerializeObjByMap[StreamLevelName].Num() < 1)
 	{
 		UE_LOG(LogTemp, Warning, TEXT(" Cur StreamLevelName Serialize OBJ is Null!! "));
 		return false;
@@ -485,7 +485,7 @@ bool USerializeSystemNew::LoadActorData(const UObject* WorldContextObject, FStri
 
 	return true;
 }
-#pragma optimize("",off)
+//#pragma optimize("",off)
 UObject* USerializeSystemNew::CreateActorDeperOuter(const UObject* WorldContextObject, FObjSerializeData InSerializeData,
 	TMap< FString, FObjSerializeData> AllSerializeObj,
 	TMap<FString, UObject *> &SerializeObjList,
@@ -665,4 +665,4 @@ UObject* USerializeSystemNew::CreateActorDeperOuter(const UObject* WorldContextO
 
 	return nullptr;
 }
-#pragma optimize("",on)
+//#pragma optimize("",on)

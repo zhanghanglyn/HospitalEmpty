@@ -63,7 +63,7 @@ public:
 				CallBackName 外部需要回调的functionName,需要一个参数UObject*
 	*/
 	UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"))
-	void LoadStreamLevel(const UObject* WorldContextObject, FName InStreamLevelName , UObject* CallOuter , FName CallBackName , UObject* InParam);
+	void LoadStreamLevel(const UObject* WorldContextObject, FName InStreamLevelName , UObject* CallOuter = nullptr, FName CallBackName = "", UObject* InParam = nullptr);
 
 protected:
 	/* 异步加载完成后的回调 */

@@ -117,6 +117,9 @@ public:
 	DECLARE_DELEGATE(FStreamLevelLoadDelegate)
 	FStreamLevelLoadDelegate StreamLevelLoadDelegate;
 
+	DECLARE_DELEGATE(FStreamLevelUnLoadDelegate)
+	FStreamLevelUnLoadDelegate StreamLevelUnLoadDelegate;
+
 public:
 	static USaveGameSystem* Get(const UObject* WorldContextObject);
 
@@ -140,6 +143,10 @@ public:
 	/* 4.16 新添加接口，给外部加载StreamLevel使用的接口，Load一个StreamLevel */
 	UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"))
 	bool LoadStreamLevel(const UObject* WorldContextObject, TArray<FName> InStreamLevelNameS, UObject* CallOuter = nullptr, FName CallBackName = "", UObject* InParam = nullptr);
+	/* 4.17 移除StreamLevel */
+	UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"))
+	bool UnLoadStreamLevel(const UObject* WorldContextObject, TArray<FName> InStreamLevelNameS, UObject* CallOuter = nullptr, FName CallBackName = "", UObject* InParam = nullptr);
+
 
 	/* 获取当前的数据配置表 */
 	FGameSaveData GetGameSaveData()
@@ -165,6 +172,10 @@ protected:
 	UFUNCTION()
 	void AllLoadStreamLevelOverCall(UObject* InParam);
 
+	/* 4.16 给外部StreamLevelVolume使用的UnLoad回调 */
+	UFUNCTION()
+	void AllUnLoadStreamLevelOverCall(UObject* InParam);
+
 protected:
 	/* 存档数量 */
 	UPROPERTY()
@@ -185,6 +196,9 @@ protected:
 	/* 4.16 给外部StreamLevelVolume使用的本次所需要的加载的StreamLevelS */
 	UPROPERTY()
 	TArray<FName> CurStraemLevelLoadedNames;
+	/* 4.16 给外部StreamLevelVolume使用的本次所需要的卸载的StreamLevelS */
+	UPROPERTY()
+	TArray<FName> CurStraemLevelUnLoadedNames;
 
 	/* 游戏存档路径，该路径直接写死吧 */
 	static FString GameIDName;

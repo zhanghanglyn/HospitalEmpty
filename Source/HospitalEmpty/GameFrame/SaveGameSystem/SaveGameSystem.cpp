@@ -238,18 +238,22 @@ bool USaveGameSystem::LoadStreamLevel(const UObject* WorldContextObject, TArray<
 	TArray<ULevelStreaming*> LevelStreamings = CurWorld->GetStreamingLevels();
 	for (int32 NameCount = 0; NameCount < LevelStreamings.Num(); ++NameCount)
 	{
-		FName PackageNameToLoad = LevelStreamings[NameCount]->PackageNameToLoad;
-		FString StreamLevelNameErr = (FPackageName::GetShortFName(PackageNameToLoad)).ToString();
-		//如果待显示的LevelName在该World中存在，则加载
-		if (InStreamLevelNameS.Contains(*StreamLevelNameErr))
+		//如果当前StreamLevel未被加载，才被加载
+		if (LevelStreamings[NameCount]->GetCurrentState() == ULevelStreaming::ECurrentState::Unloaded)
 		{
-			ULoadStreamParam* TempParam = NewObject<ULoadStreamParam>();
-			TempParam->GameID = LoadParam.GameID;
-			TempParam->StreamLevelName = StreamLevelNameErr;
-			TempParam->WorldContextObject = WorldContextObject;
-			LoadMapSystem->LoadStreamLevel(WorldContextObject, *StreamLevelNameErr, this, "AllLoadStreamLevelOverCall", TempParam);
+			FName PackageNameToLoad = LevelStreamings[NameCount]->PackageNameToLoad;
+			FString StreamLevelNameErr = (FPackageName::GetShortFName(PackageNameToLoad)).ToString();
+			//如果待显示的LevelName在该World中存在，则加载
+			if (InStreamLevelNameS.Contains(*StreamLevelNameErr))
+			{
+				ULoadStreamParam* TempParam = NewObject<ULoadStreamParam>();
+				TempParam->GameID = LoadParam.GameID;
+				TempParam->StreamLevelName = StreamLevelNameErr;
+				TempParam->WorldContextObject = WorldContextObject;
+				LoadMapSystem->LoadStreamLevel(WorldContextObject, *StreamLevelNameErr, this, "AllLoadStreamLevelOverCall", TempParam);
 
-			CurStraemLevelLoadedNames.Add(*StreamLevelNameErr);
+				CurStraemLevelLoadedNames.Add(*StreamLevelNameErr);
+			}
 		}
 	}
 
@@ -270,6 +274,77 @@ void USaveGameSystem::AllLoadStreamLevelOverCall(UObject* InParam)
 		{
 			StreamLevelLoadDelegate.ExecuteIfBound();
 			StreamLevelLoadDelegate.Unbind();
+		}
+	}
+}
+
+/********************  卸载  ********************/
+bool USaveGameSystem::UnLoadStreamLevel(const UObject* WorldContextObject, TArray<FName> InStreamLevelNameS, UObject* CallOuter,
+	FName CallBackName /* = "" */, UObject* InParam /* = nullptr */)
+{
+	if (LoadParam.GameID.IsEmpty() || LoadParam.GameID.Equals(""))
+	{
+		return false;
+	}
+
+	//在此，根据存储的数据判断下当前需要加载的StreamLevelName是哪几个。
+	FSaveDataListStruct DataList = GameSaveData.StructData[LoadParam.GameID];
+	UWorld* CurWorld = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
+	if (!CurWorld)
+		return false;
+	ULoadMapSystem* LoadMapSystem = ULoadMapSystem::Get(WorldContextObject);
+	if (!LoadMapSystem)
+		return false;
+
+	/* 清空本次需要加载的StreamLevel */
+	CurStraemLevelUnLoadedNames.Empty();
+
+	StreamLevelUnLoadDelegate.Unbind();
+	StreamLevelUnLoadDelegate.BindUFunction(CallOuter, CallBackName, InParam);
+
+	//找到当前world中所有的StreamLevel，判断是否已经进行了加载
+	TArray<ULevelStreaming*> LevelStreamings = CurWorld->GetStreamingLevels();
+	for (int32 NameCount = 0; NameCount < LevelStreamings.Num(); ++NameCount)
+	{
+		//如果当前StreamLevel已被加载，才卸载
+		if (LevelStreamings[NameCount]->GetCurrentState() == ULevelStreaming::ECurrentState::LoadedVisible)
+		{
+			FName PackageNameToLoad = LevelStreamings[NameCount]->PackageNameToLoad;
+			FString StreamLevelNameErr = (FPackageName::GetShortFName(PackageNameToLoad)).ToString();
+			//如果待显示的LevelName在该World中存在，则加载
+			if (InStreamLevelNameS.Contains(*StreamLevelNameErr))
+			{
+				ULoadStreamParam* TempParam = NewObject<ULoadStreamParam>();
+				TempParam->GameID = LoadParam.GameID;
+				TempParam->StreamLevelName = StreamLevelNameErr;
+				TempParam->WorldContextObject = WorldContextObject;
+
+				/* 4.17 应该要在此判断，当前Level上有多少个Actor，将其移除！因为创建的时候，是创建在整个世界中的 */
+				ULevelStreaming* CurStraemLevel = LevelStreamings[NameCount];
+				LoadMapSystem->RemoveAllSaveableActor(CurStraemLevel->GetLoadedLevel(), StreamLevelNameErr);
+
+				LoadMapSystem->UnLoadStreamLevel(WorldContextObject, *StreamLevelNameErr, this, "AllUnLoadStreamLevelOverCall", TempParam);
+
+				CurStraemLevelUnLoadedNames.Add(*StreamLevelNameErr);
+			}
+		}
+	}
+
+	return true;
+}
+
+void USaveGameSystem::AllUnLoadStreamLevelOverCall(UObject* InParam)
+{
+	if (ULoadStreamParam* TempParam = Cast<ULoadStreamParam>(InParam))
+	{
+		//加载完一个，清除一个
+		if (CurStraemLevelUnLoadedNames.Contains(*TempParam->StreamLevelName))
+			CurStraemLevelUnLoadedNames.Remove(*TempParam->StreamLevelName);
+
+		if (CurStraemLevelUnLoadedNames.Num() < 1)
+		{
+			StreamLevelUnLoadDelegate.ExecuteIfBound();
+			StreamLevelUnLoadDelegate.Unbind();
 		}
 	}
 }

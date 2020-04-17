@@ -3,6 +3,15 @@
 #include "CoreMinimal.h"
 #include "LoadMapSystem.generated.h"
 
+UENUM(BlueprintType)
+enum class EStreamLevelLoadState:uint8
+{
+	NORMAL		UMETA(DisplayName = "未处于加载也为处于卸载"),
+	LOADING		UMETA(DisplayName = "处于加载状态"),
+	UNLODING	UMETA(DisplayName = "处于卸载状态"),
+
+};
+
 /* 4.14  test 创建一个专门用来回调的UObject试试！*/
 UCLASS(BlueprintType)
 class ULoadStreamCallOjb : public UObject
@@ -63,16 +72,26 @@ public:
 				CallBackName 外部需要回调的functionName,需要一个参数UObject*
 	*/
 	UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"))
-	void LoadStreamLevel(const UObject* WorldContextObject, FName InStreamLevelName , UObject* CallOuter = nullptr, FName CallBackName = "", UObject* InParam = nullptr);
+	bool LoadStreamLevel(const UObject* WorldContextObject, FName InStreamLevelName , UObject* CallOuter = nullptr, FName CallBackName = "", UObject* InParam = nullptr);
+	
+	/*
+		4.17 UnloadStreamLevel
+		该接口，卸载StreamLevelName对应的StreamLevel,不需要保存数据，因为只有玩家点击保存才会保存数据（或是在自动保存处）
+		Param : CallOuter外部需要回调的OBJ
+				CallBackName 外部需要回调的functionName,需要一个参数UObject*
+	*/
+	UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"))
+	bool UnLoadStreamLevel(const UObject* WorldContextObject, FName InStreamLevelName, UObject* CallOuter = nullptr, FName CallBackName = "", UObject* InParam = nullptr);
+
+	/* 4.17 移除对应的Level上的可保存Actor */
+	UFUNCTION(BlueprintCallable)
+	void RemoveAllSaveableActor( ULevel* InLevel , FString InStreamLevelName);
 
 protected:
 	/* 异步加载完成后的回调 */
 	UFUNCTION()
 	void AsynLoadPackageCall(const FName& PackageName, UPackage* LoadedPackage, int32 InResult);
 
-	/* 4.13 加载StreamLevel完毕后的回调 */
-	UFUNCTION(BlueprintCallable)
-	void StreamLevelLoaded(UObject* InParam);
 protected:
 	/* 当加载地图时，在反射中使用的Object指针会丢失，应该是被回收了，所以保存记录下来使用 */
 	UPROPERTY()
@@ -81,6 +100,13 @@ protected:
 	/* StreamLevel加载时使用的UID */
 	UPROPERTY()
 	int32 CallBackUID = 1;
+
+	/*	4.17 无论是正在加载或是正在卸载，一个Level永远都应该只有一个状态，要么处于加载要么处于卸载
+		Val为其当前处于的状态    Key 为对应的StreamLevelName
+		应该做成任务链的形式，但是本阶段就不处理了，
+	*/
+	UPROPERTY()
+	TMap<FString , EStreamLevelLoadState> OperatingStreamLevel;
 
 public:
 	/* StreamLevel加载时使用的保存参数集 , key 为UID，val 为对应的参数 */

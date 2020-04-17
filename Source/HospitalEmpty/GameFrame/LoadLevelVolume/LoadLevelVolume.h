@@ -54,7 +54,7 @@ protected:
 
 	/*  初始化周边的四个面的坐标，用来当Overlap发生时，判断是碰到了哪一个面
 		先尝试使用简单粗暴一点的方式来进行，直接判断与X Y 哪一个最接近，进而判断是与哪一个面发生了碰撞
-	*/ 
+	*/  
 	void InitAroundLocation();
 
 	/* 判断一个传入点是位于该Volume的哪一边 */
@@ -66,6 +66,10 @@ protected:
 	/* 所有StreamLevel加载完的回调 */
 	UFUNCTION()
 	void StreamLevelLoadedCallBack(UObject* InParam );
+
+	/* 所有StreamLevel卸载完的回调 */
+	UFUNCTION()
+	void StreamLevelUnLoadedCallBack(UObject* InParam);
 
 protected:
 	/* 进入触发器以及离开触发器的回调 */
@@ -88,5 +92,8 @@ protected:
 
 	UPROPERTY()
 	EOverlepLocationType CurOverlapLocationType;
+
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "地图加载相关", meta = (DisplayName = "测试生成的地图墙"))
+	//AVolume* TestVolume;
 
 };

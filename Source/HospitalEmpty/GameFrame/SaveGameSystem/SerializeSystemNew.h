@@ -129,6 +129,7 @@ public:
 	//以该Ojb存储生成的ID作为Key
 	TMap< FString, FObjSerializeData> SerializeObj;  
 	//4.10 存档的时候，根据StreamLevel的名字再分一下 , Key为StreamLevelName
+	//4.17 应该是对该数据进行增量添加和计算，而不是直接把所有的都替换了，之后做存档的时候要注意
 	TMap< FString, TMap< FString, FObjSerializeData>> SerializeObjByMap;
 
 	FString LevelName;	//保存当前存档对应的Level名称

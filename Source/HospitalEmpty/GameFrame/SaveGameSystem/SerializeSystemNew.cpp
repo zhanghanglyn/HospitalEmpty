@@ -485,7 +485,7 @@ bool USerializeSystemNew::LoadActorData(const UObject* WorldContextObject, FStri
 
 	return true;
 }
-//#pragma optimize("",off)
+#pragma optimize("",off)
 UObject* USerializeSystemNew::CreateActorDeperOuter(const UObject* WorldContextObject, FObjSerializeData InSerializeData,
 	TMap< FString, FObjSerializeData> AllSerializeObj,
 	TMap<FString, UObject *> &SerializeObjList,
@@ -622,9 +622,9 @@ UObject* USerializeSystemNew::CreateActorDeperOuter(const UObject* WorldContextO
 							if (FindedObj != nullptr)
 								NewActor = FindedObj;
 							else
-								NewActor = CurWorld->SpawnActor(SpawnClass, &SpawnPos, &SpawnRot, SpawnParam);
+								NewActor = CurObjLevel->OwningWorld->SpawnActor(SpawnClass, &SpawnPos, &SpawnRot, SpawnParam);
 
-							//NewActor = CurWorld->SpawnActor(SpawnClass, &SpawnPos, &SpawnRot, SpawnParam);
+							
 							BCreateWithSpawn = true;
 						}	
 					}
@@ -665,4 +665,4 @@ UObject* USerializeSystemNew::CreateActorDeperOuter(const UObject* WorldContextO
 
 	return nullptr;
 }
-//#pragma optimize("",on)
+#pragma optimize("",on)

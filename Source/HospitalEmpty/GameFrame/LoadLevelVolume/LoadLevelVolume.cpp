@@ -2,6 +2,8 @@
 #include "Engine/CollisionProfile.h"
 #include "Components/BrushComponent.h"
 #include "GameFrame/SaveGameSystem/SaveGameSystem.h"
+#include "Common/CommonLibrary.h"
+#include "Sound/AudioVolume.h"
 
 ALoadLevelVolume::ALoadLevelVolume(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -36,10 +38,16 @@ void ALoadLevelVolume::OnTriggerOverlapBegin(AActor* OtherActor, UPrimitiveCompo
 		if (!OverlapActor || !OverlapActor->GetRootComponent())
 			return;
 	}
+	if (!OverlapActor->Tags.Contains("player"))
+		return;
 
 	SetCurOverLapLocationType(OverlapActor->GetActorLocation());
 
-	/* Begin的时候，应该UnLoad掉 */
+	/* Begin的时候，应该UnLoad掉StreamLevel */
+	TArray<FName> CurStreamLevelNames = GetStreamLevelNames(CurOverlapLocationType);
+
+	USaveGameSystem::Get(this)->UnLoadStreamLevel(this, CurStreamLevelNames, this, "StreamLevelUnLoadedCallBack", nullptr);
+
 }
 
 void ALoadLevelVolume::OnTriggerOverlapEnd(AActor* OtherActor, UPrimitiveComponent* OtherComp,
@@ -68,6 +76,11 @@ void ALoadLevelVolume::StreamLevelLoadedCallBack(UObject* InParam)
 {
 	UE_LOG(LogTemp, Warning, TEXT(" All the StreamLevelIsLoaded!!! "));
 }
+void ALoadLevelVolume::StreamLevelUnLoadedCallBack(UObject* InParam)
+{
+	UE_LOG(LogTemp, Warning, TEXT(" All the StreamLevelUnLoadedCallBack!!! "));
+}
+
 
 void ALoadLevelVolume::InitAroundLocation()
 {
@@ -81,6 +94,23 @@ void ALoadLevelVolume::InitAroundLocation()
 	LLBoundLocation.BottomY = VolumeLocation.Y + CurBox.GetSize().Y / 2;
 
 	LLBoundLocation.Center = FVector2D( VolumeLocation.X , VolumeLocation.Y);
+
+	//在此测试一下，能不能自己创建一个Volume 由于创建函数只是一个Editor的函数，所以，在正式创建之后应该保存在Level的序列化中，不用通过这个再次初始化
+//#if WITH_EDITOR
+//	if (!TestVolume)
+//	{
+//		if (UObject* OuterLevel = UCommonLibrary::GetOuterLevel(this))
+//		{
+//			FString RealLevelName = OuterLevel->GetFullGroupName(true);
+//			UCommonLibrary::CreateBoxVolume(Cast<ULevel>(OuterLevel), AAudioVolume::StaticClass(), this->GetActorTransform(),
+//				"Test_Wall!!!");
+//		}
+//	}
+//	
+//#endif
+
+
+
 }
 #pragma optimize("",on)
 
